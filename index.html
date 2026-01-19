@@ -17,7 +17,6 @@ body{
     display:flex;
 }
 
-/* ========== TU MISMO SIDEBAR (sin cambios) ========== */
 .sidebar{
     width:260px;
     background:#1f2937;
@@ -42,7 +41,6 @@ body{
     color:#1f2937;
 }
 
-/* ========== CONTENIDO ========== */
 .content{flex:1;padding:30px;}
 .container{max-width:1600px;margin:auto;}
 
@@ -65,11 +63,11 @@ header h1{color:#84cc16;font-size:32px;}
     min-width:220px;
 }
 
-/* ========== KPIs ========== */
 .kpi-grid{
     display:grid;
     grid-template-columns:repeat(6,1fr);
     gap:16px;
+    margin-bottom:20px;
 }
 .kpi-card{
     background:#ffffff;
@@ -89,20 +87,29 @@ header h1{color:#84cc16;font-size:32px;}
 }
 .kpi-value{font-size:22px;font-weight:700;}
 .kpi-value.highlight{color:#84cc16}
-.kpi-subvalue{font-size:11px;color:#9ca3af;}
+.kpi-subvalue{font-size:11px;color:#9ca3af;margin-top:4px;}
 
-/* ========== GRÁFICAS ========== */
+.chart-row{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:16px;
+    margin-bottom:20px;
+}
+
 .chart-container {
     background:#ffffff;
     border:2px solid #e5e7eb;
     border-radius:12px;
     padding:15px;
-    margin-top:15px;
+}
+.chart-container h3{
+    font-size:14px;
+    margin-bottom:10px;
+    color:#1f2937;
 }
 canvas{max-height:220px;}
 
-/* ========== TABLA ========== */
-table{width:100%;border-collapse:collapse;}
+table{width:100%;border-collapse:collapse;margin-top:10px;}
 th,td{
     border:1px solid #e5e7eb;
     padding:8px;
@@ -115,7 +122,6 @@ th{background:#1f2937;color:white;}
 
 <body>
 
-<!-- ======= SIDEBAR ORIGINAL ======= -->
 <aside class="sidebar">
     <h2>Traxion</h2>
     <div class="menu-item active" id="menu-km">🚛 Kilómetros</div>
@@ -140,7 +146,7 @@ th{background:#1f2937;color:white;}
     </select>
 </div>
 
-<!-- ======= KPIs (TU MISMO DISEÑO) ======= -->
+<!-- KPIs -->
 <div class="kpi-grid">
     <div class="kpi-card highlight">
         <div class="kpi-label">TOTAL KM RECORRIDOS</div>
@@ -163,27 +169,41 @@ th{background:#1f2937;color:white;}
     <div class="kpi-card">
         <div class="kpi-label">KM DE SERVICIO</div>
         <div class="kpi-value" id="kpiServicio">0 km</div>
-        <div class="kpi-subvalue" id="pctServicio"></div>
+        <div class="kpi-subvalue" id="pctServicio">0% del total</div>
     </div>
 
     <div class="kpi-card">
         <div class="kpi-label">KM MTTO / CARGA / RH / SEG</div>
         <div class="kpi-value" id="kpiMtto">0 km</div>
-        <div class="kpi-subvalue" id="pctMtto"></div>
+        <div class="kpi-subvalue" id="pctMtto">0% del total</div>
     </div>
 
     <div class="kpi-card warning">
         <div class="kpi-label">KM INEFICIENTE (VACÍO)</div>
         <div class="kpi-value" id="kpiVacio">0 km</div>
-        <div class="kpi-subvalue" id="pctVacio"></div>
+        <div class="kpi-subvalue" id="pctVacio">0% del total</div>
     </div>
 </div>
 
-<div class="chart-container">
-    <h3>Progreso Acumulado Diario vs Permitido</h3>
-    <canvas id="chartProgreso"></canvas>
+<!-- Gráficas -->
+<div class="chart-row">
+    <div class="chart-container">
+        <h3>Progreso Acumulado Diario vs Permitido</h3>
+        <canvas id="chartProgreso"></canvas>
+    </div>
+
+    <div class="chart-container">
+        <h3>Distribución Total (%)</h3>
+        <canvas id="chartDistribucion"></canvas>
+    </div>
+
+    <div class="chart-container">
+        <h3>Comportamiento Diario</h3>
+        <canvas id="chartDiario"></canvas>
+    </div>
 </div>
 
+<!-- Tabla -->
 <div class="chart-container">
 <h3>Tabla Consolidada (SOLO UDN seleccionada)</h3>
 <table>
@@ -225,7 +245,7 @@ async function cargarDatos(){
     });
 }
 
-let chartProgreso;
+let chartProgreso, chartDistribucion, chartDiario;
 
 async function actualizar(){
     const unidad = unidadNegocio.value.trim().toUpperCase();
@@ -238,27 +258,32 @@ async function actualizar(){
     const hoy = new Date();
     hoy.setDate(hoy.getDate()-1);
 
-    rows.forEach(r=>{
+    rows.forEach((r, idx) => {
+        if(idx === 0) return; // Skip header
+
+        // Columnas según Excel:
+        // SETTEPI: L=UDN(11), M=Día(12), N=Total(13), O=Servicio(14), P=Mtto(15), Q=Vacío(16), R=Permitido(17)
+        // LIPU: T=UDN(19), U=Día(20), V=Total(21), W=Servicio(22), X=Mtto(23), Y=Vacío(24), Z=Permitido(25)
 
         const udnDiario = (r[11]||r[19]||"").trim().toUpperCase();
         const dia = num(r[12]||r[20]);
 
-        if(udnDiario === unidad && dia>=1 && dia<=hoy.getDate()){
+        if(udnDiario === unidad && dia >= 1 && dia <= hoy.getDate()){
 
             let kmTotal, kmServ, kmMtto, kmVac, kmPerm;
 
-            if(unidad==="SETTEPI SALTILLO"){
-                kmTotal = num(r[13]); // N
-                kmServ  = num(r[14]); // O
-                kmMtto  = num(r[15]); // P
-                kmVac   = num(r[16]); // Q
-                kmPerm  = num(r[17]); // R  <-- PERMITIDO SETTEPI
+            if(unidad === "SETTEPI SALTILLO"){
+                kmTotal = num(r[13]); // Columna N
+                kmServ  = num(r[14]); // Columna O
+                kmMtto  = num(r[15]); // Columna P
+                kmVac   = num(r[16]); // Columna Q
+                kmPerm  = num(r[17]); // Columna R
             } else {
-                kmTotal = num(r[21]); // V
-                kmServ  = num(r[22]); // W
-                kmMtto  = num(r[23]); // X
-                kmVac   = num(r[24]); // Y
-                kmPerm  = num(r[25]); // Z  <-- PERMITIDO LIPU
+                kmTotal = num(r[21]); // Columna V
+                kmServ  = num(r[22]); // Columna W
+                kmMtto  = num(r[23]); // Columna X
+                kmVac   = num(r[24]); // Columna Y
+                kmPerm  = num(r[25]); // Columna Z
             }
 
             total += kmTotal;
@@ -267,8 +292,9 @@ async function actualizar(){
             vacio += kmVac;
             permitido += kmPerm;
 
-            datosDiarios.push({dia, kmTotal, kmPerm});
+            datosDiarios.push({dia, kmTotal, kmServ, kmMtto, kmVac, kmPerm});
 
+            // Para la tabla (columnas A-J son comunes)
             const gerente = r[1]||"SIN GERENTE";
             const jefe = r[2]||"SIN JEFE";
             const cliente = r[3]||"SIN CLIENTE";
@@ -285,23 +311,33 @@ async function actualizar(){
         }
     });
 
-    /* ====== KPIs (CORRECTOS) ====== */
+    // ====== KPIs ======
     kpiTotal.innerText = total.toLocaleString()+" km";
     kpiServicio.innerText = servicio.toLocaleString()+" km";
     kpiMtto.innerText = mtto.toLocaleString()+" km";
     kpiVacio.innerText = vacio.toLocaleString()+" km";
     kpiPermitido.innerText = permitido.toLocaleString()+" km";
 
+    // Porcentajes de cada KPI
+    const pctServ = total > 0 ? ((servicio/total)*100).toFixed(1) : 0;
+    const pctMt = total > 0 ? ((mtto/total)*100).toFixed(1) : 0;
+    const pctVac = total > 0 ? ((vacio/total)*100).toFixed(1) : 0;
+
+    pctServicio.innerText = pctServ + "% del total";
+    pctMtto.innerText = pctMt + "% del total";
+    pctVacio.innerText = pctVac + "% del total";
+
+    // Margen
     const margen = permitido - total;
     kpiMargen.innerText = margen.toLocaleString()+" km";
 
-    const pct = permitido ? ((margen/permitido)*100).toFixed(1) : 0;
+    const pctMargen = permitido > 0 ? ((margen/permitido)*100).toFixed(1) : 0;
     const importe = (margen*6).toLocaleString("es-MX",{style:"currency",currency:"MXN"});
-    txtMargen.innerHTML = `${pct}% de los KM permitidos.<br>Equivale a: ${importe}`;
+    txtMargen.innerHTML = `${pctMargen}% de los KM permitidos.<br>Equivale a: ${importe}`;
 
     headerPeriodo.innerText = "Periodo al día "+hoy.getDate();
 
-    /* ====== GRAFICA 1 (ACUMULADO REAL vs PERMITIDO) ====== */
+    // ====== GRÁFICA 1: Progreso Acumulado ======
     datosDiarios.sort((a,b)=>a.dia-b.dia);
 
     let labels=[], realAc=0, perAc=0;
@@ -310,7 +346,7 @@ async function actualizar(){
     datosDiarios.forEach(d=>{
         realAc += d.kmTotal;
         perAc += d.kmPerm;
-        labels.push(d.dia);
+        labels.push("Día "+d.dia);
         realData.push(realAc);
         perData.push(perAc);
     });
@@ -321,15 +357,84 @@ async function actualizar(){
         data:{
             labels,
             datasets:[
-                {label:"KM Real Acumulado",data:realData,borderColor:"#84cc16"},
-                {label:"KM Permitido Acumulado",data:perData,borderColor:"#1f2937"}
+                {
+                    label:"KM Real Acumulado",
+                    data:realData,
+                    borderColor:"#84cc16",
+                    backgroundColor:"rgba(132,204,22,0.1)",
+                    tension:0.3,
+                    fill:true
+                },
+                {
+                    label:"KM Permitido Acumulado",
+                    data:perData,
+                    borderColor:"#1f2937",
+                    backgroundColor:"rgba(31,41,55,0.1)",
+                    tension:0.3,
+                    fill:true
+                }
             ]
+        },
+        options:{
+            responsive:true,
+            maintainAspectRatio:true,
+            plugins:{
+                legend:{display:true,position:'top'}
+            }
         }
     });
 
-    /* ====== TABLA (SOLO UDN FILTRADA) ====== */
+    // ====== GRÁFICA 2: Distribución (Pie) ======
+    if(chartDistribucion) chartDistribucion.destroy();
+    chartDistribucion = new Chart(document.getElementById("chartDistribucion"),{
+        type:"pie",
+        data:{
+            labels:["Servicio","Mtto","Vacío"],
+            datasets:[{
+                data:[servicio, mtto, vacio],
+                backgroundColor:["#84cc16","#f59e0b","#ef4444"]
+            }]
+        },
+        options:{
+            responsive:true,
+            maintainAspectRatio:true,
+            plugins:{
+                legend:{display:true,position:'bottom'}
+            }
+        }
+    });
+
+    // ====== GRÁFICA 3: Comportamiento Diario ======
+    let servDiario=[], mttoDiario=[], vacioDiario=[];
+    datosDiarios.forEach(d=>{
+        servDiario.push(d.kmServ);
+        mttoDiario.push(d.kmMtto);
+        vacioDiario.push(d.kmVac);
+    });
+
+    if(chartDiario) chartDiario.destroy();
+    chartDiario = new Chart(document.getElementById("chartDiario"),{
+        type:"line",
+        data:{
+            labels,
+            datasets:[
+                {label:"Servicio",data:servDiario,borderColor:"#84cc16",tension:0.3},
+                {label:"Mtto",data:mttoDiario,borderColor:"#6b7280",tension:0.3},
+                {label:"Vacío",data:vacioDiario,borderColor:"#ef4444",tension:0.3}
+            ]
+        },
+        options:{
+            responsive:true,
+            maintainAspectRatio:true,
+            plugins:{
+                legend:{display:true,position:'top'}
+            }
+        }
+    });
+
+    // ====== TABLA ======
     let tabla = Object.values(tablaMap).map(r=>{
-        let pctVac = r.rec ? (r.ine/r.rec*100) : 0;
+        let pctVac = r.rec > 0 ? (r.ine/r.rec*100) : 0;
         return {...r, pctVac};
     });
 
