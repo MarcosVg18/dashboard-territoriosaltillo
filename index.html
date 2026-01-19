@@ -125,8 +125,6 @@ th{background:#1f2937;color:white;}
 <aside class="sidebar">
     <h2>Traxion</h2>
     <div class="menu-item active" id="menu-km">🚛 Kilómetros</div>
-    <div class="menu-item" id="menu-flota">🚗 Flota Vehicular</div>
-    <div class="menu-item" id="menu-flota2">🚗 Dif GPS vs Cargas</div>
 </aside>
 
 <main class="content">
@@ -205,7 +203,7 @@ th{background:#1f2937;color:white;}
 
 <!-- Tabla -->
 <div class="chart-container">
-<h3>Tabla Consolidada (SOLO UDN seleccionada)</h3>
+<h3>Tabla Detalle (A–I filtrada por UDN)</h3>
 <table>
 <thead>
 <tr>
@@ -253,101 +251,90 @@ async function actualizar(){
 
     let total=0, servicio=0, mtto=0, vacio=0, permitidoTotal=0;
     let datosDiarios = [];
-    let tablaMap = {};
+    let tablaFilas = [];
 
     const hoy = new Date();
     hoy.setDate(hoy.getDate()-1);
+    const mesActual = hoy.getMonth()+1;
 
-    // Leer KM PERMITIDO TOTAL de fila 7 (índice 6)
-    // AC7 = columna 28 para SETTEPI
-    // AD7 = columna 29 para LIPU
+    // Leer KM PERMITIDO TOTAL fila 7
     if(rows.length > 6){
-        if(unidad === "SETTEPI SALTILLO"){
-            permitidoTotal = num(rows[6][28]); // AC7
-        } else {
-            permitidoTotal = num(rows[6][29]); // AD7
-        }
+        permitidoTotal = unidad==="SETTEPI SALTILLO"
+            ? num(rows[6][28])   // AC7
+            : num(rows[6][29]);  // AD7
     }
 
     rows.forEach((r, idx) => {
-        if(idx < 7) return; // Saltar encabezados y fila 7
+        if(idx < 7) return;
 
-        // Columnas según Excel:
-        // SETTEPI: L=UDN(11), M=Día(12), N=Total(13), O=Servicio(14), P=Mtto(15), Q=Vacío(16), R=Permitido Diario(17)
-        // LIPU: T=UDN(19), U=Día(20), V=Total(21), W=Servicio(22), X=Mtto(23), Y=Vacío(24), Z=Permitido Diario(25)
+        const dia = num(unidad==="SETTEPI SALTILLO" ? r[12] : r[20]);
+        const mes = num(unidad==="SETTEPI SALTILLO" ? r[10] : r[18]);
 
-        const udnDiario = (r[11]||r[19]||"").trim().toUpperCase();
-        const dia = num(r[12]||r[20]);
+        if(mes !== mesActual) return;
 
-        if(udnDiario === unidad && dia >= 1 && dia <= hoy.getDate()){
+        let udnDiario = unidad==="SETTEPI SALTILLO"
+            ? (r[11]||"").trim().toUpperCase()
+            : (r[19]||"").trim().toUpperCase();
 
-            let kmTotal, kmServ, kmMtto, kmVac, kmPermDiario;
+        if(udnDiario !== unidad) return;
 
-            if(unidad === "SETTEPI SALTILLO"){
-                kmTotal = num(r[13]); // Columna N
-                kmServ  = num(r[14]); // Columna O
-                kmMtto  = num(r[15]); // Columna P
-                kmVac   = num(r[16]); // Columna Q
-                kmPermDiario = num(r[17]); // Columna R - Permitido diario
-            } else {
-                kmTotal = num(r[21]); // Columna V
-                kmServ  = num(r[22]); // Columna W
-                kmMtto  = num(r[23]); // Columna X
-                kmVac   = num(r[24]); // Columna Y
-                kmPermDiario = num(r[25]); // Columna Z - Permitido diario
-            }
+        let kmTotal, kmServ, kmMtto, kmVac, kmPermDiario;
 
-            total += kmTotal;
-            servicio += kmServ;
-            mtto += kmMtto;
-            vacio += kmVac;
-
-            datosDiarios.push({dia, kmTotal, kmServ, kmMtto, kmVac, kmPermDiario});
-
-            // Para la tabla (columnas A-J son comunes)
-            const gerente = r[1]||"SIN GERENTE";
-            const jefe = r[2]||"SIN JEFE";
-            const cliente = r[3]||"SIN CLIENTE";
-            const key = gerente+"|"+jefe+"|"+cliente;
-
-            if(!tablaMap[key]){
-                tablaMap[key]={gerente,jefe,cliente,rec:0,serv:0,mtto:0,ine:0};
-            }
-
-            tablaMap[key].rec += kmTotal;
-            tablaMap[key].serv += kmServ;
-            tablaMap[key].mtto += kmMtto;
-            tablaMap[key].ine += kmVac;
+        if(unidad==="SETTEPI SALTILLO"){
+            kmTotal = num(r[13]);
+            kmServ  = num(r[14]);
+            kmMtto  = num(r[15]);
+            kmVac   = num(r[16]);
+            kmPermDiario = num(r[17]); // R
+        } else {
+            kmTotal = num(r[21]);
+            kmServ  = num(r[22]);
+            kmMtto  = num(r[23]);
+            kmVac   = num(r[24]);
+            kmPermDiario = num(r[25]); // Z
         }
+
+        total += kmTotal;
+        servicio += kmServ;
+        mtto += kmMtto;
+        vacio += kmVac;
+
+        datosDiarios.push({dia, kmTotal, kmServ, kmMtto, kmVac, kmPermDiario});
+
+        tablaFilas.push({
+            gerente: r[1]||"",
+            jefe: r[2]||"",
+            cliente: r[3]||"",
+            rec: kmTotal,
+            serv: kmServ,
+            mtto: kmMtto,
+            ine: kmVac
+        });
     });
 
-    // ====== KPIs ======
     kpiTotal.innerText = total.toLocaleString()+" km";
     kpiServicio.innerText = servicio.toLocaleString()+" km";
     kpiMtto.innerText = mtto.toLocaleString()+" km";
     kpiVacio.innerText = vacio.toLocaleString()+" km";
     kpiPermitido.innerText = permitidoTotal.toLocaleString()+" km";
 
-    // Porcentajes de cada KPI
-    const pctServ = total > 0 ? ((servicio/total)*100).toFixed(1) : 0;
-    const pctMt = total > 0 ? ((mtto/total)*100).toFixed(1) : 0;
-    const pctVac = total > 0 ? ((vacio/total)*100).toFixed(1) : 0;
+    const pctServ = total>0 ? ((servicio/total)*100).toFixed(1) : 0;
+    const pctMt = total>0 ? ((mtto/total)*100).toFixed(1) : 0;
+    const pctVac = total>0 ? ((vacio/total)*100).toFixed(1) : 0;
 
-    pctServicio.innerText = pctServ + "% del total";
-    pctMtto.innerText = pctMt + "% del total";
-    pctVacio.innerText = pctVac + "% del total";
+    pctServicio.innerText = pctServ+"% del total";
+    pctMtto.innerText = pctMt+"% del total";
+    pctVacio.innerText = pctVac+"% del total";
 
-    // Margen
     const margen = permitidoTotal - total;
     kpiMargen.innerText = margen.toLocaleString()+" km";
 
-    const pctMargen = permitidoTotal > 0 ? ((margen/permitidoTotal)*100).toFixed(1) : 0;
+    const pctMargen = permitidoTotal>0 ? ((margen/permitidoTotal)*100).toFixed(1) : 0;
     const importe = (margen*6).toLocaleString("es-MX",{style:"currency",currency:"MXN"});
     txtMargen.innerHTML = `${pctMargen}% de los KM permitidos.<br>Equivale a: ${importe}`;
 
     headerPeriodo.innerText = "Periodo al día "+hoy.getDate();
 
-    // ====== GRÁFICA 1: Progreso Acumulado (con colores Traxion) ======
     datosDiarios.sort((a,b)=>a.dia-b.dia);
 
     let labels=[], realAc=0, perAc=0;
@@ -364,137 +351,37 @@ async function actualizar(){
     if(chartProgreso) chartProgreso.destroy();
     chartProgreso = new Chart(document.getElementById("chartProgreso"),{
         type:"line",
-        data:{
-            labels,
+        data:{labels,
             datasets:[
-                {
-                    label:"KM Real Acumulado",
-                    data:realData,
-                    borderColor:"#84cc16",
-                    backgroundColor:"rgba(132,204,22,0.2)",
-                    borderWidth:3,
-                    tension:0.3,
-                    fill:true,
-                    pointRadius:4,
-                    pointBackgroundColor:"#84cc16"
-                },
-                {
-                    label:"KM Permitido Acumulado",
-                    data:perData,
-                    borderColor:"#1f2937",
-                    backgroundColor:"rgba(31,41,55,0.1)",
-                    borderWidth:3,
-                    tension:0.3,
-                    fill:false,
-                    pointRadius:4,
-                    pointBackgroundColor:"#1f2937",
-                    borderDash:[5,5]
-                }
+                {label:"KM Real Acumulado",data:realData,borderColor:"#84cc16",fill:true},
+                {label:"KM Permitido Acumulado",data:perData,borderColor:"#1f2937"}
             ]
-        },
-        options:{
-            responsive:true,
-            maintainAspectRatio:true,
-            plugins:{
-                legend:{display:true,position:'top'}
-            },
-            scales:{
-                y:{beginAtZero:true}
-            }
         }
     });
 
-    // ====== GRÁFICA 2: Distribución (Pie con colores Traxion) ======
     if(chartDistribucion) chartDistribucion.destroy();
     chartDistribucion = new Chart(document.getElementById("chartDistribucion"),{
         type:"pie",
-        data:{
-            labels:["Servicio","Mtto","Vacío"],
-            datasets:[{
-                data:[servicio, mtto, vacio],
-                backgroundColor:["#84cc16","#f59e0b","#ef4444"],
-                borderWidth:2,
-                borderColor:"#ffffff"
-            }]
-        },
-        options:{
-            responsive:true,
-            maintainAspectRatio:true,
-            plugins:{
-                legend:{display:true,position:'bottom'}
-            }
-        }
-    });
-
-    // ====== GRÁFICA 3: Comportamiento Diario (colores Traxion) ======
-    let servDiario=[], mttoDiario=[], vacioDiario=[];
-    datosDiarios.forEach(d=>{
-        servDiario.push(d.kmServ);
-        mttoDiario.push(d.kmMtto);
-        vacioDiario.push(d.kmVac);
+        data:{labels:["Servicio","Mtto","Vacío"],datasets:[{data:[servicio,mtto,vacio]}]}
     });
 
     if(chartDiario) chartDiario.destroy();
     chartDiario = new Chart(document.getElementById("chartDiario"),{
         type:"line",
-        data:{
-            labels,
-            datasets:[
-                {
-                    label:"Servicio",
-                    data:servDiario,
-                    borderColor:"#84cc16",
-                    backgroundColor:"rgba(132,204,22,0.1)",
-                    borderWidth:2,
-                    tension:0.3,
-                    fill:true
-                },
-                {
-                    label:"Mtto",
-                    data:mttoDiario,
-                    borderColor:"#6b7280",
-                    backgroundColor:"rgba(107,114,128,0.1)",
-                    borderWidth:2,
-                    tension:0.3,
-                    fill:true
-                },
-                {
-                    label:"Vacío",
-                    data:vacioDiario,
-                    borderColor:"#ef4444",
-                    backgroundColor:"rgba(239,68,68,0.1)",
-                    borderWidth:2,
-                    tension:0.3,
-                    fill:true
-                }
-            ]
-        },
-        options:{
-            responsive:true,
-            maintainAspectRatio:true,
-            plugins:{
-                legend:{display:true,position:'top'}
-            },
-            scales:{
-                y:{beginAtZero:true}
-            }
-        }
+        data:{labels,datasets:[
+            {label:"Servicio",data:datosDiarios.map(d=>d.kmServ)},
+            {label:"Mtto",data:datosDiarios.map(d=>d.kmMtto)},
+            {label:"Vacío",data:datosDiarios.map(d=>d.kmVac)}
+        ]}
     });
-
-    // ====== TABLA (ordenada por % Vacío descendente) ======
-    let tabla = Object.values(tablaMap).map(r=>{
-        let pctVac = r.rec > 0 ? (r.ine/r.rec*100) : 0;
-        return {...r, pctVac};
-    });
-
-    // Ordenar por % Vacío de mayor a menor
-    tabla.sort((a,b)=> b.pctVac - a.pctVac);
 
     const body = document.getElementById("tablaConsolidada");
     body.innerHTML="";
 
-    tabla.forEach(r=>{
-        const rowColor = r.pctVac > 25 ? 'background:#fee2e2;' : '';
+    tablaFilas.forEach(r=>{
+        const pctVac = r.rec>0 ? (r.ine/r.rec*100) : 0;
+        const rowColor = pctVac>25 ? 'background:#fee2e2;' : '';
+
         body.innerHTML += `
         <tr style="${rowColor}">
           <td>${r.gerente}</td>
@@ -504,7 +391,7 @@ async function actualizar(){
           <td>${r.serv.toLocaleString()}</td>
           <td>${r.mtto.toLocaleString()}</td>
           <td>${r.ine.toLocaleString()}</td>
-          <td><strong>${r.pctVac.toFixed(2)}%</strong></td>
+          <td><strong>${pctVac.toFixed(2)}%</strong></td>
         </tr>`;
     });
 }
