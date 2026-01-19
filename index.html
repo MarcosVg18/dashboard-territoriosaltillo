@@ -17,7 +17,7 @@ body{
     display:flex;
 }
 
-/* ====== SIDEBAR ====== */
+/* ====== SIDEBAR (TU MENÚ ORIGINAL) ====== */
 .sidebar{
     width:260px;
     background:#1f2937;
@@ -35,6 +35,11 @@ body{
     margin-bottom:12px;
     color:#d1d5db;
     font-weight:600;
+    cursor:pointer;
+}
+.menu-item.active{
+    background:#84cc16;
+    color:#1f2937;
 }
 
 /* ====== CONTENT ====== */
@@ -50,6 +55,7 @@ header{
 header h1{color:#84cc16;font-size:32px;}
 .subtitle{color:#d1d5db;margin-top:6px;}
 
+/* FILTER */
 .filter-bar{margin:10px 0 18px 0;}
 .filter-bar select{
     padding:10px 14px;
@@ -59,7 +65,7 @@ header h1{color:#84cc16;font-size:32px;}
     font-weight:600;
 }
 
-/* ====== KPIs ====== */
+/* ====== KPIs (TUS TARJETAS ORIGINALES) ====== */
 .kpi-grid{
     display:grid;
     grid-template-columns:repeat(6,1fr);
@@ -109,14 +115,16 @@ th{background:#1f2937;color:white;}
 
 <body>
 
+<!-- ====== TU MENÚ ORIGINAL ====== -->
 <aside class="sidebar">
     <h2>Traxion</h2>
+    <div class="menu-item active">🚛 Kilómetros</div>
+    <div class="menu-item">🚗 Flota Vehicular</div>
+    <div class="menu-item">🚗 Dif GPS vs Cargas</div>
 </aside>
 
 <main class="content">
 <div class="container">
-
-<section>
 
 <header>
     <h1>Dashboard de Kilómetros Recorridos</h1>
@@ -130,7 +138,7 @@ th{background:#1f2937;color:white;}
     </select>
 </div>
 
-<!-- KPIs -->
+<!-- ====== KPIs COMO LOS QUERÍAS ====== -->
 <div class="kpi-grid">
     <div class="kpi-card highlight">
         <div class="kpi-label">TOTAL KM RECORRIDOS</div>
@@ -141,7 +149,7 @@ th{background:#1f2937;color:white;}
     <div class="kpi-card">
         <div class="kpi-label">KM PERMITIDOS</div>
         <div class="kpi-value" id="kpiPermitido">0 km</div>
-        <div class="kpi-subvalue">Límite establecido</div>
+        <div class="kpi-subvalue">Acumulado diario (R / Z)</div>
     </div>
 
     <div class="kpi-card highlight">
@@ -166,7 +174,7 @@ th{background:#1f2937;color:white;}
     </div>
 </div>
 
-<!-- Graficas -->
+<!-- ====== TUS 3 GRÁFICAS ====== -->
 <div class="row-charts">
     <div class="chart-container">
         <h3>Progreso Acumulado</h3>
@@ -184,7 +192,7 @@ th{background:#1f2937;color:white;}
     </div>
 </div>
 
-<!-- Tabla -->
+<!-- ====== TABLA SOLO UDN FILTRADA ====== -->
 <div class="chart-container">
 <h3>Tabla Consolidada (solo UDN seleccionada)</h3>
 <table>
@@ -204,7 +212,6 @@ th{background:#1f2937;color:white;}
 </table>
 </div>
 
-</section>
 </div>
 </main>
 
@@ -242,18 +249,18 @@ async function actualizar(){
     rows.forEach(r=>{
         const udn = (r[0]||"").trim().toUpperCase();
 
-        /* ====== KPIs ====== */
+        // ---- KPIs MAESTROS (tus columnas originales) ----
         if(udn === unidad){
             total += num(r[4]);
             servicio += num(r[5]);
             mtto += num(r[6]);
             vacio += num(r[7]);
-            permitidoTotal += num(r[9]);
         }
 
         const diaSet = num(r[12]);
         const diaLipu = num(r[20]);
 
+        // ---- DIARIOS CON TUS COLUMNAS REALES ----
         if(unidad==="SETTEPI SALTILLO" && diaSet>=1 && diaSet<=hoy.getDate()){
             datosDiarios.push({
                 dia: diaSet,
@@ -261,7 +268,7 @@ async function actualizar(){
                 kmServ: num(r[14]),
                 kmMtto: num(r[15]),
                 kmVac: num(r[16]),
-                kmPermitido: num(r[17]),
+                kmPermitido: num(r[17]), // <-- COLUMNA R
                 gerente:r[1], jefe:r[2], cliente:r[3]
             });
         }
@@ -273,7 +280,7 @@ async function actualizar(){
                 kmServ: num(r[22]),
                 kmMtto: num(r[23]),
                 kmVac: num(r[24]),
-                kmPermitido: num(r[25]),
+                kmPermitido: num(r[25]), // <-- COLUMNA Z
                 gerente:r[1], jefe:r[2], cliente:r[3]
             });
         }
@@ -287,6 +294,7 @@ async function actualizar(){
     datosDiarios.forEach(d=>{
         realAc += d.kmTotal;
         perAc += d.kmPermitido;
+        permitidoTotal += d.kmPermitido; // <- acumulado correcto
 
         labels.push(d.dia);
         realData.push(realAc);
@@ -304,7 +312,7 @@ async function actualizar(){
         tablaMap[key].ine += d.kmVac;
     });
 
-    /* ====== KPIs en pantalla ====== */
+    // ====== KPIs EN PANTALLA ======
     kpiTotal.innerText = total.toLocaleString()+" km";
     kpiServicio.innerText = servicio.toLocaleString()+" km";
     kpiMtto.innerText = mtto.toLocaleString()+" km";
@@ -320,7 +328,7 @@ async function actualizar(){
 
     headerPeriodo.innerText = "Periodo al día "+hoy.getDate();
 
-    /* ====== GRAFICA 1 ====== */
+    // ====== GRÁFICA 1 (LINEAL) ======
     if(chartProgreso) chartProgreso.destroy();
     chartProgreso = new Chart(document.getElementById("chartProgreso"),{
         type:"line",
@@ -331,8 +339,7 @@ async function actualizar(){
         ]}
     });
 
-    /* ====== PIE ====== */
-    const totalPie = servicio+mtto+vacio;
+    // ====== PIE ======
     if(chartPie) chartPie.destroy();
     chartPie = new Chart(document.getElementById("chartPie"),{
         type:"pie",
@@ -345,7 +352,7 @@ async function actualizar(){
         }
     });
 
-    /* ====== LINEAS ====== */
+    // ====== LINEAS DIARIAS ======
     if(chartLineas) chartLineas.destroy();
     chartLineas = new Chart(document.getElementById("chartLineas"),{
         type:"line",
@@ -359,7 +366,7 @@ async function actualizar(){
         }
     });
 
-    /* ====== TABLA (SOLO UDN FILTRADA) ====== */
+    // ====== TABLA SOLO UDN FILTRADA ======
     let tabla = Object.values(tablaMap).map(r=>{
         let pctVac = r.rec ? (r.ine/r.rec*100) : 0;
         return {...r, pctVac};
