@@ -117,6 +117,14 @@ th,td{
     text-align:center;
 }
 th{background:#1f2937;color:white;}
+
+.debug{
+    background:#fff3cd;
+    padding:10px;
+    margin:10px 0;
+    border-radius:5px;
+    font-size:11px;
+}
 </style>
 </head>
 
@@ -145,6 +153,8 @@ th{background:#1f2937;color:white;}
         <option value="LIPU SALTILLO">LIPU SALTILLO</option>
     </select>
 </div>
+
+<div class="debug" id="debugInfo" style="display:none;"></div>
 
 <!-- KPIs -->
 <div class="kpi-grid">
@@ -233,7 +243,8 @@ const SHEET_NAME = "Kilometros";
 
 function num(v){
     if(!v) return 0;
-    return Number(v.toString().replace(/,/g,"").trim()) || 0;
+    let str = v.toString().replace(/,/g,"").trim();
+    return Number(str) || 0;
 }
 
 async function cargarDatos(){
@@ -248,15 +259,16 @@ async function cargarDatos(){
 let chartProgreso, chartDistribucion, chartDiario;
 
 async function actualizar(){
-    const unidad = unidadNegocio.value.trim().toUpperCase();
+    const unidad = unidadNegocio.value.trim();
     const rows = await cargarDatos();
 
     let total=0, servicio=0, mtto=0, vacio=0, permitidoTotal=0;
     let datosDiarios = [];
     let tablaMap = {};
+    let debugLines = [];
 
     const hoy = new Date();
-    hoy.setDate(hoy.getDate()-1);
+    const diaActual = hoy.getDate() - 1;
 
     // Leer KM PERMITIDO TOTAL de fila 7 (índice 6)
     // AC7 = columna 28 para SETTEPI
@@ -269,34 +281,44 @@ async function actualizar(){
         }
     }
 
-    rows.forEach((r, idx) => {
-        if(idx < 7) return; // Saltar encabezados y fila 7
+    debugLines.push(`Buscando: ${unidad}`);
+    debugLines.push(`Días a procesar: 1 a ${diaActual}`);
+    debugLines.push(`Permitido Total: ${permitidoTotal}`);
 
-        // Columnas según Excel:
-        // SETTEPI: L=UDN(11), M=Día(12), N=Total(13), O=Servicio(14), P=Mtto(15), Q=Vacío(16), R=Permitido Diario(17)
-        // LIPU: T=UDN(19), U=Día(20), V=Total(21), W=Servicio(22), X=Mtto(23), Y=Vacío(24), Z=Permitido Diario(25)
-
-        const udnDiario = (r[11]||r[19]||"").trim().toUpperCase();
-        const dia = num(r[12]||r[20]);
-
-        if(udnDiario === unidad && dia >= 1 && dia <= hoy.getDate()){
-
-            let kmTotal, kmServ, kmMtto, kmVac, kmPermDiario;
-
-            if(unidad === "SETTEPI SALTILLO"){
-                kmTotal = num(r[13]); // Columna N
-                kmServ  = num(r[14]); // Columna O
-                kmMtto  = num(r[15]); // Columna P
-                kmVac   = num(r[16]); // Columna Q
-                kmPermDiario = num(r[17]); // Columna R - Permitido diario
-            } else {
-                kmTotal = num(r[21]); // Columna V
-                kmServ  = num(r[22]); // Columna W
-                kmMtto  = num(r[23]); // Columna X
-                kmVac   = num(r[24]); // Columna Y
-                kmPermDiario = num(r[25]); // Columna Z - Permitido diario
-            }
-
+    // Procesar datos desde fila 8 en adelante
+    for(let idx = 7; idx < rows.length; idx++){
+        const r = rows[idx];
+        
+        // Determinar qué columnas usar según la UDN
+        let udnCol, diaCol, totalCol, servCol, mttoCol, vacCol, permCol;
+        
+        // Buscar en columnas de SETTEPI primero
+        const udnSettepi = (r[11]||"").toString().trim();
+        const udnLipu = (r[19]||"").toString().trim();
+        
+        let esSettepi = udnSettepi.toUpperCase().includes("SETTEPI");
+        let esLipu = udnLipu.toUpperCase().includes("LIPU");
+        
+        let kmTotal=0, kmServ=0, kmMtto=0, kmVac=0, kmPermDiario=0, dia=0;
+        
+        if(esSettepi && unidad === "SETTEPI SALTILLO"){
+            dia = num(r[12]);
+            kmTotal = num(r[13]); // N
+            kmServ  = num(r[14]); // O
+            kmMtto  = num(r[15]); // P
+            kmVac   = num(r[16]); // Q
+            kmPermDiario = num(r[17]); // R
+        } 
+        else if(esLipu && unidad === "LIPU SALTILLO"){
+            dia = num(r[20]);
+            kmTotal = num(r[21]); // V
+            kmServ  = num(r[22]); // W
+            kmMtto  = num(r[23]); // X
+            kmVac   = num(r[24]); // Y
+            kmPermDiario = num(r[25]); // Z
+        }
+        
+        if(dia >= 1 && dia <= diaActual && kmTotal > 0){
             total += kmTotal;
             servicio += kmServ;
             mtto += kmMtto;
@@ -304,7 +326,7 @@ async function actualizar(){
 
             datosDiarios.push({dia, kmTotal, kmServ, kmMtto, kmVac, kmPermDiario});
 
-            // Para la tabla (columnas A-J son comunes)
+            // Para la tabla
             const gerente = r[1]||"SIN GERENTE";
             const jefe = r[2]||"SIN JEFE";
             const cliente = r[3]||"SIN CLIENTE";
@@ -319,7 +341,14 @@ async function actualizar(){
             tablaMap[key].mtto += kmMtto;
             tablaMap[key].ine += kmVac;
         }
-    });
+    }
+
+    debugLines.push(`Total procesado: ${total} km`);
+    debugLines.push(`Registros en tabla: ${Object.keys(tablaMap).length}`);
+    debugLines.push(`Días encontrados: ${datosDiarios.length}`);
+    
+    document.getElementById('debugInfo').innerHTML = debugLines.join('<br>');
+    document.getElementById('debugInfo').style.display = 'block';
 
     // ====== KPIs ======
     kpiTotal.innerText = total.toLocaleString()+" km";
@@ -345,9 +374,9 @@ async function actualizar(){
     const importe = (margen*6).toLocaleString("es-MX",{style:"currency",currency:"MXN"});
     txtMargen.innerHTML = `${pctMargen}% de los KM permitidos.<br>Equivale a: ${importe}`;
 
-    headerPeriodo.innerText = "Periodo al día "+hoy.getDate();
+    headerPeriodo.innerText = "Periodo al día "+diaActual;
 
-    // ====== GRÁFICA 1: Progreso Acumulado (con colores Traxion) ======
+    // ====== GRÁFICA 1: Progreso Acumulado ======
     datosDiarios.sort((a,b)=>a.dia-b.dia);
 
     let labels=[], realAc=0, perAc=0;
@@ -404,7 +433,7 @@ async function actualizar(){
         }
     });
 
-    // ====== GRÁFICA 2: Distribución (Pie con colores Traxion) ======
+    // ====== GRÁFICA 2: Distribución ======
     if(chartDistribucion) chartDistribucion.destroy();
     chartDistribucion = new Chart(document.getElementById("chartDistribucion"),{
         type:"pie",
@@ -426,7 +455,7 @@ async function actualizar(){
         }
     });
 
-    // ====== GRÁFICA 3: Comportamiento Diario (colores Traxion) ======
+    // ====== GRÁFICA 3: Comportamiento Diario ======
     let servDiario=[], mttoDiario=[], vacioDiario=[];
     datosDiarios.forEach(d=>{
         servDiario.push(d.kmServ);
@@ -481,13 +510,12 @@ async function actualizar(){
         }
     });
 
-    // ====== TABLA (ordenada por % Vacío descendente) ======
+    // ====== TABLA ======
     let tabla = Object.values(tablaMap).map(r=>{
         let pctVac = r.rec > 0 ? (r.ine/r.rec*100) : 0;
         return {...r, pctVac};
     });
 
-    // Ordenar por % Vacío de mayor a menor
     tabla.sort((a,b)=> b.pctVac - a.pctVac);
 
     const body = document.getElementById("tablaConsolidada");
