@@ -1,257 +1,3 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard Traxion</title>
-
-<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{
-    font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
-    background:#f3f4f6;
-    color:#1f2937;
-    display:flex;
-}
-
-/* ====== SIDEBAR ====== */
-.sidebar{
-    width:260px;
-    background:#1f2937;
-    min-height:100vh;
-    padding:25px 20px;
-}
-.sidebar h2{
-    color:#84cc16;
-    text-align:center;
-    margin-bottom:30px;
-}
-.menu-item{
-    padding:14px 18px;
-    border-radius:10px;
-    margin-bottom:12px;
-    color:#d1d5db;
-    font-weight:600;
-    cursor:pointer;
-}
-.menu-item.active{
-    background:#84cc16;
-    color:#1f2937;
-}
-
-/* ====== CONTENT ====== */
-.content{
-    flex:1;
-    padding:30px;
-}
-.container{
-    max-width:1600px;
-    margin:auto;
-}
-
-/* ====== HEADER ====== */
-header{
-    background:linear-gradient(135deg,#1f2937,#374151);
-    padding:30px;
-    border-radius:14px;
-    margin-bottom:14px;
-}
-header h1{
-    color:#84cc16;
-    font-size:32px;
-}
-.subtitle{
-    color:#d1d5db;
-    margin-top:6px;
-}
-
-/* ====== FILTER ====== */
-.filter-bar{
-    margin:10px 0 18px 0;
-}
-.filter-bar select{
-    padding:10px 14px;
-    border-radius:10px;
-    border:2px solid #e5e7eb;
-    font-size:14px;
-    font-weight:600;
-}
-
-/* ====== KPIs ====== */
-.kpi-grid{
-    display:grid;
-    grid-template-columns:repeat(6,1fr);
-    gap:16px;
-}
-.kpi-card{
-    background:#ffffff;
-    border:2px solid #e5e7eb;
-    border-radius:12px;
-    padding:16px;
-}
-.kpi-card.highlight{border-left:4px solid #84cc16}
-.kpi-card.warning{border-left:4px solid #f59e0b}
-
-.kpi-label{
-    font-size:11px;
-    font-weight:600;
-    color:#6b7280;
-    text-transform:uppercase;
-    margin-bottom:6px;
-}
-.kpi-value{
-    font-size:22px;
-    font-weight:700;
-}
-.kpi-value.highlight{color:#84cc16}
-.kpi-subvalue{
-    font-size:11px;
-    color:#9ca3af;
-}
-
-/* ====== GRÁFICAS ====== */
-.chart-container {
-    background:#ffffff;
-    border:2px solid #e5e7eb;
-    border-radius:12px;
-    padding:15px;
-    margin-top:15px;
-}
-
-.row-charts{
-    display:grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap:15px;
-}
-
-canvas{
-    max-height:220px;
-}
-
-/* ====== TABLA ====== */
-table{
-    width:100%;
-    border-collapse:collapse;
-}
-th,td{
-    border:1px solid #e5e7eb;
-    padding:8px;
-    font-size:12px;
-    text-align:center;
-}
-th{
-    background:#1f2937;
-    color:white;
-}
-</style>
-</head>
-
-<body>
-
-<aside class="sidebar">
-    <h2>Traxion</h2>
-    <div class="menu-item active" id="menu-km">🚛 Kilómetros</div>
-    <div class="menu-item" id="menu-flota">🚗 Flota Vehicular</div>
-</aside>
-
-<main class="content">
-<div class="container">
-
-<section id="view-kilometros">
-
-<header>
-    <h1>Dashboard de Kilómetros Recorridos</h1>
-    <p class="subtitle" id="headerPeriodo"></p>
-</header>
-
-<div class="filter-bar">
-    <select id="unidadNegocio">
-        <option value="SETTEPI SALTILLO">SETTEPI SALTILLO</option>
-        <option value="LIPU SALTILLO">LIPU SALTILLO</option>
-    </select>
-</div>
-
-<div class="kpi-grid">
-    <div class="kpi-card highlight">
-        <div class="kpi-label">TOTAL KM RECORRIDOS</div>
-        <div class="kpi-value highlight" id="kpiTotal">0 km</div>
-        <div class="kpi-subvalue">Acumulado del periodo</div>
-    </div>
-
-    <div class="kpi-card">
-        <div class="kpi-label">KM PERMITIDOS</div>
-        <div class="kpi-value" id="kpiPermitido">0 km</div>
-        <div class="kpi-subvalue">Límite establecido</div>
-    </div>
-
-    <div class="kpi-card highlight">
-        <div class="kpi-label">MARGEN DISPONIBLE</div>
-        <div class="kpi-value highlight" id="kpiMargen">0 km</div>
-        <div class="kpi-subvalue" id="txtMargen"></div>
-    </div>
-
-    <div class="kpi-card">
-        <div class="kpi-label">KM DE SERVICIO</div>
-        <div class="kpi-value" id="kpiServicio">0 km</div>
-        <div class="kpi-subvalue" id="pctServicio"></div>
-    </div>
-
-    <div class="kpi-card">
-        <div class="kpi-label">KM MTTO / CARGA / RH / SEG</div>
-        <div class="kpi-value" id="kpiMtto">0 km</div>
-        <div class="kpi-subvalue" id="pctMtto"></div>
-    </div>
-
-    <div class="kpi-card warning">
-        <div class="kpi-label">KM INEFICIENTE (VACÍO)</div>
-        <div class="kpi-value" id="kpiVacio">0 km</div>
-        <div class="kpi-subvalue" id="pctVacio"></div>
-    </div>
-</div>
-
-<div class="row-charts">
-    <div class="chart-container">
-        <h3>Progreso Acumulado</h3>
-        <canvas id="chartProgreso"></canvas>
-    </div>
-
-    <div class="chart-container">
-        <h3>Distribución Total (%)</h3>
-        <canvas id="chartPie"></canvas>
-    </div>
-
-    <div class="chart-container">
-        <h3>Comportamiento Diario</h3>
-        <canvas id="chartLineas"></canvas>
-    </div>
-</div>
-
-<div class="chart-container">
-<h3>Tabla Consolidada (ordenada por % vacío)</h3>
-<table>
-<thead>
-<tr>
-  <th>Gerente</th>
-  <th>Jefe</th>
-  <th>Cliente</th>
-  <th>KM Recorridos</th>
-  <th>KM Servicio</th>
-  <th>KM Mtto</th>
-  <th>KM Ineficiente</th>
-  <th>% Vacío</th>
-</tr>
-</thead>
-<tbody id="tablaConsolidada"></tbody>
-</table>
-</div>
-
-</section>
-</div>
-</main>
-
 <script>
 const SHEET_ID = "1l3QYg7N050BScrtNhKkHQ-hHNDgaK9Prw95Dzb2-DRE";
 const SHEET_NAME = "Kilometros";
@@ -285,6 +31,7 @@ async function actualizar(){
     rows.forEach(r=>{
         const udnMaestro = (r[0]||"").trim().toUpperCase();
 
+        /* ====== KPIs (ACUMULADO GENERAL) ====== */
         if(udnMaestro===unidad){
             total += num(r[4]);
             servicio += num(r[5]);
@@ -293,6 +40,7 @@ async function actualizar(){
             permitidoTotal += num(r[9]);
         }
 
+        /* ====== DATOS DIARIOS (GRAFICA 1 Y 3) ====== */
         const diaSettepi = num(r[12]);
         const diaLipu = num(r[20]);
 
@@ -321,20 +69,27 @@ async function actualizar(){
         }
     });
 
+    /* ====== ORDENAR POR DÍA ====== */
     datosDiarios.sort((a,b)=>a.dia-b.dia);
 
-    let realAc=0, perAc=0, labels=[], realData=[], perData=[];
+    /* ====== ACUMULADOS PARA GRÁFICA 1 ====== */
+    let realAc=0, perAc=0;
+    let labels=[], realData=[], perData=[];
 
     datosDiarios.forEach(d=>{
         realAc += d.kmTotal;
         perAc += d.kmPermitidoDia;
+
         labels.push(d.dia);
         realData.push(realAc);
         perData.push(perAc);
 
+        /* ====== TABLA (SOLO UDN FILTRADA) ====== */
         const key = d.gerente+"|"+d.jefe+"|"+d.cliente;
+
         if(!tablaMap[key]){
-            tablaMap[key]={gerente:d.gerente,jefe:d.jefe,cliente:d.cliente,rec:0,serv:0,mtto:0,ine:0};
+            tablaMap[key]={gerente:d.gerente,jefe:d.jefe,cliente:d.cliente,
+                           rec:0,serv:0,mtto:0,ine:0};
         }
         tablaMap[key].rec += d.kmTotal;
         tablaMap[key].serv += d.kmServ;
@@ -342,13 +97,14 @@ async function actualizar(){
         tablaMap[key].ine += d.kmVac;
     });
 
+    /* ====== KPIs (YA CORRECTOS) ====== */
     kpiTotal.innerText = total.toLocaleString()+" km";
     kpiServicio.innerText = servicio.toLocaleString()+" km";
     kpiMtto.innerText = mtto.toLocaleString()+" km";
     kpiVacio.innerText = vacio.toLocaleString()+" km";
     kpiPermitido.innerText = permitidoTotal.toLocaleString()+" km";
 
-    const margen = permitidoTotal-total;
+    const margen = permitidoTotal - total;
     kpiMargen.innerText = margen.toLocaleString()+" km";
 
     const pct = permitidoTotal?((margen/permitidoTotal)*100).toFixed(1):0;
@@ -357,6 +113,7 @@ async function actualizar(){
 
     headerPeriodo.innerText = "Periodo al día "+hoy.getDate();
 
+    /* ====== GRAFICA 1 (YA FUNCIONA) ====== */
     if(chartProgreso) chartProgreso.destroy();
     chartProgreso = new Chart(document.getElementById("chartProgreso"),{
         type:"line",
@@ -367,6 +124,7 @@ async function actualizar(){
         ]}
     });
 
+    /* ====== PIE ====== */
     const totalPie = servicio+mtto+vacio;
     const pServ = totalPie?((servicio/totalPie)*100).toFixed(1):0;
     const pMtto = totalPie?((mtto/totalPie)*100).toFixed(1):0;
@@ -388,6 +146,7 @@ async function actualizar(){
         }
     });
 
+    /* ====== LINEAS ====== */
     if(chartLineas) chartLineas.destroy();
     chartLineas = new Chart(document.getElementById("chartLineas"),{
         type:"line",
@@ -401,6 +160,7 @@ async function actualizar(){
         }
     });
 
+    /* ====== TABLA FINAL (SOLO UDN FILTRADA) ====== */
     let tabla = Object.values(tablaMap).map(r=>{
         let pctVac = r.rec? (r.ine/r.rec*100) : 0;
         return {...r, pctVac};
@@ -429,6 +189,3 @@ async function actualizar(){
 unidadNegocio.addEventListener("change",actualizar);
 actualizar();
 </script>
-
-</body>
-</html>
