@@ -432,7 +432,7 @@ async function actualizar(){
 
     headerPeriodo.innerText = `Periodo al día ${diaActual} - ${unidad}`;
 
-    // ====== GRÁFICA 1: KM por Día - Recorrido vs Permitido ======
+    // ====== GRÁFICA 1: KM por Día - Recorrido vs Permitido (LÍNEAS) ======
     datosDiarios.sort((a,b)=>a.dia-b.dia);
 
     let labels=[];
@@ -444,33 +444,48 @@ async function actualizar(){
         perDiario.push(d.kmPermDiario);      // KM permitido del día
     });
 
+    console.log('===== DEBUG GRÁFICA 1 =====');
+    console.log('Unidad:', unidad);
+    console.log('Total días encontrados:', datosDiarios.length);
     console.log('Labels:', labels);
-    console.log('KM Real:', realDiario);
-    console.log('KM Permitido:', perDiario);
+    console.log('KM Real por día:', realDiario);
+    console.log('KM Permitido por día:', perDiario);
+    console.log('Primer dato completo:', datosDiarios[0]);
 
     if(chartProgreso) chartProgreso.destroy();
     
     if(labels.length > 0){
         chartProgreso = new Chart(document.getElementById("chartProgreso"),{
-            type:"bar",
+            type:"line",
             data:{
                 labels,
                 datasets:[
                     {
                         label:"KM Recorridos",
                         data:realDiario,
-                        backgroundColor:"rgba(132,204,22,0.8)",
                         borderColor:"#84cc16",
-                        borderWidth:2,
-                        borderRadius:6
+                        backgroundColor:"rgba(132,204,22,0.2)",
+                        borderWidth:3,
+                        tension:0.3,
+                        fill:true,
+                        pointRadius:6,
+                        pointBackgroundColor:"#84cc16",
+                        pointBorderColor:"#fff",
+                        pointBorderWidth:2
                     },
                     {
                         label:"KM Permitido",
                         data:perDiario,
-                        backgroundColor:"rgba(31,41,55,0.6)",
                         borderColor:"#1f2937",
-                        borderWidth:2,
-                        borderRadius:6
+                        backgroundColor:"rgba(31,41,55,0.1)",
+                        borderWidth:3,
+                        tension:0.3,
+                        fill:false,
+                        pointRadius:6,
+                        pointBackgroundColor:"#1f2937",
+                        pointBorderColor:"#fff",
+                        pointBorderWidth:2,
+                        borderDash:[8,4]
                     }
                 ]
             },
@@ -478,7 +493,11 @@ async function actualizar(){
                 responsive:true,
                 maintainAspectRatio:true,
                 plugins:{
-                    legend:{display:true,position:'top',labels:{font:{size:12,weight:'bold'}}}
+                    legend:{
+                        display:true,
+                        position:'top',
+                        labels:{font:{size:12,weight:'bold'}}
+                    }
                 },
                 scales:{
                     y:{
@@ -492,7 +511,7 @@ async function actualizar(){
             }
         });
     } else {
-        console.error('No hay datos para graficar');
+        console.error('❌ No hay datos para graficar - labels está vacío');
     }
 
     // ====== GRÁFICA 2: Distribución con PORCENTAJES (de la primera tabla - totales) ======
