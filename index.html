@@ -326,7 +326,7 @@ async function actualizar(){
     const rows = await cargarDatos();
 
     const hoy = new Date();
-    const diaActual = hoy.getDate() - 1;
+    const diaActual = hoy.getDate(); // Cambiado: ahora es 20, no 19
 
     // ===== KPIs desde la PRIMERA TABLA (A-J) =====
     // SUMAR todas las filas que corresponden a la unidad
@@ -364,8 +364,8 @@ async function actualizar(){
     // ===== GRÁFICAS desde las TABLAS DIARIAS (L-R y T-Z) =====
     let datosDiarios = [];
 
-    // Empezar desde fila 8 (índice 7) porque fila 7 tiene encabezados
-    for(let idx = 7; idx < rows.length; idx++){
+    // Empezar desde fila 2 (índice 1) para leer TODOS los días
+    for(let idx = 1; idx < rows.length; idx++){
         const r = rows[idx];
         
         let dia=0, kmTotal=0, kmServ=0, kmMtto=0, kmVac=0, kmPermDiario=0;
@@ -399,14 +399,24 @@ async function actualizar(){
             }
         }
         
-        // Solo agregar si encontró datos válidos
-        if(encontrado && dia >= 1 && dia <= diaActual){
+        // Solo agregar si encontró datos válidos y el día es válido
+        if(encontrado && dia >= 1 && dia < diaActual){
             datosDiarios.push({dia, kmTotal, kmServ, kmMtto, kmVac, kmPermDiario});
+            
+            // Debug para el primer día
+            if(datosDiarios.length === 1){
+                console.log('🔍 Primer día leído:');
+                console.log('  Fila Excel:', idx + 1);
+                console.log('  Día:', dia);
+                console.log('  KM Total:', kmTotal, '(columna', unidad === "SETTEPI SALTILLO" ? 'N/13' : 'V/21', ')');
+                console.log('  KM Permitido:', kmPermDiario, '(columna', unidad === "SETTEPI SALTILLO" ? 'R/17' : 'Z/25', ')');
+                console.log('  Valor raw columna Z:', r[25]);
+            }
         }
     }
 
     console.log(`Datos diarios encontrados: ${datosDiarios.length} días`);
-    console.log('Primeros 3 días:', datosDiarios.slice(0,3));
+    console.log('Primeros 3 días completos:', datosDiarios.slice(0,3));
 
     // ====== ACTUALIZAR KPIs ======
     kpiTotal.innerText = total.toLocaleString()+" km";
