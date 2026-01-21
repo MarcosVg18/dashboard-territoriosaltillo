@@ -1077,33 +1077,34 @@ async function cargarScoreSeg(){
                 if(!r || r.length < 24) continue;
                 
                 datosScoreSeg.push({
-                    udn: r[0]||"",
-                    gerente: r[1]||"",
-                    jefe: r[2]||"",
-                    anio: r[3]||"",
-                    mes: r[4]||"",
-                    sem: r[5]||"",
-                    dia: r[6]||"",
-                    operador: r[7]||"",
-                    cliente: r[8]||"",
-                    // Eventos Críticos (J-N, índices 9-13)
+                    // ===== COLUMNA A =====
+                    udn: r[0] || "",
+
+                    // ===== COLUMNA H - I =====
+                    operador: r[7] || "",
+                    cliente: r[8] || "",
+
+                    // ===== EVENTOS CRÍTICOS (J-N) =====
                     critAcel: num(r[9]),
                     critFreno: num(r[10]),
                     critGiroD: num(r[11]),
                     critGiroI: num(r[12]),
                     critVeloc: num(r[13]),
-                    // Eventos Moderados (O-S, índices 14-18)
+
+                    // ===== EVENTOS MODERADOS (O-S) =====
                     modAcel: num(r[14]),
                     modFreno: num(r[15]),
                     modGiroD: num(r[16]),
                     modGiroI: num(r[17]),
                     modVeloc: num(r[18]),
-                    // Eventos Leves (T-W, índices 19-22)
+
+                    // ===== EVENTOS LEVES (T-W) =====
                     levFreno: num(r[19]),
                     levGiroD: num(r[20]),
                     levGiroI: num(r[21]),
                     levVeloc: num(r[22]),
-                    // Score (X, índice 23)
+
+                    // ===== SCORE FINAL (X) =====
                     score: num(r[23])
                 });
             }
@@ -1290,3 +1291,4 @@ function exportarScoreExcel(){
 
 </body>
 </html>
+
