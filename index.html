@@ -221,12 +221,15 @@ canvas{
 <div class="container-fluid">
     <aside class="sidebar">
         <h2>🚛 Traxion</h2>
-        <div class="menu-item active" id="menu-km">📊 Kilómetros</div>
-        <div class="menu-item" id="menu-flota">🚗 Flota Vehicular</div>
-        <div class="menu-item" id="menu-flota2">📍 Dif GPS vs Cargas</div>
+        <div class="menu-item active" data-seccion="kilometros">📊 Kilómetros</div>
+        <div class="menu-item" data-seccion="flota">🚗 Flota Vehicular</div>
+        <div class="menu-item" data-seccion="scoreseg">🛡️ Eventos Score Seg</div>
     </aside>
 
     <main class="content">
+
+    <!-- ==================== SECCIÓN 1: KILÓMETROS ==================== -->
+    <section id="seccion-kilometros" class="seccion-dashboard">
 
     <header>
         <h1>Dashboard de Kilómetros Recorridos</h1>
@@ -345,12 +348,183 @@ canvas{
         </div>
     </div>
 
+    </section>
+    <!-- ==================== FIN SECCIÓN KILÓMETROS ==================== -->
+
+
+    <!-- ==================== SECCIÓN 2: FLOTA VEHICULAR ==================== -->
+    <section id="seccion-flota" class="seccion-dashboard" style="display:none;">
+
+    <header>
+        <h1>Dashboard de Flota Vehicular</h1>
+        <p class="subtitle">Gestión y monitoreo de vehículos</p>
+    </header>
+
+    <div style="text-align:center;padding:100px 20px;">
+        <h2 style="color:#84cc16;font-size:48px;margin-bottom:20px;">🚗</h2>
+        <h3 style="color:#6b7280;font-size:24px;margin-bottom:10px;">Sección en construcción</h3>
+        <p style="color:#9ca3af;font-size:16px;">Aquí irá el contenido de Flota Vehicular</p>
+        <p style="color:#9ca3af;font-size:14px;margin-top:20px;">
+            Dime qué KPIs, gráficas y tablas necesitas para esta sección
+        </p>
+    </div>
+
+    </section>
+    <!-- ==================== FIN SECCIÓN FLOTA ==================== -->
+
+
+    <!-- ==================== SECCIÓN 3: EVENTOS SCORE SEG ==================== -->
+    <section id="seccion-scoreseg" class="seccion-dashboard" style="display:none;">
+
+    <header>
+        <h1>Dashboard de Eventos Score Seg</h1>
+        <p class="subtitle">Monitoreo de seguridad y comportamiento</p>
+    </header>
+
+    <!-- Filtros Múltiples -->
+    <div class="chart-container" style="margin-bottom:20px;">
+        <h3>Filtros de Búsqueda</h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:15px;">
+            <select id="filtroScoreUDN" style="padding:10px;border:2px solid #e5e7eb;border-radius:8px;font-size:13px;">
+                <option value="">Todas las UDN</option>
+            </select>
+            <select id="filtroScoreGerente" style="padding:10px;border:2px solid #e5e7eb;border-radius:8px;font-size:13px;">
+                <option value="">Todos los Gerentes</option>
+            </select>
+            <select id="filtroScoreJefe" style="padding:10px;border:2px solid #e5e7eb;border-radius:8px;font-size:13px;">
+                <option value="">Todos los Jefes</option>
+            </select>
+            <select id="filtroScoreAnio" style="padding:10px;border:2px solid #e5e7eb;border-radius:8px;font-size:13px;">
+                <option value="">Todos los Años</option>
+            </select>
+            <select id="filtroScoreMes" style="padding:10px;border:2px solid #e5e7eb;border-radius:8px;font-size:13px;">
+                <option value="">Todos los Meses</option>
+            </select>
+            <select id="filtroScoreSem" style="padding:10px;border:2px solid #e5e7eb;border-radius:8px;font-size:13px;">
+                <option value="">Todas las Semanas</option>
+            </select>
+            <select id="filtroScoreDia" style="padding:10px;border:2px solid #e5e7eb;border-radius:8px;font-size:13px;">
+                <option value="">Todos los Días</option>
+            </select>
+            <select id="filtroScoreCliente" style="padding:10px;border:2px solid #e5e7eb;border-radius:8px;font-size:13px;">
+                <option value="">Todos los Clientes</option>
+            </select>
+            <input type="text" id="filtroScoreOperador" placeholder="🔍 Buscar Operador" style="padding:10px;border:2px solid #e5e7eb;border-radius:8px;font-size:13px;">
+            <button onclick="limpiarFiltrosScore()" style="padding:10px;border:2px solid #e5e7eb;border-radius:8px;background:#fff;cursor:pointer;font-weight:600;">
+                🗑️ Limpiar Filtros
+            </button>
+        </div>
+        <div style="margin-top:15px;padding:10px;background:#f3f4f6;border-radius:8px;">
+            <span style="font-size:14px;color:#6b7280;">Registros mostrados: <strong id="contadorRegistros">0</strong></span>
+        </div>
+    </div>
+
+    <!-- Tabla de Score Seg -->
+    <div class="chart-container">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
+            <h3 style="margin:0;">Detalle de Eventos por Operador</h3>
+            <button onclick="exportarScoreExcel()" style="
+                background:#84cc16;
+                color:#1f2937;
+                border:none;
+                padding:10px 20px;
+                border-radius:8px;
+                font-weight:700;
+                font-size:14px;
+                cursor:pointer;
+                transition:all 0.3s;
+                box-shadow:0 2px 4px rgba(0,0,0,0.1);
+            " onmouseover="this.style.background='#65a30d'" onmouseout="this.style.background='#84cc16'">
+                📥 Exportar a Excel
+            </button>
+        </div>
+        
+        <div style="overflow-x:auto;">
+            <table id="tablaScoreSeg" style="font-size:12px;">
+                <thead>
+                    <tr>
+                        <th>UDN</th>
+                        <th>Gerente</th>
+                        <th>Jefe</th>
+                        <th>Año</th>
+                        <th>Mes</th>
+                        <th>Sem</th>
+                        <th>Día</th>
+                        <th>Operador</th>
+                        <th>Cliente</th>
+                        <th colspan="5" style="background:#dc2626;color:white;">EVENTOS CRÍTICOS</th>
+                        <th colspan="5" style="background:#f59e0b;color:white;">EVENTOS MODERADOS</th>
+                        <th colspan="4" style="background:#eab308;color:white;">EVENTOS LEVES</th>
+                        <th style="background:#1f2937;color:#84cc16;">SCORE</th>
+                    </tr>
+                    <tr style="background:#f9fafb;">
+                        <th colspan="9"></th>
+                        <th style="font-size:10px;">Acel</th>
+                        <th style="font-size:10px;">Freno</th>
+                        <th style="font-size:10px;">Giro D</th>
+                        <th style="font-size:10px;">Giro I</th>
+                        <th style="font-size:10px;">Veloc</th>
+                        <th style="font-size:10px;">Acel</th>
+                        <th style="font-size:10px;">Freno</th>
+                        <th style="font-size:10px;">Giro D</th>
+                        <th style="font-size:10px;">Giro I</th>
+                        <th style="font-size:10px;">Veloc</th>
+                        <th style="font-size:10px;">Freno</th>
+                        <th style="font-size:10px;">Giro D</th>
+                        <th style="font-size:10px;">Giro I</th>
+                        <th style="font-size:10px;">Veloc</th>
+                        <th style="font-size:10px;">Final</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaScoreBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    </section>
+    <!-- ==================== FIN SECCIÓN SCORE SEG ==================== -->
+
     </main>
 </div>
 
 <script>
 const SHEET_ID = "1l3QYg7N050BScrtNhKkHQ-hHNDgaK9Prw95Dzb2-DRE";
 const SHEET_NAME = "Kilometros";
+
+// ====== SISTEMA DE NAVEGACIÓN ENTRE SECCIONES ======
+function cambiarSeccion(nombreSeccion){
+    // Ocultar todas las secciones
+    document.querySelectorAll('.seccion-dashboard').forEach(s => s.style.display = 'none');
+    
+    // Mostrar la sección seleccionada
+    document.getElementById(`seccion-${nombreSeccion}`).style.display = 'block';
+    
+    // Actualizar menú activo
+    document.querySelectorAll('.menu-item').forEach(item => {
+        item.classList.remove('active');
+    });
+    document.querySelector(`[data-seccion="${nombreSeccion}"]`).classList.add('active');
+    
+    // Cargar datos específicos de la sección
+    if(nombreSeccion === 'kilometros'){
+        actualizar();
+    } else if(nombreSeccion === 'flota'){
+        // Aquí cargarás datos de flota cuando lo desarrollemos
+        console.log('Cargando sección Flota Vehicular...');
+    } else if(nombreSeccion === 'scoreseg'){
+        cargarScoreSeg();
+    }
+}
+
+// Event listeners para el menú
+document.querySelectorAll('.menu-item').forEach(item => {
+    item.addEventListener('click', function(){
+        const seccion = this.getAttribute('data-seccion');
+        cambiarSeccion(seccion);
+    });
+});
+
+// ====== FUNCIONES DE KILÓMETROS (FASE 1) ======
 
 function num(v){
     if(!v) return 0;
@@ -877,6 +1051,241 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 actualizar();
+
+// ====== FUNCIONES DE SCORE SEG (FASE 3) ======
+const SHEET_SCORESEG = "Detalle ScoreSeg";
+let datosScoreSeg = [];
+let datosScoreFiltrados = [];
+
+async function cargarScoreSeg(){
+    console.log('🔄 Cargando Score Seg...');
+    
+    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&sheet=${encodeURIComponent(SHEET_SCORESEG)}`;
+    const res = await fetch(url);
+    const csv = await res.text();
+    
+    Papa.parse(csv, {
+        header: false,
+        skipEmptyLines: true,
+        complete: function(results){
+            const rows = results.data;
+            datosScoreSeg = [];
+            
+            // Leer desde fila 2 (índice 1) para saltar encabezados
+            for(let i = 1; i < rows.length; i++){
+                const r = rows[i];
+                if(!r || r.length < 24) continue;
+                
+                datosScoreSeg.push({
+                    udn: r[0]||"",
+                    gerente: r[1]||"",
+                    jefe: r[2]||"",
+                    anio: r[3]||"",
+                    mes: r[4]||"",
+                    sem: r[5]||"",
+                    dia: r[6]||"",
+                    operador: r[7]||"",
+                    cliente: r[8]||"",
+                    // Eventos Críticos (J-N, índices 9-13)
+                    critAcel: num(r[9]),
+                    critFreno: num(r[10]),
+                    critGiroD: num(r[11]),
+                    critGiroI: num(r[12]),
+                    critVeloc: num(r[13]),
+                    // Eventos Moderados (O-S, índices 14-18)
+                    modAcel: num(r[14]),
+                    modFreno: num(r[15]),
+                    modGiroD: num(r[16]),
+                    modGiroI: num(r[17]),
+                    modVeloc: num(r[18]),
+                    // Eventos Leves (T-W, índices 19-22)
+                    levFreno: num(r[19]),
+                    levGiroD: num(r[20]),
+                    levGiroI: num(r[21]),
+                    levVeloc: num(r[22]),
+                    // Score (X, índice 23)
+                    score: num(r[23])
+                });
+            }
+            
+            console.log(`✓ Score Seg cargado: ${datosScoreSeg.length} registros`);
+            poblarFiltrosScore();
+            datosScoreFiltrados = [...datosScoreSeg];
+            renderizarTablaScore();
+        }
+    });
+}
+
+function poblarFiltrosScore(){
+    const udns = [...new Set(datosScoreSeg.map(d => d.udn))].sort();
+    const gerentes = [...new Set(datosScoreSeg.map(d => d.gerente))].sort();
+    const jefes = [...new Set(datosScoreSeg.map(d => d.jefe))].sort();
+    const anios = [...new Set(datosScoreSeg.map(d => d.anio))].sort();
+    const meses = [...new Set(datosScoreSeg.map(d => d.mes))].sort();
+    const sems = [...new Set(datosScoreSeg.map(d => d.sem))].sort();
+    const dias = [...new Set(datosScoreSeg.map(d => d.dia))].sort();
+    const clientes = [...new Set(datosScoreSeg.map(d => d.cliente))].sort();
+    
+    document.getElementById('filtroScoreUDN').innerHTML = '<option value="">Todas las UDN</option>' + 
+        udns.map(u => `<option value="${u}">${u}</option>`).join('');
+    
+    document.getElementById('filtroScoreGerente').innerHTML = '<option value="">Todos los Gerentes</option>' + 
+        gerentes.map(g => `<option value="${g}">${g}</option>`).join('');
+    
+    document.getElementById('filtroScoreJefe').innerHTML = '<option value="">Todos los Jefes</option>' + 
+        jefes.map(j => `<option value="${j}">${j}</option>`).join('');
+    
+    document.getElementById('filtroScoreAnio').innerHTML = '<option value="">Todos los Años</option>' + 
+        anios.map(a => `<option value="${a}">${a}</option>`).join('');
+    
+    document.getElementById('filtroScoreMes').innerHTML = '<option value="">Todos los Meses</option>' + 
+        meses.map(m => `<option value="${m}">${m}</option>`).join('');
+    
+    document.getElementById('filtroScoreSem').innerHTML = '<option value="">Todas las Semanas</option>' + 
+        sems.map(s => `<option value="${s}">${s}</option>`).join('');
+    
+    document.getElementById('filtroScoreDia').innerHTML = '<option value="">Todos los Días</option>' + 
+        dias.map(d => `<option value="${d}">${d}</option>`).join('');
+    
+    document.getElementById('filtroScoreCliente').innerHTML = '<option value="">Todos los Clientes</option>' + 
+        clientes.map(c => `<option value="${c}">${c}</option>`).join('');
+    
+    // Event listeners
+    document.getElementById('filtroScoreUDN').addEventListener('change', filtrarScoreSeg);
+    document.getElementById('filtroScoreGerente').addEventListener('change', filtrarScoreSeg);
+    document.getElementById('filtroScoreJefe').addEventListener('change', filtrarScoreSeg);
+    document.getElementById('filtroScoreAnio').addEventListener('change', filtrarScoreSeg);
+    document.getElementById('filtroScoreMes').addEventListener('change', filtrarScoreSeg);
+    document.getElementById('filtroScoreSem').addEventListener('change', filtrarScoreSeg);
+    document.getElementById('filtroScoreDia').addEventListener('change', filtrarScoreSeg);
+    document.getElementById('filtroScoreCliente').addEventListener('change', filtrarScoreSeg);
+    document.getElementById('filtroScoreOperador').addEventListener('input', filtrarScoreSeg);
+}
+
+function filtrarScoreSeg(){
+    const fUdn = document.getElementById('filtroScoreUDN').value;
+    const fGerente = document.getElementById('filtroScoreGerente').value;
+    const fJefe = document.getElementById('filtroScoreJefe').value;
+    const fAnio = document.getElementById('filtroScoreAnio').value;
+    const fMes = document.getElementById('filtroScoreMes').value;
+    const fSem = document.getElementById('filtroScoreSem').value;
+    const fDia = document.getElementById('filtroScoreDia').value;
+    const fCliente = document.getElementById('filtroScoreCliente').value;
+    const fOperador = document.getElementById('filtroScoreOperador').value.toUpperCase();
+    
+    datosScoreFiltrados = datosScoreSeg.filter(d => {
+        return (!fUdn || d.udn === fUdn) &&
+               (!fGerente || d.gerente === fGerente) &&
+               (!fJefe || d.jefe === fJefe) &&
+               (!fAnio || d.anio === fAnio) &&
+               (!fMes || d.mes === fMes) &&
+               (!fSem || d.sem === fSem) &&
+               (!fDia || d.dia === fDia) &&
+               (!fCliente || d.cliente === fCliente) &&
+               (!fOperador || d.operador.toUpperCase().includes(fOperador));
+    });
+    
+    renderizarTablaScore();
+}
+
+function renderizarTablaScore(){
+    const tbody = document.getElementById('tablaScoreBody');
+    
+    if(datosScoreFiltrados.length === 0){
+        tbody.innerHTML = '<tr><td colspan="24" style="text-align:center;padding:30px;color:#6b7280;">No se encontraron registros</td></tr>';
+        document.getElementById('contadorRegistros').innerText = '0';
+        return;
+    }
+    
+    let html = '';
+    datosScoreFiltrados.forEach(d => {
+        // Función para colorear celdas de eventos
+        const colorEvento = (val) => {
+            if(val === 0) return 'background:#ffffff;';
+            if(val >= 1) return 'background:#fef3c7;font-weight:600;';
+            return '';
+        };
+        
+        // Color del score
+        let scoreColor = '#dc2626'; // Rojo por defecto
+        if(d.score >= 90) scoreColor = '#22c55e'; // Verde
+        else if(d.score >= 80) scoreColor = '#eab308'; // Amarillo
+        else if(d.score >= 70) scoreColor = '#f59e0b'; // Naranja
+        
+        html += `
+        <tr>
+            <td>${d.udn}</td>
+            <td>${d.gerente}</td>
+            <td>${d.jefe}</td>
+            <td>${d.anio}</td>
+            <td>${d.mes}</td>
+            <td>${d.sem}</td>
+            <td>${d.dia}</td>
+            <td style="font-weight:600;">${d.operador}</td>
+            <td>${d.cliente}</td>
+            <td style="${colorEvento(d.critAcel)}">${d.critAcel}</td>
+            <td style="${colorEvento(d.critFreno)}">${d.critFreno}</td>
+            <td style="${colorEvento(d.critGiroD)}">${d.critGiroD}</td>
+            <td style="${colorEvento(d.critGiroI)}">${d.critGiroI}</td>
+            <td style="${colorEvento(d.critVeloc)}">${d.critVeloc}</td>
+            <td style="${colorEvento(d.modAcel)}">${d.modAcel}</td>
+            <td style="${colorEvento(d.modFreno)}">${d.modFreno}</td>
+            <td style="${colorEvento(d.modGiroD)}">${d.modGiroD}</td>
+            <td style="${colorEvento(d.modGiroI)}">${d.modGiroI}</td>
+            <td style="${colorEvento(d.modVeloc)}">${d.modVeloc}</td>
+            <td style="${colorEvento(d.levFreno)}">${d.levFreno}</td>
+            <td style="${colorEvento(d.levGiroD)}">${d.levGiroD}</td>
+            <td style="${colorEvento(d.levGiroI)}">${d.levGiroI}</td>
+            <td style="${colorEvento(d.levVeloc)}">${d.levVeloc}</td>
+            <td style="background:${scoreColor};color:white;font-weight:800;font-size:14px;">${d.score.toFixed(1)}</td>
+        </tr>`;
+    });
+    
+    tbody.innerHTML = html;
+    document.getElementById('contadorRegistros').innerText = datosScoreFiltrados.length.toLocaleString();
+}
+
+function limpiarFiltrosScore(){
+    document.getElementById('filtroScoreUDN').value = '';
+    document.getElementById('filtroScoreGerente').value = '';
+    document.getElementById('filtroScoreJefe').value = '';
+    document.getElementById('filtroScoreAnio').value = '';
+    document.getElementById('filtroScoreMes').value = '';
+    document.getElementById('filtroScoreSem').value = '';
+    document.getElementById('filtroScoreDia').value = '';
+    document.getElementById('filtroScoreCliente').value = '';
+    document.getElementById('filtroScoreOperador').value = '';
+    datosScoreFiltrados = [...datosScoreSeg];
+    renderizarTablaScore();
+}
+
+function exportarScoreExcel(){
+    if(datosScoreFiltrados.length === 0){
+        alert('No hay datos para exportar');
+        return;
+    }
+    
+    const fecha = new Date().toLocaleDateString('es-MX');
+    
+    let csv = 'UDN,Gerente,Jefe,Año,Mes,Semana,Día,Operador,Cliente,';
+    csv += 'Acel Crit,Freno Crit,Giro D Crit,Giro I Crit,Veloc Crit,';
+    csv += 'Acel Mod,Freno Mod,Giro D Mod,Giro I Mod,Veloc Mod,';
+    csv += 'Freno Leve,Giro D Leve,Giro I Leve,Veloc Leve,Score\n';
+    
+    datosScoreFiltrados.forEach(d => {
+        csv += `"${d.udn}","${d.gerente}","${d.jefe}",${d.anio},${d.mes},${d.sem},${d.dia},"${d.operador}","${d.cliente}",`;
+        csv += `${d.critAcel},${d.critFreno},${d.critGiroD},${d.critGiroI},${d.critVeloc},`;
+        csv += `${d.modAcel},${d.modFreno},${d.modGiroD},${d.modGiroI},${d.modVeloc},`;
+        csv += `${d.levFreno},${d.levGiroD},${d.levGiroI},${d.levVeloc},${d.score}\n`;
+    });
+    
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `Score_Seg_${fecha}.csv`;
+    link.click();
+}
+
 </script>
 
 </body>
