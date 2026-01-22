@@ -3,341 +3,215 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard Traxion</title>
+<title>Dashboard Kilómetros</title>
 
-<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+<!-- ================== ESTILOS ================== -->
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{
-    font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+    font-family:'Segoe UI',Tahoma,Verdana,sans-serif;
     background:#f3f4f6;
     color:#1f2937;
-    min-height:100vh;
 }
 
-.container-fluid{
-    display:flex;
-    flex-wrap:wrap;
-}
-
-.sidebar{
-    width:260px;
+nav{
     background:#1f2937;
-    min-height:100vh;
-    padding:25px 20px;
+    padding:15px 30px;
+    display:flex;
+    gap:20px;
+    align-items:center;
 }
-.sidebar h2{
-    color:#84cc16;
-    text-align:center;
-    margin-bottom:30px;
-    font-size:28px;
-}
-.menu-item{
-    padding:14px 18px;
-    border-radius:10px;
-    margin-bottom:12px;
-    color:#d1d5db;
+nav a{
+    color:#fff;
+    text-decoration:none;
     font-weight:600;
-    cursor:pointer;
-    transition:all 0.3s;
 }
-.menu-item:hover{
-    background:#374151;
-}
-.menu-item.active{
-    background:#84cc16;
-    color:#1f2937;
+nav a:first-child{
+    color:#84cc16;
+    font-weight:800;
 }
 
-.content{
-    flex:1;
-    padding:30px;
-    min-width:0;
-}
+.content{padding:30px}
 
 header{
     background:linear-gradient(135deg,#1f2937,#374151);
-    padding:30px;
+    padding:25px;
     border-radius:14px;
     margin-bottom:20px;
 }
-header h1{
-    color:#84cc16;
-    font-size:32px;
-    margin-bottom:8px;
-}
-.subtitle{
-    color:#d1d5db;
-    font-size:16px;
-}
+header h1{color:#84cc16}
+.subtitle{color:#d1d5db}
 
-.filter-bar{
-    margin:0 0 20px 0;
-}
 .filter-bar select{
-    padding:12px 16px;
-    border-radius:10px;
+    padding:10px;
+    border-radius:8px;
     border:2px solid #e5e7eb;
-    font-size:15px;
     font-weight:600;
-    min-width:250px;
-    background:#ffffff;
-    cursor:pointer;
-    transition:border 0.3s;
-}
-.filter-bar select:focus{
-    outline:none;
-    border-color:#84cc16;
 }
 
 .kpi-grid{
     display:grid;
-    grid-template-columns:repeat(auto-fit, minmax(250px, 1fr));
-    gap:18px;
-    margin-bottom:25px;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:16px;
+    margin:25px 0;
 }
-
 .kpi-card{
-    background:#ffffff;
+    background:#fff;
     border:2px solid #e5e7eb;
     border-radius:12px;
-    padding:20px;
-    transition:transform 0.2s, box-shadow 0.2s;
+    padding:18px;
 }
-.kpi-card:hover{
-    transform:translateY(-2px);
-    box-shadow:0 4px 12px rgba(0,0,0,0.1);
-}
-.kpi-card.highlight{
-    border-left:5px solid #84cc16;
-}
-.kpi-card.warning{
-    border-left:5px solid #f59e0b;
-}
-
-.kpi-label{
-    font-size:11px;
-    font-weight:700;
-    color:#6b7280;
-    text-transform:uppercase;
-    letter-spacing:0.5px;
-    margin-bottom:8px;
-}
-.kpi-value{
-    font-size:28px;
-    font-weight:800;
-    color:#1f2937;
-    margin:8px 0;
-}
-.kpi-value.highlight{
-    color:#84cc16;
-}
-.kpi-subvalue{
-    font-size:12px;
-    color:#9ca3af;
-    margin-top:6px;
-    line-height:1.4;
-}
-
-.chart-row{
-    display:grid;
-    grid-template-columns:repeat(auto-fit, minmax(400px, 1fr));
-    gap:20px;
-    margin-bottom:25px;
-}
+.kpi-card.highlight{border-left:5px solid #84cc16}
+.kpi-card.warning{border-left:5px solid #ef4444}
+.kpi-label{font-size:11px;font-weight:700;color:#6b7280}
+.kpi-value{font-size:26px;font-weight:800;margin-top:8px}
 
 .chart-container{
-    background:#ffffff;
+    background:#fff;
     border:2px solid #e5e7eb;
     border-radius:12px;
     padding:20px;
-    transition:transform 0.2s, box-shadow 0.2s;
-}
-.chart-container:hover{
-    transform:translateY(-2px);
-    box-shadow:0 4px 12px rgba(0,0,0,0.1);
-}
-.chart-container h3{
-    font-size:16px;
-    font-weight:700;
-    margin-bottom:15px;
-    color:#1f2937;
-    padding-bottom:10px;
-    border-bottom:2px solid #84cc16;
-}
-canvas{
-    max-height:280px;
+    margin-bottom:25px;
 }
 
-@media (max-width: 1400px){
-    .kpi-grid{
-        grid-template-columns:repeat(3, 1fr);
-    }
+table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:13px;
 }
-
-@media (max-width: 1024px){
-    .sidebar{
-        width:100%;
-        min-height:auto;
-    }
-    .container-fluid{
-        flex-direction:column;
-    }
-    .kpi-grid{
-        grid-template-columns:repeat(2, 1fr);
-    }
-    .chart-row{
-        grid-template-columns:1fr;
-    }
+th,td{
+    padding:8px;
+    border-bottom:1px solid #e5e7eb;
 }
-
-@media (max-width: 640px){
-    .content{
-        padding:15px;
-    }
-    header{
-        padding:20px;
-    }
-    header h1{
-        font-size:24px;
-    }
-    .kpi-grid{
-        grid-template-columns:1fr;
-    }
-    .kpi-value{
-        font-size:24px;
-    }
-    .filter-bar select{
-        width:100%;
-    }
-}
+th{background:#f9fafb}
 </style>
-<link rel="stylesheet" href="kilometros.css">
 </head>
 
 <body>
-<section id="seccion-kilometros" class="seccion-dashboard">
 
-    <header>
-        <h1>Dashboard de Kilómetros Recorridos</h1>
-        <p class="subtitle" id="headerPeriodo">Cargando datos...</p>
-    </header>
+<!-- ================== MENÚ ================== -->
+<nav>
+  <a href="index.html">🚛 Traxion</a>
+  <a href="dashboard_kilometros.html">📊 Kilómetros</a>
+  <a href="dashboard_flota.html">🚗 Flota</a>
+  <a href="dashboard_scoreseg.html">🛡️ ScoreSeg</a>
+</nav>
 
-    <div class="filter-bar">
-        <select id="unidadNegocio">
-            <option value="SETTEPI SALTILLO">SETTEPI SALTILLO</option>
-            <option value="LIPU SALTILLO">LIPU SALTILLO</option>
-        </select>
-    </div>
+<div class="content">
 
-    <!-- KPIs -->
-    <div class="kpi-grid">
-        <div class="kpi-card highlight">
-            <div class="kpi-label">Total KM Recorridos</div>
-            <div class="kpi-value highlight" id="kpiTotal">0 km</div>
-            <div class="kpi-subvalue">Acumulado del periodo</div>
-        </div>
+<header>
+  <h1>Dashboard de Kilómetros</h1>
+  <p class="subtitle" id="headerPeriodo">Cargando datos…</p>
+</header>
 
-        <div class="kpi-card">
-            <div class="kpi-label">KM Permitidos</div>
-            <div class="kpi-value" id="kpiPermitido">0 km</div>
-            <div class="kpi-subvalue">Límite establecido</div>
-        </div>
+<div class="filter-bar">
+  <select id="unidadNegocio">
+    <option value="SETTEPI SALTILLO">SETTEPI SALTILLO</option>
+    <option value="LIPU SALTILLO">LIPU SALTILLO</option>
+  </select>
+</div>
 
-        <div class="kpi-card highlight">
-            <div class="kpi-label">Margen Disponible</div>
-            <div class="kpi-value highlight" id="kpiMargen">0 km</div>
-            <div class="kpi-subvalue" id="txtMargen">Calculando...</div>
-        </div>
+<div class="kpi-grid">
+  <div class="kpi-card highlight">
+    <div class="kpi-label">Total KM</div>
+    <div class="kpi-value" id="kpiTotal">0</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">KM Servicio</div>
+    <div class="kpi-value" id="kpiServicio">0</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">KM Mtto</div>
+    <div class="kpi-value" id="kpiMtto">0</div>
+  </div>
+  <div class="kpi-card warning">
+    <div class="kpi-label">KM Vacío</div>
+    <div class="kpi-value" id="kpiVacio">0</div>
+  </div>
+</div>
 
-        <div class="kpi-card">
-            <div class="kpi-label">KM de Servicio</div>
-            <div class="kpi-value" id="kpiServicio">0 km</div>
-            <div class="kpi-subvalue" id="pctServicio">0% del total</div>
-        </div>
+<div class="chart-container">
+  <h3>Detalle por Cliente</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>UDN</th>
+        <th>Gerente</th>
+        <th>Cliente</th>
+        <th>KM Total</th>
+        <th>KM Vacío</th>
+      </tr>
+    </thead>
+    <tbody id="tablaDetalle"></tbody>
+  </table>
+</div>
 
-        <div class="kpi-card">
-            <div class="kpi-label">KM Mtto / Carga / RH / Seg</div>
-            <div class="kpi-value" id="kpiMtto">0 km</div>
-            <div class="kpi-subvalue" id="pctMtto">0% del total</div>
-        </div>
+</div>
 
-        <div class="kpi-card warning">
-            <div class="kpi-label">KM Ineficiente (Vacío)</div>
-            <div class="kpi-value" id="kpiVacio">0 km</div>
-            <div class="kpi-subvalue" id="pctVacio">0% del total</div>
-        </div>
-    </div>
+<!-- ================== LIBRERÍAS ================== -->
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
-    <!-- Gráficas -->
-    <div class="chart-row">
-        <div class="chart-container">
-            <h3>KM Recorridos vs Permitido por Día</h3>
-            <canvas id="chartProgreso"></canvas>
-        </div>
+<!-- ================== SCRIPT ================== -->
+<script>
+const SHEET_ID = "1l3QYg7N050BScrtNhKkHQ-hHNDgaK9Prw95Dzb2-DRE";
+const SHEET_NAME = "Kilometros";
 
-        <div class="chart-container">
-            <h3>Distribución Total (%)</h3>
-            <canvas id="chartDistribucion"></canvas>
-        </div>
+function num(v){
+  if(!v) return 0;
+  return Number(v.toString().replace(/[$,]/g,'')) || 0;
+}
 
-        <div class="chart-container">
-            <h3>Comportamiento Diario</h3>
-            <canvas id="chartDiario"></canvas>
-        </div>
-    </div>
+async function cargarDatos(){
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&sheet=${SHEET_NAME}`;
+  const res = await fetch(url);
+  const csv = await res.text();
+  return new Promise(r=>{
+    Papa.parse(csv,{header:false,skipEmptyLines:true,complete:x=>r(x.data)});
+  });
+}
 
-    <!-- Tabla de Detalle -->
-    <div class="chart-container">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
-            <h3 style="margin:0;">Detalle por Cliente</h3>
-            <button id="btnExportar" style="
-                background:#84cc16;
-                color:#1f2937;
-                border:none;
-                padding:10px 20px;
-                border-radius:8px;
-                font-weight:700;
-                font-size:14px;
-                cursor:pointer;
-                transition:all 0.3s;
-                box-shadow:0 2px 4px rgba(0,0,0,0.1);
-            " onmouseover="this.style.background='#65a30d'" onmouseout="this.style.background='#84cc16'">
-                📥 Exportar a Excel
-            </button>
-        </div>
-        
-        <!-- Filtros -->
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:15px;">
-            <input type="text" id="filtroGerente" placeholder="🔍 Filtrar Gerente" style="padding:8px;border:2px solid #e5e7eb;border-radius:6px;font-size:13px;">
-            <input type="text" id="filtroJefe" placeholder="🔍 Filtrar Jefe" style="padding:8px;border:2px solid #e5e7eb;border-radius:6px;font-size:13px;">
-            <input type="text" id="filtroCliente" placeholder="🔍 Filtrar Cliente" style="padding:8px;border:2px solid #e5e7eb;border-radius:6px;font-size:13px;">
-            <button id="btnLimpiar" style="padding:8px;border:2px solid #e5e7eb;border-radius:6px;background:#fff;cursor:pointer;font-weight:600;" onclick="limpiarFiltros()">🗑️ Limpiar</button>
-        </div>
-        
-        <div style="overflow-x:auto;">
-            <table style="margin:0 auto;max-width:100%;">
-                <thead>
-                    <tr>
-                        <th>Unidad de Negocio</th>
-                        <th>Gerente de OP</th>
-                        <th>Jefe de OP</th>
-                        <th>Cliente</th>
-                        <th>KM Recorridos</th>
-                        <th>KM de Servicios</th>
-                        <th>KM Mtto/Carga/RH/Seg</th>
-                        <th>KM Ineficiente</th>
-                        <th>% Vacío</th>
-                    </tr>
-                </thead>
-                <tbody id="tablaDetalle"></tbody>
-            </table>
-        </div>
-    </div>
+async function actualizar(){
+  const unidad = document.getElementById('unidadNegocio').value;
+  const rows = await cargarDatos();
 
-    </section>
-<script src="kilometros.js"></script>
+  let total=0, serv=0, mtto=0, vacio=0;
+  let html="";
+
+  for(let i=1;i<rows.length;i++){
+    const r = rows[i];
+    if(!r || !r[0]) continue;
+
+    const udn = r[0].toUpperCase();
+    if(unidad.includes("SETTEPI") && !udn.includes("SETTEPI")) continue;
+    if(unidad.includes("LIPU") && !udn.includes("LIPU")) continue;
+
+    total += num(r[4]);
+    serv  += num(r[5]);
+    mtto  += num(r[6]);
+    vacio += num(r[7]);
+
+    html += `
+      <tr>
+        <td>${r[0]}</td>
+        <td>${r[1]}</td>
+        <td>${r[3]}</td>
+        <td style="text-align:right">${num(r[4]).toLocaleString()}</td>
+        <td style="text-align:right;color:#dc2626">${num(r[7]).toLocaleString()}</td>
+      </tr>`;
+  }
+
+  kpiTotal.innerText = total.toLocaleString()+" km";
+  kpiServicio.innerText = serv.toLocaleString()+" km";
+  kpiMtto.innerText = mtto.toLocaleString()+" km";
+  kpiVacio.innerText = vacio.toLocaleString()+" km";
+
+  tablaDetalle.innerHTML = html || `<tr><td colspan="5" style="text-align:center">Sin datos</td></tr>`;
+  headerPeriodo.innerText = unidad;
+}
+
+document.getElementById('unidadNegocio').addEventListener('change', actualizar);
+document.addEventListener('DOMContentLoaded', actualizar);
+</script>
+
 </body>
 </html>
