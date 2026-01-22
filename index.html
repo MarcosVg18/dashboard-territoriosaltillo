@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Traxión | Dashboard Ejecutivo</title>
-
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{
@@ -24,48 +23,62 @@ body{
     background:#1f2937;
     color:#fff;
     padding:20px;
+    overflow-y:auto;
 }
-
 .sidebar h1{
     color:#84cc16;
     font-size:22px;
     margin-bottom:30px;
+    text-align:center;
 }
-
 .menu-group{
     margin-bottom:25px;
 }
-
 .menu-group-title{
-    font-size:13px;
+    font-size:11px;
     color:#9ca3af;
     margin-bottom:10px;
     text-transform:uppercase;
     letter-spacing:1px;
+    font-weight:700;
 }
-
 .menu-item{
     display:block;
-    padding:10px 12px;
-    margin-bottom:6px;
+    padding:12px 15px;
+    margin-bottom:8px;
     border-radius:8px;
     color:#e5e7eb;
     text-decoration:none;
     font-weight:600;
+    transition:all 0.3s;
+    font-size:14px;
 }
-
 .menu-item:hover{
     background:#374151;
+    transform:translateX(5px);
 }
-
 .menu-item.active{
     background:#84cc16;
     color:#1f2937;
 }
-
-.menu-item.disabled{
-    opacity:.4;
-    cursor:not-allowed;
+.menu-item.available{
+    position:relative;
+}
+.menu-item.available::after{
+    content:'✓';
+    position:absolute;
+    right:15px;
+    color:#84cc16;
+    font-weight:800;
+}
+.menu-item.construccion{
+    opacity:0.6;
+}
+.menu-item.construccion::after{
+    content:'🚧';
+    position:absolute;
+    right:15px;
+    font-size:12px;
 }
 
 /* ===== Main ===== */
@@ -82,7 +95,7 @@ body{
     position:absolute;
     inset:0;
     background:
-      linear-gradient(rgba(255,255,255,.85),rgba(255,255,255,.85)),
+      linear-gradient(rgba(255,255,255,.88),rgba(255,255,255,.88)),
       url("https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?auto=format&fit=crop&w=1600&q=80");
     background-size:cover;
     background-position:center;
@@ -97,59 +110,168 @@ body{
     justify-content:center;
     align-items:center;
     text-align:center;
+    padding:40px;
 }
-
 .hero img{
-    width:160px;
-    margin-bottom:20px;
+    width:180px;
+    margin-bottom:30px;
+    filter:drop-shadow(0 4px 8px rgba(0,0,0,0.1));
 }
-
 .hero h2{
-    font-size:48px;
-    letter-spacing:4px;
+    font-size:56px;
+    letter-spacing:6px;
     font-weight:900;
     color:#1f2937;
+    margin-bottom:10px;
 }
-
 .hero p{
     margin-top:10px;
-    font-size:16px;
+    font-size:18px;
     color:#6b7280;
+    font-weight:500;
+}
+.hero .tagline{
+    font-size:16px;
+    color:#84cc16;
+    font-weight:700;
+    margin-top:20px;
+    letter-spacing:2px;
+}
+
+.stats-grid{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:30px;
+    margin-top:60px;
+    max-width:900px;
+}
+
+.stat-card{
+    background:rgba(255,255,255,0.9);
+    backdrop-filter:blur(10px);
+    border:2px solid #e5e7eb;
+    border-radius:12px;
+    padding:25px;
+    text-align:center;
+    transition:all 0.3s;
+}
+.stat-card:hover{
+    transform:translateY(-5px);
+    box-shadow:0 8px 20px rgba(0,0,0,0.1);
+    border-color:#84cc16;
+}
+.stat-card .icon{
+    font-size:40px;
+    margin-bottom:15px;
+}
+.stat-card h3{
+    font-size:14px;
+    color:#6b7280;
+    margin-bottom:10px;
+    text-transform:uppercase;
+    letter-spacing:1px;
+    font-weight:700;
+}
+.stat-card .value{
+    font-size:32px;
+    font-weight:800;
+    color:#1f2937;
+}
+.stat-card.available .value{
+    color:#84cc16;
+}
+
+@media (max-width: 1024px){
+    .layout{
+        flex-direction:column;
+    }
+    .sidebar{
+        width:100%;
+        max-height:300px;
+    }
+    .stats-grid{
+        grid-template-columns:1fr;
+        gap:20px;
+    }
+}
+
+@media (max-width: 640px){
+    .hero h2{
+        font-size:36px;
+        letter-spacing:3px;
+    }
+    .hero p{
+        font-size:16px;
+    }
+    .hero img{
+        width:140px;
+    }
+    .stats-grid{
+        margin-top:40px;
+    }
 }
 </style>
 </head>
-
 <body>
-
 <div class="layout">
-
-    <!-- ===== MENU ===== -->
+    <!-- ===== MENU LATERAL ===== -->
     <aside class="sidebar">
-        <h1>TRAXIÓN</h1>
-
+        <h1>🚛 TRAXIÓN</h1>
+        
         <div class="menu-group">
-            <div class="menu-group-title">Logística</div>
-            <a href="dashboard_kilometros.html" class="menu-item">📊 Kilómetros</a>
-            <span class="menu-item disabled">🚗 Flota (próx.)</span>
+            <div class="menu-group-title">📊 Logística</div>
+            <a href="dashboard_kilometros.html" class="menu-item available">📍 Kilómetros Recorridos</a>
+            <a href="dashboard_flota.html" class="menu-item construccion">🚗 Flota Vehicular</a>
         </div>
-
+        
         <div class="menu-group">
-            <div class="menu-group-title">Seg Vial</div>
-            <span class="menu-item disabled">🛡️ Score Seguridad (próx.)</span>
+            <div class="menu-group-title">🛡️ Seguridad Vial</div>
+            <a href="dashboard_scoreseg.html" class="menu-item available">⚠️ Score de Seguridad</a>
+            <span class="menu-item construccion" style="cursor:not-allowed;">🚨 Alertas y Eventos</span>
+        </div>
+        
+        <div class="menu-group">
+            <div class="menu-group-title">📈 Reportes</div>
+            <span class="menu-item construccion" style="cursor:not-allowed;">📋 Reportes Ejecutivos</span>
+            <span class="menu-item construccion" style="cursor:not-allowed;">📊 Análisis Comparativo</span>
+        </div>
+        
+        <div class="menu-group">
+            <div class="menu-group-title">⚙️ Configuración</div>
+            <span class="menu-item construccion" style="cursor:not-allowed;">👤 Usuarios</span>
+            <span class="menu-item construccion" style="cursor:not-allowed;">🔧 Ajustes</span>
         </div>
     </aside>
-
-    <!-- ===== MAIN ===== -->
+    
+    <!-- ===== CONTENIDO PRINCIPAL ===== -->
     <main class="main">
         <div class="hero">
-            <!-- Si tienes logo local, cámbialo -->
             <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Traxion_logo.svg/512px-Traxion_logo.svg.png" alt="Traxión">
             <h2>TRAXIÓN</h2>
             <p>Business Intelligence · Operaciones · Seguridad</p>
+            <p class="tagline">DASHBOARD EJECUTIVO</p>
+            
+            <div class="stats-grid">
+                <div class="stat-card available">
+                    <div class="icon">📊</div>
+                    <h3>Kilómetros</h3>
+                    <div class="value">✓</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="icon">🚗</div>
+                    <h3>Flota</h3>
+                    <div class="value">35%</div>
+                </div>
+                
+                <div class="stat-card available">
+                    <div class="icon">🛡️</div>
+                    <h3>ScoreSeg</h3>
+                    <div class="value">✓</div>
+                </div>
+            </div>
         </div>
     </main>
-
 </div>
-
 </body>
 </html>
