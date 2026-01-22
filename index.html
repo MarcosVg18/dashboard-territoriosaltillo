@@ -444,12 +444,6 @@ canvas{
                 <thead>
                     <tr>
                         <th>UDN</th>
-                        <th>Gerente</th>
-                        <th>Jefe</th>
-                        <th>Año</th>
-                        <th>Mes</th>
-                        <th>Sem</th>
-                        <th>Día</th>
                         <th>Operador</th>
                         <th>Cliente</th>
                         <th colspan="5" style="background:#dc2626;color:white;">EVENTOS CRÍTICOS</th>
@@ -1076,35 +1070,35 @@ async function cargarScoreSeg(){
                 const r = rows[i];
                 if(!r || r.length < 24) continue;
                 
-                datosScoreSeg.push({
-                    udn: r[0]||"",
-                    gerente: r[1]||"",
-                    jefe: r[2]||"",
-                    anio: r[3]||"",
-                    mes: r[4]||"",
-                    sem: r[5]||"",
-                    dia: r[6]||"",
-                    operador: r[7]||"",
-                    cliente: r[8]||"",
+              datosScoreSeg.push({
+                    udn: r[0]||"",              // Columna A
+                    gerente: r[1]||"",          // Columna B (solo para filtrar)
+                    jefe: r[2]||"",             // Columna C (solo para filtrar)
+                    cliente: r[3]||"",          // Columna D (solo para filtrar)
+                    anio: r[4]||"",             // Columna E (solo para filtrar)
+                    mes: r[5]||"",              // Columna F (solo para filtrar)
+                    sem: r[6]||"",              // Columna G (solo para filtrar)
+                    dia: r[7]||"",              // Columna H (solo para filtrar)
+                    operador: r[8]||"",         // Columna I - MOSTRAR
                     // Eventos Críticos (J-N, índices 9-13)
-                    critAcel: num(r[9]),
-                    critFreno: num(r[10]),
-                    critGiroD: num(r[11]),
-                    critGiroI: num(r[12]),
-                    critVeloc: num(r[13]),
+                    critAcel: num(r[9]),       // Columna J
+                    critFreno: num(r[10]),     // Columna K
+                    critGiroD: num(r[11]),     // Columna L
+                    critGiroI: num(r[12]),     // Columna M
+                    critVeloc: num(r[13]),     // Columna N
                     // Eventos Moderados (O-S, índices 14-18)
-                    modAcel: num(r[14]),
-                    modFreno: num(r[15]),
-                    modGiroD: num(r[16]),
-                    modGiroI: num(r[17]),
-                    modVeloc: num(r[18]),
+                    modAcel: num(r[14]),       // Columna O
+                    modFreno: num(r[15]),      // Columna P
+                    modGiroD: num(r[16]),      // Columna Q
+                    modGiroI: num(r[17]),      // Columna R
+                    modVeloc: num(r[18]),      // Columna S
                     // Eventos Leves (T-W, índices 19-22)
-                    levFreno: num(r[19]),
-                    levGiroD: num(r[20]),
-                    levGiroI: num(r[21]),
-                    levVeloc: num(r[22]),
+                    levFreno: num(r[19]),      // Columna T
+                    levGiroD: num(r[20]),      // Columna U
+                    levGiroI: num(r[21]),      // Columna V
+                    levVeloc: num(r[22]),      // Columna W
                     // Score (X, índice 23)
-                    score: num(r[23])
+                    score: num(r[23])          // Columna X
                 });
             }
             
@@ -1215,12 +1209,6 @@ function renderizarTablaScore(){
         html += `
         <tr>
             <td>${d.udn}</td>
-            <td>${d.gerente}</td>
-            <td>${d.jefe}</td>
-            <td>${d.anio}</td>
-            <td>${d.mes}</td>
-            <td>${d.sem}</td>
-            <td>${d.dia}</td>
             <td style="font-weight:600;">${d.operador}</td>
             <td>${d.cliente}</td>
             <td style="${colorEvento(d.critAcel)}">${d.critAcel}</td>
@@ -1264,16 +1252,13 @@ function exportarScoreExcel(){
         alert('No hay datos para exportar');
         return;
     }
-    
-    const fecha = new Date().toLocaleDateString('es-MX');
-    
-    let csv = 'UDN,Gerente,Jefe,Año,Mes,Semana,Día,Operador,Cliente,';
+    let csv = 'UDN,Operador,';
     csv += 'Acel Crit,Freno Crit,Giro D Crit,Giro I Crit,Veloc Crit,';
     csv += 'Acel Mod,Freno Mod,Giro D Mod,Giro I Mod,Veloc Mod,';
     csv += 'Freno Leve,Giro D Leve,Giro I Leve,Veloc Leve,Score\n';
     
     datosScoreFiltrados.forEach(d => {
-        csv += `"${d.udn}","${d.gerente}","${d.jefe}",${d.anio},${d.mes},${d.sem},${d.dia},"${d.operador}","${d.cliente}",`;
+        csv += `"${d.udn}","${d.operador}",`;
         csv += `${d.critAcel},${d.critFreno},${d.critGiroD},${d.critGiroI},${d.critVeloc},`;
         csv += `${d.modAcel},${d.modFreno},${d.modGiroD},${d.modGiroI},${d.modVeloc},`;
         csv += `${d.levFreno},${d.levGiroD},${d.levGiroI},${d.levVeloc},${d.score}\n`;
@@ -1290,3 +1275,4 @@ function exportarScoreExcel(){
 
 </body>
 </html>
+
