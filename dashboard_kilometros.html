@@ -756,4 +756,266 @@ async function actualizar(){
             ],
             datasets:[{
                 data:[servicio, mtto, vacio],
-                backgroundColor:["#
+                backgroundColor:["#84cc16","#f59e0b","#ef4444"],
+                borderWidth:3,
+                borderColor:"#ffffff",
+                hoverOffset:10
+            }]
+        },
+        options:{
+            responsive:true,
+            maintainAspectRatio:true,
+            plugins:{
+                legend:{
+                    display:true,
+                    position:'bottom',
+                    labels:{font:{size:12,weight:'bold'},padding:15}
+                },
+                tooltip:{
+                    callbacks:{
+                        label: function(context){
+                            const label = context.label || '';
+                            const value = context.parsed || 0;
+                            return label + ': ' + value.toLocaleString() + ' km';
+                        }
+                    }
+                }
+            },
+            cutout:'60%'
+        }
+    });
+
+    // Gráfica 3: Comportamiento
+    let servDiario=[], mttoDiario=[], vacioDiario=[];
+    datosDiarios.forEach(d=>{
+        servDiario.push(d.kmServ);
+        mttoDiario.push(d.kmMtto);
+        vacioDiario.push(d.kmVac);
+    });
+
+    if(chartDiario) chartDiario.destroy();
+    chartDiario = new Chart(document.getElementById("chartDiario"),{
+        type:"line",
+        data:{
+            labels,
+            datasets:[
+                {
+                    label:"Servicio",
+                    data:servDiario,
+                    borderColor:"#84cc16",
+                    backgroundColor:"rgba(132,204,22,0.15)",
+                    borderWidth:2.5,
+                    tension:0.3,
+                    fill:true,
+                    pointRadius:4,
+                    pointBackgroundColor:"#84cc16"
+                },
+                {
+                    label:"Mtto",
+                    data:mttoDiario,
+                    borderColor:"#6b7280",
+                    backgroundColor:"rgba(107,114,128,0.15)",
+                    borderWidth:2.5,
+                    tension:0.3,
+                    fill:true,
+                    pointRadius:4,
+                    pointBackgroundColor:"#6b7280"
+                },
+                {
+                    label:"Vacío",
+                    data:vacioDiario,
+                    borderColor:"#ef4444",
+                    backgroundColor:"rgba(239,68,68,0.15)",
+                    borderWidth:2.5,
+                    tension:0.3,
+                    fill:true,
+                    pointRadius:4,
+                    pointBackgroundColor:"#ef4444"
+                }
+            ]
+        },
+        options:{
+            responsive:true,
+            maintainAspectRatio:true,
+            plugins:{
+                legend:{display:true,position:'top',labels:{font:{size:12,weight:'bold'}}}
+            },
+            scales:{
+                y:{beginAtZero:true,grid:{color:'rgba(0,0,0,0.05)'}}
+            }
+        }
+    });
+}
+
+function renderizarTabla(filas){
+    const tablaBody = document.getElementById('tablaDetalle');
+    
+    if(filas.length === 0){
+        tablaBody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:20px;color:#6b7280;">No se encontraron registros con los filtros aplicados</td></tr>';
+        return;
+    }
+    
+    let html = '';
+    filas.forEach(f => {
+        const pctNum = parseFloat(f.pctVacio.replace('%','').replace(',','.')) || 0;
+        const rowClass = pctNum > 25 ? 'highlight-row' : '';
+        
+        html += `
+        <tr class="${rowClass}">
+            <td>${f.udn}</td>
+            <td>${f.gerente}</td>
+            <td>${f.jefe}</td>
+            <td>${f.cliente}</td>
+            <td style="text-align:right;font-weight:600;">${formatearNumero(f.kmRecorridos)}</td>
+            <td style="text-align:right;">${formatearNumero(f.kmServicios)}</td>
+            <td style="text-align:right;">${formatearNumero(f.kmMtto)}</td>
+            <td style="text-align:right;">${formatearNumero(f.kmIneficiente)}</td>
+            <td style="font-weight:700;color:${pctNum > 25 ? '#dc2626' : '#059669'};">${f.pctVacio}</td>
+        </tr>`;
+    });
+    
+    tablaBody.innerHTML = html;
+}
+
+function renderizarTablaCarro(filas){
+    const tablaBody = document.getElementById('tablaCarro');
+    
+    if(filas.length === 0){
+        tablaBody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:#6b7280;">No se encontraron registros con los filtros aplicados</td></tr>';
+        return;
+    }
+    
+    let html = '';
+    filas.forEach(f => {
+        const pctNum = parseFloat(f.pctVacio.replace('%','').replace(',','.')) || 0;
+        const rowClass = pctNum > 25 ? 'highlight-row' : '';
+        
+        html += `
+        <tr class="${rowClass}">
+            <td style="font-weight:600;">${f.economico}</td>
+            <td>${f.placa}</td>
+            <td>${f.cliente}</td>
+            <td style="text-align:right;font-weight:600;">${formatearNumero(f.kmRecorridos)}</td>
+            <td style="text-align:right;">${formatearNumero(f.kmServicios)}</td>
+            <td style="text-align:right;">${formatearNumero(f.kmMtto)}</td>
+            <td style="text-align:right;">${formatearNumero(f.kmIneficiente)}</td>
+            <td style="font-weight:700;color:${pctNum > 25 ? '#dc2626' : '#059669'};">${f.pctVacio}</td>
+        </tr>`;
+    });
+    
+    tablaBody.innerHTML = html;
+}
+
+function filtrarTabla(){
+    const filtroGerente = document.getElementById('filtroGerente').value.toUpperCase();
+    const filtroJefe = document.getElementById('filtroJefe').value.toUpperCase();
+    const filtroCliente = document.getElementById('filtroCliente').value.toUpperCase();
+    
+    const filasFiltradas = todasLasFilas.filter(f => {
+        const coincideGerente = !filtroGerente || f.gerente.toUpperCase().includes(filtroGerente);
+        const coincideJefe = !filtroJefe || f.jefe.toUpperCase().includes(filtroJefe);
+        const coincideCliente = !filtroCliente || f.cliente.toUpperCase().includes(filtroCliente);
+        return coincideGerente && coincideJefe && coincideCliente;
+    });
+    
+    renderizarTabla(filasFiltradas);
+}
+
+function filtrarTablaCarro(){
+    const filtroEconomico = document.getElementById('filtroEconomico').value.toUpperCase();
+    const filtroPlaca = document.getElementById('filtroPlaca').value.toUpperCase();
+    const filtroCliente = document.getElementById('filtroClienteCarro').value.toUpperCase();
+    
+    const filasFiltradas = todasLasFilasCarro.filter(f => {
+        const coincideEconomico = !filtroEconomico || f.economico.toUpperCase().includes(filtroEconomico);
+        const coincidePlaca = !filtroPlaca || f.placa.toUpperCase().includes(filtroPlaca);
+        const coincideCliente = !filtroCliente || f.cliente.toUpperCase().includes(filtroCliente);
+        return coincideEconomico && coincidePlaca && coincideCliente;
+    });
+    
+    renderizarTablaCarro(filasFiltradas);
+}
+
+function limpiarFiltros(){
+    document.getElementById('filtroGerente').value = '';
+    document.getElementById('filtroJefe').value = '';
+    document.getElementById('filtroCliente').value = '';
+    renderizarTabla(todasLasFilas);
+}
+
+function limpiarFiltrosCarro(){
+    document.getElementById('filtroEconomico').value = '';
+    document.getElementById('filtroPlaca').value = '';
+    document.getElementById('filtroClienteCarro').value = '';
+    renderizarTablaCarro(todasLasFilasCarro);
+}
+
+function exportarExcelCliente(){
+    if(todasLasFilas.length === 0){
+        alert('No hay datos para exportar');
+        return;
+    }
+    
+    const unidad = document.getElementById('unidadNegocio').value;
+    const fecha = new Date().toLocaleDateString('es-MX');
+    
+    let csv = 'Unidad de Negocio,Gerente de OP,Jefe de OP,Cliente,KM Recorridos,KM de Servicios,KM Mtto/Carga/RH/Seg,KM Ineficiente,% Vacío\n';
+    
+    todasLasFilas.forEach(f => {
+        csv += `"${f.udn}","${f.gerente}","${f.jefe}","${f.cliente}",${f.kmRecorridos},${f.kmServicios},${f.kmMtto},${f.kmIneficiente},"${f.pctVacio}"\n`;
+    });
+    
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `Detalle_Kilometros_Cliente_${unidad.replace(' ','_')}_${fecha}.csv`;
+    link.click();
+}
+
+function exportarExcelCarro(){
+    if(todasLasFilasCarro.length === 0){
+        alert('No hay datos para exportar');
+        return;
+    }
+    
+    const unidad = document.getElementById('unidadNegocio').value;
+    const fecha = new Date().toLocaleDateString('es-MX');
+    
+    let csv = 'Económico,Placa,Cliente,KM Recorridos,KM de Servicios,KM Mtto/Carga/RH/Seg,KM Ineficiente,% Vacío\n';
+    
+    todasLasFilasCarro.forEach(f => {
+        csv += `"${f.economico}","${f.placa}","${f.cliente}",${f.kmRecorridos},${f.kmServicios},${f.kmMtto},${f.kmIneficiente},"${f.pctVacio}"\n`;
+    });
+    
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `Detalle_Kilometros_Carro_${unidad.replace(' ','_')}_${fecha}.csv`;
+    link.click();
+}
+
+// Event Listeners
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('unidadNegocio').addEventListener('change', actualizar);
+    
+    // Filtros tabla cliente
+    document.getElementById('filtroGerente').addEventListener('input', filtrarTabla);
+    document.getElementById('filtroJefe').addEventListener('input', filtrarTabla);
+    document.getElementById('filtroCliente').addEventListener('input', filtrarTabla);
+    document.getElementById('btnExportarCliente').addEventListener('click', exportarExcelCliente);
+    document.getElementById('btnLimpiarCliente').addEventListener('click', limpiarFiltros);
+    
+    // Filtros tabla carro
+    document.getElementById('filtroEconomico').addEventListener('input', filtrarTablaCarro);
+    document.getElementById('filtroPlaca').addEventListener('input', filtrarTablaCarro);
+    document.getElementById('filtroClienteCarro').addEventListener('input', filtrarTablaCarro);
+    document.getElementById('btnExportarCarro').addEventListener('click', exportarExcelCarro);
+    document.getElementById('btnLimpiarCarro').addEventListener('click', limpiarFiltrosCarro);
+    
+    // Cargar datos iniciales
+    actualizar();
+});
+</script>
+
+</body>
+</html>
