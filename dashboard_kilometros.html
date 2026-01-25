@@ -386,8 +386,8 @@ input[type="text"]:focus{
         
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:15px;">
             <input type="text" id="filtroEconomico" placeholder="🔍 Filtrar Económico">
-            <input type="text" id="filtroPlaca" placeholder="🔍 Filtrar Placa">
-            <input type="text" id="filtroClienteCarro" placeholder="🔍 Filtrar Cliente">
+            <input type="text" id="filtroGerenteCarro" placeholder="🔍 Filtrar Gerente">
+            <input type="text" id="filtroJefeCarro" placeholder="🔍 Filtrar Jefe">
             <button id="btnLimpiarCarro">🗑️ Limpiar</button>
         </div>
         
@@ -396,8 +396,8 @@ input[type="text"]:focus{
                 <thead>
                     <tr>
                         <th>Económico</th>
-                        <th>Placa</th>
-                        <th>Cliente</th>
+                        <th>Gerente de OP</th>
+                        <th>Jefe de OP</th>
                         <th>KM Recorridos</th>
                         <th>KM de Servicios</th>
                         <th>KM Mtto/Carga/RH/Seg</th>
@@ -619,32 +619,35 @@ async function actualizar(){
     
     let filasCarros = [];
     
-    // AJUSTA ESTAS COLUMNAS SEGÚN TU EXCEL
-    // Por ahora asumo que los datos por carro están en las columnas después de los datos diarios
-    // Ejemplo: columnas 30-37 para carros
+    // Datos por CARRO desde el Excel
+    // AG=32, AH=33, AI=34, AJ=35, AK=36, AL=37, AM=38, AN=39, AO=40, AP=41
     for(let i = 1; i < rows.length; i++){
         const r = rows[i];
-        if(!r || r.length < 38) continue;
+        if(!r || r.length < 42) continue;
         
-        // Ajusta estos índices según dónde estén los datos en tu Excel
-        const economico = (r[30]||"").toString().trim();
-        const placa = (r[31]||"").toString().trim();
-        const clienteCarro = (r[32]||"").toString().trim();
-        const kmRecorridosCarro = num(r[33]);
-        const kmServiciosCarro = num(r[34]);
-        const kmMttoCarro = num(r[35]);
-        const kmIneficienteCarro = num(r[36]);
-        const pctVacioCarro = (r[37]||"0%").toString();
+        const udnCarro = (r[32]||"").toString().trim().toUpperCase();
+        const gerenteCarro = (r[33]||"").toString().trim();
+        const jefeCarro = (r[34]||"").toString().trim();
+        const economico = (r[35]||"").toString().trim();
+        const kmRecorridosCarro = num(r[36]);
+        const kmServiciosCarro = num(r[37]);
+        const kmMttoCarro = num(r[38]);
+        const kmIneficienteCarro = num(r[39]);
+        const pctVacioCarro = (r[40]||"0%").toString();
         
         // Filtrar por unidad de negocio
-        if(economico && (
-            (unidad === "SETTEPI SALTILLO" && economico.toUpperCase().includes("SETT")) ||
-            (unidad === "LIPU SALTILLO" && economico.toUpperCase().includes("LIPU"))
-        )){
+        let coincide = false;
+        if(unidad === "SETTEPI SALTILLO"){
+            coincide = udnCarro.includes("SETTEPI");
+        } else if(unidad === "LIPU SALTILLO"){
+            coincide = udnCarro.includes("LIPU");
+        }
+        
+        if(coincide && economico){
             filasCarros.push({
                 economico,
-                placa,
-                cliente: clienteCarro,
+                gerente: gerenteCarro,
+                jefe: jefeCarro,
                 kmRecorridos: kmRecorridosCarro,
                 kmServicios: kmServiciosCarro,
                 kmMtto: kmMttoCarro,
@@ -893,8 +896,8 @@ function renderizarTablaCarro(filas){
         html += `
         <tr class="${rowClass}">
             <td style="font-weight:600;">${f.economico}</td>
-            <td>${f.placa}</td>
-            <td>${f.cliente}</td>
+            <td>${f.gerente}</td>
+            <td>${f.jefe}</td>
             <td style="text-align:right;font-weight:600;">${formatearNumero(f.kmRecorridos)}</td>
             <td style="text-align:right;">${formatearNumero(f.kmServicios)}</td>
             <td style="text-align:right;">${formatearNumero(f.kmMtto)}</td>
@@ -923,14 +926,14 @@ function filtrarTabla(){
 
 function filtrarTablaCarro(){
     const filtroEconomico = document.getElementById('filtroEconomico').value.toUpperCase();
-    const filtroPlaca = document.getElementById('filtroPlaca').value.toUpperCase();
-    const filtroCliente = document.getElementById('filtroClienteCarro').value.toUpperCase();
+    const filtroGerente = document.getElementById('filtroGerenteCarro').value.toUpperCase();
+    const filtroJefe = document.getElementById('filtroJefeCarro').value.toUpperCase();
     
     const filasFiltradas = todasLasFilasCarro.filter(f => {
         const coincideEconomico = !filtroEconomico || f.economico.toUpperCase().includes(filtroEconomico);
-        const coincidePlaca = !filtroPlaca || f.placa.toUpperCase().includes(filtroPlaca);
-        const coincideCliente = !filtroCliente || f.cliente.toUpperCase().includes(filtroCliente);
-        return coincideEconomico && coincidePlaca && coincideCliente;
+        const coincideGerente = !filtroGerente || f.gerente.toUpperCase().includes(filtroGerente);
+        const coincideJefe = !filtroJefe || f.jefe.toUpperCase().includes(filtroJefe);
+        return coincideEconomico && coincideGerente && coincideJefe;
     });
     
     renderizarTablaCarro(filasFiltradas);
@@ -945,8 +948,8 @@ function limpiarFiltros(){
 
 function limpiarFiltrosCarro(){
     document.getElementById('filtroEconomico').value = '';
-    document.getElementById('filtroPlaca').value = '';
-    document.getElementById('filtroClienteCarro').value = '';
+    document.getElementById('filtroGerenteCarro').value = '';
+    document.getElementById('filtroJefeCarro').value = '';
     renderizarTablaCarro(todasLasFilasCarro);
 }
 
@@ -981,10 +984,10 @@ function exportarExcelCarro(){
     const unidad = document.getElementById('unidadNegocio').value;
     const fecha = new Date().toLocaleDateString('es-MX');
     
-    let csv = 'Económico,Placa,Cliente,KM Recorridos,KM de Servicios,KM Mtto/Carga/RH/Seg,KM Ineficiente,% Vacío\n';
+    let csv = 'Económico,Gerente de OP,Jefe de OP,KM Recorridos,KM de Servicios,KM Mtto/Carga/RH/Seg,KM Ineficiente,% Vacío\n';
     
     todasLasFilasCarro.forEach(f => {
-        csv += `"${f.economico}","${f.placa}","${f.cliente}",${f.kmRecorridos},${f.kmServicios},${f.kmMtto},${f.kmIneficiente},"${f.pctVacio}"\n`;
+        csv += `"${f.economico}","${f.gerente}","${f.jefe}",${f.kmRecorridos},${f.kmServicios},${f.kmMtto},${f.kmIneficiente},"${f.pctVacio}"\n`;
     });
     
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -1007,8 +1010,8 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Filtros tabla carro
     document.getElementById('filtroEconomico').addEventListener('input', filtrarTablaCarro);
-    document.getElementById('filtroPlaca').addEventListener('input', filtrarTablaCarro);
-    document.getElementById('filtroClienteCarro').addEventListener('input', filtrarTablaCarro);
+    document.getElementById('filtroGerenteCarro').addEventListener('input', filtrarTablaCarro);
+    document.getElementById('filtroJefeCarro').addEventListener('input', filtrarTablaCarro);
     document.getElementById('btnExportarCarro').addEventListener('click', exportarExcelCarro);
     document.getElementById('btnLimpiarCarro').addEventListener('click', limpiarFiltrosCarro);
     
