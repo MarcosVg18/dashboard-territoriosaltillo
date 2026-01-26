@@ -444,11 +444,15 @@ async function actualizar(){
     const unidad = unidadNegocio.value.trim();
     const rows = await cargarDatos();
 
-    const hoy = new Date();
-    const diaActual = hoy.getDate() - 1;
-
+    // Obtener el día desde la celda AC10 (columna 28, fila 9 porque el array empieza en 0)
+    let diaActual = 1;
+    if(rows.length > 9 && rows[9][28]){
+        diaActual = num(rows[9][28]);
+    }
+    
     console.log('📄 INICIANDO ACTUALIZACIÓN');
     console.log('Unidad seleccionada:', unidad);
+    console.log('Día actual desde AC10:', diaActual);
     console.log('Filas cargadas del Excel:', rows.length);
 
     let total=0, servicio=0, mtto=0, vacio=0, permitidoTotal=0;
