@@ -24,8 +24,9 @@ nav{
     align-items:center;
     box-shadow:0 2px 8px rgba(0,0,0,0.1);
     position:relative;
+    flex-wrap:wrap;
 }
-nav a{
+nav > a{
     color:#e5e7eb;
     text-decoration:none;
     font-weight:600;
@@ -34,17 +35,13 @@ nav a{
     transition:all 0.3s;
     white-space:nowrap;
 }
-nav a:first-child{
+nav > a:first-child{
     color:#84cc16;
     font-weight:800;
     font-size:18px;
 }
-nav a:hover{
+nav > a:hover{
     background:#374151;
-}
-nav a.active{
-    background:#84cc16;
-    color:#1f2937;
 }
 
 /* ===== MENÚ DROPDOWN ===== */
@@ -64,15 +61,14 @@ nav a.active{
     display:flex;
     align-items:center;
     gap:6px;
+    background:transparent;
+    border:none;
+    font-size:14px;
+    font-family:inherit;
 }
 
 .dropdown-toggle:hover{
     background:#374151;
-}
-
-.dropdown-toggle.active{
-    background:#84cc16;
-    color:#1f2937;
 }
 
 .dropdown-arrow{
@@ -80,7 +76,7 @@ nav a.active{
     transition:transform 0.3s;
 }
 
-.dropdown:hover .dropdown-arrow{
+.dropdown.open .dropdown-arrow{
     transform:rotate(180deg);
 }
 
@@ -90,7 +86,7 @@ nav a.active{
     top:100%;
     left:0;
     background:#374151;
-    min-width:200px;
+    min-width:220px;
     border-radius:8px;
     box-shadow:0 4px 12px rgba(0,0,0,0.3);
     margin-top:8px;
@@ -98,7 +94,7 @@ nav a.active{
     overflow:hidden;
 }
 
-.dropdown:hover .dropdown-menu{
+.dropdown.open .dropdown-menu{
     display:block;
 }
 
@@ -255,7 +251,6 @@ header h1{
 
 @media (max-width: 640px){
     nav{
-        flex-wrap:wrap;
         gap:10px;
     }
     .content{
@@ -290,25 +285,24 @@ header h1{
     <a href="index.html">🚛 TRAXIÓN</a>
     
     <!-- DROPDOWN LOGÍSTICA -->
-    <div class="dropdown">
-        <div class="dropdown-toggle">
+    <div class="dropdown" id="dropdownLogistica">
+        <button class="dropdown-toggle" onclick="toggleDropdown('dropdownLogistica')">
             📦 Logística <span class="dropdown-arrow">▼</span>
-        </div>
+        </button>
         <div class="dropdown-menu">
             <a href="dashboard_kilometros.html">📊 Kilómetros</a>
-            <a href="dashboard_flota.html" class="active">🚗 Flota</a>
-            <a href="dashboard_alertas.html">🔔 Alertas</a>
+            <a href="dashboard_difkm.html">📏 Dif Km cargas vs GPS</a>
             <a href="dashboard_NS.html">📈 Nivel de Servicio</a>
         </div>
     </div>
     
     <!-- DROPDOWN SEGURIDAD VIAL -->
-    <div class="dropdown">
-        <div class="dropdown-toggle">
+    <div class="dropdown" id="dropdownSeguridad">
+        <button class="dropdown-toggle" onclick="toggleDropdown('dropdownSeguridad')">
             🛡️ Seguridad Vial <span class="dropdown-arrow">▼</span>
-        </div>
+        </button>
         <div class="dropdown-menu">
-            <a href="dashboard_scoreseg.html">🛡️ ScoreSeg</a>
+            <a href="dashboard_scoreseg.html">⚠️ Score de Seguridad</a>
         </div>
     </div>
 </nav>
@@ -369,6 +363,33 @@ header h1{
     </div>
 
 </main>
+
+<!-- ================== JAVASCRIPT ================== -->
+<script>
+function toggleDropdown(dropdownId) {
+    const dropdown = document.getElementById(dropdownId);
+    const allDropdowns = document.querySelectorAll('.dropdown');
+    
+    // Cerrar todos los demás dropdowns
+    allDropdowns.forEach(d => {
+        if (d.id !== dropdownId) {
+            d.classList.remove('open');
+        }
+    });
+    
+    // Toggle el dropdown actual
+    dropdown.classList.toggle('open');
+}
+
+// Cerrar dropdowns al hacer click fuera
+document.addEventListener('click', function(event) {
+    if (!event.target.closest('.dropdown')) {
+        document.querySelectorAll('.dropdown').forEach(d => {
+            d.classList.remove('open');
+        });
+    }
+});
+</script>
 
 </body>
 </html>
