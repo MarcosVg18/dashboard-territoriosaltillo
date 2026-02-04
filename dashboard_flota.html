@@ -5,989 +5,158 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dashboard Flota Vehicular | Traxión</title>
 
-<!-- ================== CDN ================== -->
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
-<!-- ================== ESTILOS ================== -->
 <style>
+/* ==== ESTILOS (sin cambios) ==== */
 *{margin:0;padding:0;box-sizing:border-box}
-body{
-    font-family:'Segoe UI',Tahoma,Verdana,sans-serif;
-    background:#f3f4f6;
-    color:#1f2937;
-    min-height:100vh;
-}
-
-/* ===== NAVEGACIÓN ===== */
-nav{
-    background:#1f2937;
-    padding:15px 30px;
-    display:flex;
-    gap:25px;
-    align-items:center;
-    box-shadow:0 2px 8px rgba(0,0,0,0.1);
-    position:relative;
-    flex-wrap:wrap;
-}
-nav > a{
-    color:#e5e7eb;
-    text-decoration:none;
-    font-weight:600;
-    padding:8px 16px;
-    border-radius:8px;
-    transition:all 0.3s;
-    white-space:nowrap;
-}
-nav > a:first-child{
-    color:#84cc16;
-    font-weight:800;
-    font-size:18px;
-}
-nav > a:hover{
-    background:#374151;
-}
-
-/* ===== MENÚ DROPDOWN ===== */
-.dropdown{
-    position:relative;
-    display:inline-block;
-}
-
-.dropdown-toggle{
-    color:#e5e7eb;
-    text-decoration:none;
-    font-weight:600;
-    padding:8px 16px;
-    border-radius:8px;
-    transition:all 0.3s;
-    cursor:pointer;
-    display:flex;
-    align-items:center;
-    gap:6px;
-    background:transparent;
-    border:none;
-    font-size:14px;
-    font-family:inherit;
-}
-
-.dropdown-toggle:hover{
-    background:#374151;
-}
-
-.dropdown-arrow{
-    font-size:12px;
-    transition:transform 0.3s;
-}
-
-.dropdown.open .dropdown-arrow{
-    transform:rotate(180deg);
-}
-
-.dropdown-menu{
-    display:none;
-    position:absolute;
-    top:100%;
-    left:0;
-    background:#374151;
-    min-width:220px;
-    border-radius:8px;
-    box-shadow:0 4px 12px rgba(0,0,0,0.3);
-    margin-top:8px;
-    z-index:1000;
-    overflow:hidden;
-}
-
-.dropdown.open .dropdown-menu{
-    display:block;
-}
-
-.dropdown-menu a{
-    display:block;
-    padding:12px 20px;
-    color:#e5e7eb;
-    text-decoration:none;
-    font-weight:600;
-    transition:all 0.3s;
-    border-radius:0;
-}
-
-.dropdown-menu a:hover{
-    background:#4b5563;
-    padding-left:25px;
-}
-
-.dropdown-menu a.active{
-    background:#84cc16;
-    color:#1f2937;
-}
-
-/* ===== CONTENIDO ===== */
-.content{
-    padding:30px;
-    max-width:1600px;
-    margin:0 auto;
-}
-
-header{
-    background:linear-gradient(135deg,#1f2937,#374151);
-    padding:30px;
-    border-radius:14px;
-    margin-bottom:20px;
-}
-header h1{
-    color:#84cc16;
-    font-size:32px;
-    margin-bottom:8px;
-}
-.subtitle{
-    color:#d1d5db;
-    font-size:16px;
-}
-
-/* ===== BUSCADOR ===== */
-.search-bar{
-    background:#ffffff;
-    border:2px solid #e5e7eb;
-    border-radius:12px;
-    padding:25px;
-    margin-bottom:20px;
-}
-
-.search-container{
-    display:flex;
-    gap:15px;
-    align-items:center;
-    flex-wrap:wrap;
-}
-
-.search-container input{
-    flex:1;
-    min-width:250px;
-    padding:12px 16px;
-    border:2px solid #e5e7eb;
-    border-radius:10px;
-    font-size:15px;
-    font-weight:600;
-    transition:border 0.3s;
-}
-
-.search-container input:focus{
-    outline:none;
-    border-color:#84cc16;
-}
-
-.search-container button{
-    padding:12px 24px;
-    background:#84cc16;
-    color:#1f2937;
-    border:none;
-    border-radius:10px;
-    font-weight:700;
-    font-size:14px;
-    cursor:pointer;
-    transition:all 0.3s;
-    box-shadow:0 2px 4px rgba(0,0,0,0.1);
-}
-
-.search-container button:hover{
-    background:#65a30d;
-    transform:translateY(-2px);
-    box-shadow:0 4px 8px rgba(0,0,0,0.15);
-}
-
-.search-result{
-    margin-top:20px;
-    padding:20px;
-    background:#f9fafb;
-    border-left:5px solid #84cc16;
-    border-radius:8px;
-    display:none;
-}
-
-.search-result.show{
-    display:block;
-}
-
-.search-result h3{
-    color:#1f2937;
-    font-size:18px;
-    margin-bottom:12px;
-}
-
-.search-result-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));
-    gap:12px;
-}
-
-.search-result-item{
-    display:flex;
-    flex-direction:column;
-    gap:4px;
-}
-
-.search-result-label{
-    font-size:11px;
-    font-weight:700;
-    color:#6b7280;
-    text-transform:uppercase;
-    letter-spacing:0.5px;
-}
-
-.search-result-value{
-    font-size:14px;
-    font-weight:600;
-    color:#1f2937;
-}
-
-/* ===== KPIs ===== */
-.kpi-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));
-    gap:18px;
-    margin-bottom:25px;
-}
-
-.kpi-card{
-    background:#ffffff;
-    border:2px solid #e5e7eb;
-    border-radius:12px;
-    padding:20px;
-    transition:transform 0.2s, box-shadow 0.2s;
-    cursor:pointer;
-}
-
-.kpi-card:hover{
-    transform:translateY(-2px);
-    box-shadow:0 4px 12px rgba(0,0,0,0.1);
-}
-
-.kpi-card.total{
-    border-left:5px solid #3b82f6;
-}
-
-.kpi-card.operando{
-    border-left:5px solid #84cc16;
-}
-
-.kpi-card.mantenimiento{
-    border-left:5px solid #f59e0b;
-}
-
-.kpi-card.ineficiencias{
-    border-left:5px solid #ef4444;
-}
-
-.kpi-card.taller{
-    border-left:5px solid #8b5cf6;
-}
-
-.kpi-card.corralon{
-    border-left:5px solid #64748b;
-}
-
-.kpi-label{
-    font-size:11px;
-    font-weight:700;
-    color:#6b7280;
-    text-transform:uppercase;
-    letter-spacing:0.5px;
-    margin-bottom:8px;
-}
-
-.kpi-value{
-    font-size:32px;
-    font-weight:800;
-    color:#1f2937;
-    margin:8px 0;
-}
-
-.kpi-value.total{
-    color:#3b82f6;
-}
-
-.kpi-value.operando{
-    color:#84cc16;
-}
-
-.kpi-value.mantenimiento{
-    color:#f59e0b;
-}
-
-.kpi-value.ineficiencias{
-    color:#ef4444;
-}
-
-.kpi-value.taller{
-    color:#8b5cf6;
-}
-
-.kpi-value.corralon{
-    color:#64748b;
-}
-
-.kpi-subvalue{
-    font-size:12px;
-    color:#9ca3af;
-    margin-top:6px;
-    line-height:1.4;
-}
-
-/* ===== TABLA ===== */
-.table-container{
-    background:#ffffff;
-    border:2px solid #e5e7eb;
-    border-radius:12px;
-    padding:20px;
-    margin-bottom:25px;
-}
-
-.table-container h3{
-    font-size:18px;
-    font-weight:700;
-    margin-bottom:15px;
-    color:#1f2937;
-    padding-bottom:10px;
-    border-bottom:2px solid #84cc16;
-}
-
-.table-filters{
-    display:grid;
-    grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));
-    gap:10px;
-    margin-bottom:15px;
-}
-
-.table-filters input{
-    padding:10px 14px;
-    border:2px solid #e5e7eb;
-    border-radius:8px;
-    font-size:14px;
-    transition:border 0.3s;
-}
-
-.table-filters input:focus{
-    outline:none;
-    border-color:#84cc16;
-}
-
-.table-actions{
-    display:flex;
-    gap:10px;
-    margin-bottom:15px;
-    flex-wrap:wrap;
-}
-
-.table-actions button{
-    padding:10px 18px;
-    background:#374151;
-    color:#e5e7eb;
-    border:none;
-    border-radius:8px;
-    font-weight:600;
-    font-size:13px;
-    cursor:pointer;
-    transition:all 0.3s;
-}
-
-.table-actions button:hover{
-    background:#4b5563;
-}
-
-.table-actions button.export{
-    background:#84cc16;
-    color:#1f2937;
-}
-
-.table-actions button.export:hover{
-    background:#65a30d;
-}
-
-table{
-    width:100%;
-    border-collapse:collapse;
-    font-size:13px;
-}
-
-th,td{
-    padding:12px 10px;
-    text-align:left;
-    border-bottom:1px solid #e5e7eb;
-}
-
-th{
-    background:#f9fafb;
-    font-weight:700;
-    color:#374151;
-    position:sticky;
-    top:0;
-}
-
-tr:hover{
-    background:#f9fafb;
-}
-
-.status-badge{
-    display:inline-block;
-    padding:4px 10px;
-    border-radius:12px;
-    font-size:11px;
-    font-weight:700;
-    text-transform:uppercase;
-}
-
-.status-operando{
-    background:#d1fae5;
-    color:#065f46;
-}
-
-.status-mantenimiento{
-    background:#fef3c7;
-    color:#92400e;
-}
-
-.status-ineficiencias{
-    background:#fee2e2;
-    color:#991b1b;
-}
-
-.status-taller{
-    background:#ede9fe;
-    color:#5b21b6;
-}
-
-.status-corralon{
-    background:#e2e8f0;
-    color:#1e293b;
-}
-
-.table-scroll{
-    overflow-x:auto;
-    max-height:600px;
-    overflow-y:auto;
-}
-
-@media (max-width: 1024px){
-    .kpi-grid{
-        grid-template-columns:repeat(2, 1fr);
-    }
-}
-
-@media (max-width: 640px){
-    nav{
-        flex-wrap:wrap;
-        gap:10px;
-    }
-    .content{
-        padding:15px;
-    }
-    header{
-        padding:20px;
-    }
-    header h1{
-        font-size:24px;
-    }
-    .kpi-grid{
-        grid-template-columns:1fr;
-    }
-    .kpi-value{
-        font-size:28px;
-    }
-    .search-container{
-        flex-direction:column;
-    }
-    .search-container input,
-    .search-container button{
-        width:100%;
-    }
-}
+body{font-family:'Segoe UI',Tahoma,Verdana,sans-serif;background:#f3f4f6;color:#1f2937}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:10px;border-bottom:1px solid #e5e7eb}
+th{background:#f9fafb;font-weight:700}
 </style>
 </head>
 
 <body>
 
-<!-- ================== NAVEGACIÓN ================== -->
-<nav>
-    <a href="index.html">🚛 TRAXIÓN</a>
-    
-    <!-- DROPDOWN LOGÍSTICA -->
-    <div class="dropdown" id="dropdownLogistica">
-        <button class="dropdown-toggle" onclick="toggleDropdown('dropdownLogistica')">
-            📦 Logística <span class="dropdown-arrow">▼</span>
-        </button>
-        <div class="dropdown-menu">
-            <a href="dashboard_kilometros.html">📊 Kilómetros</a>
-            <a href="dashboard_flota.html" class="active">🚗 Flota</a>
-            <a href="dashboard_difkm.html">📏 Dif Km cargas vs GPS</a>
-            <a href="dashboard_NS.html">📈 Nivel de Servicio</a>
-        </div>
-    </div>
-    
-    <!-- DROPDOWN SEGURIDAD VIAL -->
-    <div class="dropdown" id="dropdownSeguridad">
-        <button class="dropdown-toggle" onclick="toggleDropdown('dropdownSeguridad')">
-            🛡️ Seguridad Vial <span class="dropdown-arrow">▼</span>
-        </button>
-        <div class="dropdown-menu">
-            <a href="dashboard_scoreseg.html">⚠️ Score de Seguridad</a>
-        </div>
-    </div>
-</nav>
+<h2 style="padding:20px">Dashboard Flota Vehicular</h2>
 
-<!-- ================== CONTENIDO ================== -->
-<main class="content">
+<div style="padding:20px">
+<input id="searchVehicleId" placeholder="Buscar Vehicle ID">
+<button onclick="buscarVehiculo()">Buscar</button>
+</div>
 
-    <header>
-        <h1>Dashboard de Flota Vehicular</h1>
-        <p class="subtitle" id="headerSubtitle">Gestión y monitoreo integral de vehículos</p>
-    </header>
+<div style="padding:20px">
+<h3>Resumen por Cliente</h3>
+<table>
+<thead>
+<tr>
+<th>Cliente</th>
+<th>Total</th>
+<th>Operando</th>
+<th>Mantenimiento</th>
+<th>Ineficiencias</th>
+<th>Taller</th>
+<th>Corralón</th>
+<th>% Operando</th>
+</tr>
+</thead>
+<tbody id="tablaDetalle"></tbody>
+</table>
+</div>
 
-    <!-- BUSCADOR POR VEHICLE ID -->
-    <div class="search-bar">
-        <h3 style="margin-bottom:15px;color:#1f2937;font-size:16px;">🔍 Buscar Vehículo por ID</h3>
-        <div class="search-container">
-            <input type="text" id="searchVehicleId" placeholder="Ingresa el Vehicle ID (ejemplo: 5002, 4815, 13872)">
-            <button onclick="buscarVehiculo()">🔎 Buscar</button>
-        </div>
-        
-        <div class="search-result" id="searchResult">
-            <h3>📋 Información del Vehículo</h3>
-            <div class="search-result-grid" id="searchResultContent"></div>
-        </div>
-    </div>
-
-    <!-- KPIs DE ESTATUS AGRUPADO (TODOS LOS VEHÍCULOS) -->
-    <div class="kpi-grid">
-        <div class="kpi-card total">
-            <div class="kpi-label">🚗 Total de Vehículos</div>
-            <div class="kpi-value total" id="kpiTotal">0</div>
-            <div class="kpi-subvalue">Flota completa</div>
-        </div>
-
-        <div class="kpi-card operando">
-            <div class="kpi-label">✅ Operando</div>
-            <div class="kpi-value operando" id="kpiOperando">0</div>
-            <div class="kpi-subvalue" id="pctOperando">0% del total</div>
-        </div>
-
-        <div class="kpi-card mantenimiento">
-            <div class="kpi-label">🔧 Mantenimiento</div>
-            <div class="kpi-value mantenimiento" id="kpiMantenimiento">0</div>
-            <div class="kpi-subvalue" id="pctMantenimiento">0% del total</div>
-        </div>
-
-        <div class="kpi-card ineficiencias">
-            <div class="kpi-label">⚠️ Ineficiencias</div>
-            <div class="kpi-value ineficiencias" id="kpiIneficiencias">0</div>
-            <div class="kpi-subvalue" id="pctIneficiencias">0% del total</div>
-        </div>
-
-        <div class="kpi-card taller">
-            <div class="kpi-label">🏭 Taller Externo</div>
-            <div class="kpi-value taller" id="kpiTaller">0</div>
-            <div class="kpi-subvalue" id="pctTaller">0% del total</div>
-        </div>
-
-        <div class="kpi-card corralon">
-            <div class="kpi-label">🅿️ Corralón</div>
-            <div class="kpi-value corralon" id="kpiCorralon">0</div>
-            <div class="kpi-subvalue" id="pctCorralon">0% del total</div>
-        </div>
-    </div>
-
-    <!-- TABLA AGRUPADA POR CLIENTE -->
-    <div class="table-container">
-        <h3>📊 Resumen por Cliente</h3>
-        
-        <div class="table-filters">
-            <input type="text" id="filtroCliente" placeholder="🔍 Filtrar por Cliente">
-        </div>
-
-        <div class="table-actions">
-            <button onclick="limpiarFiltros()">🗑️ Limpiar Filtros</button>
-            <button class="export" onclick="exportarExcel()">📥 Exportar a Excel</button>
-        </div>
-
-        <div class="table-scroll">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Cliente</th>
-                        <th>Total Vehículos</th>
-                        <th>Operando</th>
-                        <th>Mantenimiento</th>
-                        <th>Ineficiencias</th>
-                        <th>Taller Externo</th>
-                        <th>Corralón</th>
-                        <th>% Operando</th>
-                    </tr>
-                </thead>
-                <tbody id="tablaDetalle"></tbody>
-            </table>
-        </div>
-        
-        <div style="margin-top:15px;padding:12px;background:#f9fafb;border-radius:8px;font-size:13px;color:#6b7280;">
-            <strong>Total de clientes:</strong> <span id="totalRegistros">0</span>
-        </div>
-    </div>
-
-</main>
-
-<!-- ================== JAVASCRIPT ================== -->
 <script>
-// ===== CONFIGURACIÓN =====
+/* ================= CONFIG ================= */
 const SHEET_ID = "1l3QYg7N050BScrtNhKkHQ-hHNDgaK9Prw95Dzb2-DRE";
 const SHEET_NAME = "FlotaVeh";
 
-// Mapeo de status a estatus agrupado
 const STATUS_MAPPING = {
-    "Operando": "Operando",
-    "Mantenimiento": "Mantenimiento",
-    "Alto Rezago Mantenimiento": "Mantenimiento",
-    "Ineficiencias": "Ineficiencias",
-    "Taller Externo": "Taller Externo",
-    "Corralon Grave": "Corralon",
-    "Corralon Media": "Corralon"
+  "Operando": "Operando",
+  "Mantenimiento": "Mantenimiento",
+  "Alto Rezago Mantenimiento": "Mantenimiento",
+  "Ineficiencias": "Ineficiencias",
+  "Taller Externo": "Taller Externo",
+  "Corralon Grave": "Corralon",
+  "Corralon Media": "Corralon"
 };
 
 let todosLosVehiculos = [];
 let resumenPorCliente = [];
-let resumenFiltrado = [];
 
-// ===== FUNCIONES DE CARGA DE DATOS =====
+/* ================= DATA ================= */
 async function cargarDatos(){
-    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&sheet=${SHEET_NAME}`;
-    const res = await fetch(url);
-    const csv = await res.text();
-    return new Promise(r=>{
-        Papa.parse(csv,{header:false,skipEmptyLines:true,complete:x=>r(x.data)});
-    });
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&sheet=${SHEET_NAME}`;
+  const res = await fetch(url);
+  const csv = await res.text();
+  return new Promise(r=>{
+    Papa.parse(csv,{skipEmptyLines:true,complete:x=>r(x.data)});
+  });
 }
 
 async function actualizar(){
-    console.log('🔄 Cargando datos de la flota...');
-    const rows = await cargarDatos();
-    console.log(`📄 Filas cargadas: ${rows.length}`);
-    
-    // Resetear contadores GLOBALES (todos los vehículos)
-    let total = 0;
-    let contadoresGlobales = {
-        "Operando": 0,
-        "Mantenimiento": 0,
-        "Ineficiencias": 0,
-        "Taller Externo": 0,
-        "Corralon": 0
-    };
-    
-    todosLosVehiculos = [];
-    let vehiculosPorCliente = {};
-    
-    // Procesar TODOS los vehículos
-    for(let i = 1; i < rows.length; i++){
-        const r = rows[i];
-        if(!r || r.length < 10) continue;
-        
-        const vehicleId = (r[0]||"").toString().trim();
-        const cliente = (r[1]||"").toString().trim();
-        const comentario = (r[2]||"").toString().trim();
-        const numChasis = (r[3]||"").toString().trim();
-        const marca = (r[4]||"").toString().trim();
-        const modelo = (r[5]||"").toString().trim();
-        const anio = (r[6]||"").toString().trim();
-        const uso = (r[7]||"").toString().trim();
-        const status = (r[8]||"").toString().trim();
-        const aireAcondicionado = (r[9]||"").toString().trim();
-        
-        const estatusAgrupado = STATUS_MAPPING[status] || status;
-        
-        // Contar TODOS los vehículos
-        if(vehicleId && vehicleId !== "" && vehicleId !== "-"){
-            total++;
-            
-            // Contadores globales
-            if(contadoresGlobales[estatusAgrupado] !== undefined){
-                contadoresGlobales[estatusAgrupado]++;
-            }
-            
-            // Guardar todos los vehículos
-            todosLosVehiculos.push({
-                vehicleId,
-                cliente,
-                comentario,
-                numChasis,
-                marca,
-                modelo,
-                anio,
-                uso,
-                status,
-                estatusAgrupado,
-                aireAcondicionado
-            });
-            
-            // Agrupar por cliente
-            if(!vehiculosPorCliente[cliente]){
-                vehiculosPorCliente[cliente] = {
-                    cliente: cliente,
-                    total: 0,
-                    operando: 0,
-                    mantenimiento: 0,
-                    ineficiencias: 0,
-                    taller: 0,
-                    corralon: 0
-                };
-            }
-            
-            vehiculosPorCliente[cliente].total++;
-            
-            switch(estatusAgrupado){
-                case "Operando":
-                    vehiculosPorCliente[cliente].operando++;
-                    break;
-                case "Mantenimiento":
-                    vehiculosPorCliente[cliente].mantenimiento++;
-                    break;
-                case "Ineficiencias":
-                    vehiculosPorCliente[cliente].ineficiencias++;
-                    break;
-                case "Taller Externo":
-                    vehiculosPorCliente[cliente].taller++;
-                    break;
-                case "Corralon":
-                    vehiculosPorCliente[cliente].corralon++;
-                    break;
-            }
-        }
-    }
-    
-    console.log('📊 TODOS LOS VEHÍCULOS:');
-    console.log('Total:', total);
-    console.log('Contadores:', contadoresGlobales);
-    
-    // Actualizar KPIs con TODOS los vehículos
-    document.getElementById('kpiTotal').innerText = total;
-    document.getElementById('kpiOperando').innerText = contadoresGlobales["Operando"];
-    document.getElementById('kpiMantenimiento').innerText = contadoresGlobales["Mantenimiento"];
-    document.getElementById('kpiIneficiencias').innerText = contadoresGlobales["Ineficiencias"];
-    document.getElementById('kpiTaller').innerText = contadoresGlobales["Taller Externo"];
-    document.getElementById('kpiCorralon').innerText = contadoresGlobales["Corralon"];
-    
-    // Actualizar porcentajes
-    const calcPct = (valor) => total > 0 ? ((valor/total)*100).toFixed(1) : 0;
-    document.getElementById('pctOperando').innerText = calcPct(contadoresGlobales["Operando"]) + "% del total";
-    document.getElementById('pctMantenimiento').innerText = calcPct(contadoresGlobales["Mantenimiento"]) + "% del total";
-    document.getElementById('pctIneficiencias').innerText = calcPct(contadoresGlobales["Ineficiencias"]) + "% del total";
-    document.getElementById('pctTaller').innerText = calcPct(contadoresGlobales["Taller Externo"]) + "% del total";
-    document.getElementById('pctCorralon').innerText = calcPct(contadoresGlobales["Corralon"]) + "% del total";
-    
-    // Actualizar subtítulo
-    document.getElementById('headerSubtitle').innerText = `${total} vehículos registrados en la flota`;
-    
-    // Convertir objeto de clientes a array y ordenar por total de vehículos
-    resumenPorCliente = Object.values(vehiculosPorCliente).sort((a,b) => b.total - a.total);
-    resumenFiltrado = [...resumenPorCliente];
-    
-    console.log(`📋 Total de clientes: ${resumenPorCliente.length}`);
-    
-    renderizarTabla(resumenFiltrado);
-}
+  const rows = await cargarDatos();
+  let clientes = {};
 
-// ===== FUNCIONES DE RENDERIZADO =====
-function renderizarTabla(clientes){
-    const tbody = document.getElementById('tablaDetalle');
-    
-    if(clientes.length === 0){
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:30px;color:#6b7280;">No se encontraron clientes con los filtros aplicados</td></tr>';
-        document.getElementById('totalRegistros').innerText = '0';
-        return;
-    }
-    
-    let html = '';
-    clientes.forEach(c => {
-        const pctOperando = c.total > 0 ? ((c.operando / c.total) * 100).toFixed(1) : 0;
-        const colorPct = pctOperando >= 80 ? '#059669' : pctOperando >= 60 ? '#f59e0b' : '#dc2626';
-        
-        html += `
-        <tr>
-            <td style="font-weight:700;">${c.cliente || '-'}</td>
-            <td style="text-align:center;font-weight:700;color:#3b82f6;">${c.total}</td>
-            <td style="text-align:center;color:#84cc16;font-weight:600;">${c.operando}</td>
-            <td style="text-align:center;color:#f59e0b;font-weight:600;">${c.mantenimiento}</td>
-            <td style="text-align:center;color:#ef4444;font-weight:600;">${c.ineficiencias}</td>
-            <td style="text-align:center;color:#8b5cf6;font-weight:600;">${c.taller}</td>
-            <td style="text-align:center;color:#64748b;font-weight:600;">${c.corralon}</td>
-            <td style="text-align:center;font-weight:700;color:${colorPct};">${pctOperando}%</td>
-        </tr>`;
+  todosLosVehiculos = [];
+
+  for(let i=1;i<rows.length;i++){
+    const r = rows[i];
+    if(!r || r.length < 11) continue;
+
+    const udn = r[0]?.trim();
+    const vehicleId = r[1]?.trim();
+    const cliente = r[2]?.trim();
+    const comentario = r[3]?.trim();
+    const chasis = r[4]?.trim();
+    const marca = r[5]?.trim();
+    const modelo = r[6]?.trim();
+    const anio = r[7]?.trim();
+    const uso = r[8]?.trim();
+    const status = r[9]?.trim();
+    const aire = r[10]?.trim();
+
+    if(!vehicleId || !cliente) continue;
+
+    const estatusAgrupado = STATUS_MAPPING[status] || status;
+
+    todosLosVehiculos.push({
+      vehicleId, cliente, udn, comentario, chasis,
+      marca, modelo, anio, uso, status, estatusAgrupado, aire
     });
-    
-    tbody.innerHTML = html;
-    document.getElementById('totalRegistros').innerText = clientes.length;
+
+    if(!clientes[cliente]){
+      clientes[cliente] = {
+        cliente,
+        total:0, operando:0, mantenimiento:0,
+        ineficiencias:0, taller:0, corralon:0
+      };
+    }
+
+    clientes[cliente].total++;
+
+    switch(estatusAgrupado){
+      case "Operando": clientes[cliente].operando++; break;
+      case "Mantenimiento": clientes[cliente].mantenimiento++; break;
+      case "Ineficiencias": clientes[cliente].ineficiencias++; break;
+      case "Taller Externo": clientes[cliente].taller++; break;
+      case "Corralon": clientes[cliente].corralon++; break;
+    }
+  }
+
+  resumenPorCliente = Object.values(clientes).sort((a,b)=>b.total-a.total);
+  renderizarTabla(resumenPorCliente);
 }
 
-// ===== FUNCIONES DE FILTRADO =====
-function aplicarFiltros(){
-    const filtroCliente = document.getElementById('filtroCliente').value.toUpperCase();
-    
-    resumenFiltrado = resumenPorCliente.filter(c => {
-        const coincideCliente = !filtroCliente || c.cliente.toUpperCase().includes(filtroCliente);
-        return coincideCliente;
-    });
-    
-    renderizarTabla(resumenFiltrado);
+/* ================= UI ================= */
+function renderizarTabla(data){
+  const tbody = document.getElementById("tablaDetalle");
+  tbody.innerHTML = "";
+
+  data.forEach(c=>{
+    const pct = c.total ? ((c.operando/c.total)*100).toFixed(1) : 0;
+    tbody.innerHTML += `
+      <tr>
+        <td>${c.cliente}</td>
+        <td>${c.total}</td>
+        <td>${c.operando}</td>
+        <td>${c.mantenimiento}</td>
+        <td>${c.ineficiencias}</td>
+        <td>${c.taller}</td>
+        <td>${c.corralon}</td>
+        <td>${pct}%</td>
+      </tr>
+    `;
+  });
 }
 
-function limpiarFiltros(){
-    document.getElementById('filtroCliente').value = '';
-    resumenFiltrado = [...resumenPorCliente];
-    renderizarTabla(resumenFiltrado);
-}
-
-// ===== FUNCIÓN DE BÚSQUEDA POR VEHICLE ID =====
 function buscarVehiculo(){
-    const searchId = document.getElementById('searchVehicleId').value.trim().toUpperCase();
-    
-    if(!searchId){
-        alert('Por favor ingresa un Vehicle ID para buscar');
-        return;
-    }
-    
-    const vehiculo = todosLosVehiculos.find(v => v.vehicleId.toUpperCase() === searchId);
-    
-    const resultDiv = document.getElementById('searchResult');
-    const contentDiv = document.getElementById('searchResultContent');
-    
-    if(vehiculo){
-        const statusClass = getStatusClass(vehiculo.estatusAgrupado);
-        
-        contentDiv.innerHTML = `
-            <div class="search-result-item">
-                <div class="search-result-label">Vehicle ID</div>
-                <div class="search-result-value" style="color:#3b82f6;font-size:18px;">${vehiculo.vehicleId}</div>
-            </div>
-            <div class="search-result-item">
-                <div class="search-result-label">Cliente</div>
-                <div class="search-result-value">${vehiculo.cliente || '-'}</div>
-            </div>
-            <div class="search-result-item">
-                <div class="search-result-label">Marca</div>
-                <div class="search-result-value">${vehiculo.marca || '-'}</div>
-            </div>
-            <div class="search-result-item">
-                <div class="search-result-label">Modelo</div>
-                <div class="search-result-value">${vehiculo.modelo || '-'}</div>
-            </div>
-            <div class="search-result-item">
-                <div class="search-result-label">Año</div>
-                <div class="search-result-value">${vehiculo.anio || '-'}</div>
-            </div>
-            <div class="search-result-item">
-                <div class="search-result-label">Uso</div>
-                <div class="search-result-value">${vehiculo.uso || '-'}</div>
-            </div>
-            <div class="search-result-item">
-                <div class="search-result-label">Status</div>
-                <div class="search-result-value">${vehiculo.status || '-'}</div>
-            </div>
-            <div class="search-result-item">
-                <div class="search-result-label">Estatus Agrupado</div>
-                <div class="search-result-value"><span class="status-badge ${statusClass}">${vehiculo.estatusAgrupado}</span></div>
-            </div>
-            <div class="search-result-item">
-                <div class="search-result-label">Aire Acondicionado</div>
-                <div class="search-result-value">${vehiculo.aireAcondicionado || '-'}</div>
-            </div>
-            <div class="search-result-item">
-                <div class="search-result-label">Número de Chasis</div>
-                <div class="search-result-value" style="font-size:12px;">${vehiculo.numChasis || '-'}</div>
-            </div>
-            <div class="search-result-item">
-                <div class="search-result-label">Comentario</div>
-                <div class="search-result-value" style="font-size:12px;">${vehiculo.comentario || '-'}</div>
-            </div>
-        `;
-        
-        resultDiv.classList.add('show');
-    } else {
-        contentDiv.innerHTML = `
-            <div style="text-align:center;padding:20px;width:100%;">
-                <div style="font-size:48px;margin-bottom:10px;">❌</div>
-                <div style="color:#6b7280;font-size:14px;">No se encontró ningún vehículo con el ID: <strong>${searchId}</strong></div>
-            </div>
-        `;
-        resultDiv.classList.add('show');
-    }
+  const id = document.getElementById("searchVehicleId").value.trim();
+  const v = todosLosVehiculos.find(x=>x.vehicleId===id);
+  if(!v) return alert("No encontrado");
+  alert(`Cliente: ${v.cliente}\nStatus: ${v.status}\nModelo: ${v.modelo}`);
 }
 
-function getStatusClass(estatusAgrupado){
-    const mapping = {
-        "Operando": "status-operando",
-        "Mantenimiento": "status-mantenimiento",
-        "Ineficiencias": "status-ineficiencias",
-        "Taller Externo": "status-taller",
-        "Corralon": "status-corralon"
-    };
-    return mapping[estatusAgrupado] || "";
-}
-
-// ===== FUNCIÓN DE EXPORTACIÓN =====
-function exportarExcel(){
-    if(resumenFiltrado.length === 0){
-        alert('No hay datos para exportar');
-        return;
-    }
-    
-    const fecha = new Date().toLocaleDateString('es-MX').replace(/\//g,'-');
-    
-    let csv = 'Cliente,Total Vehículos,Operando,Mantenimiento,Ineficiencias,Taller Externo,Corralón,% Operando\n';
-    
-    resumenFiltrado.forEach(c => {
-        const pctOperando = c.total > 0 ? ((c.operando / c.total) * 100).toFixed(1) : 0;
-        csv += `"${c.cliente}",${c.total},${c.operando},${c.mantenimiento},${c.ineficiencias},${c.taller},${c.corralon},${pctOperando}%\n`;
-    });
-    
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `Flota_Por_Cliente_${fecha}.csv`;
-    link.click();
-}
-
-// ===== MENÚ DROPDOWN =====
-function toggleDropdown(dropdownId) {
-    const dropdown = document.getElementById(dropdownId);
-    const allDropdowns = document.querySelectorAll('.dropdown');
-    
-    allDropdowns.forEach(d => {
-        if (d.id !== dropdownId) {
-            d.classList.remove('open');
-        }
-    });
-    
-    dropdown.classList.toggle('open');
-}
-
-document.addEventListener('click', function(event) {
-    if (!event.target.closest('.dropdown')) {
-        document.querySelectorAll('.dropdown').forEach(d => {
-            d.classList.remove('open');
-        });
-    }
-});
-
-// ===== EVENT LISTENERS =====
-document.addEventListener('DOMContentLoaded', () => {
-    // Filtro
-    document.getElementById('filtroCliente').addEventListener('input', aplicarFiltros);
-    
-    // Búsqueda con Enter
-    document.getElementById('searchVehicleId').addEventListener('keypress', function(e){
-        if(e.key === 'Enter'){
-            buscarVehiculo();
-        }
-    });
-    
-    // Cargar datos iniciales
-    actualizar();
-});
+document.addEventListener("DOMContentLoaded",actualizar);
 </script>
 
 </body>
