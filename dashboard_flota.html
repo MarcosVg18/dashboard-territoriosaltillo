@@ -17,7 +17,7 @@ body {
 }
 
 .container {
-  max-width: 1400px;
+  max-width: 1600px;
   margin: 0 auto;
   padding: 20px;
 }
@@ -28,24 +28,41 @@ h2 {
   font-weight: 600;
 }
 
-.search-box {
+.filters-section {
   background: white;
   padding: 20px;
   border-radius: 8px;
   margin-bottom: 20px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  align-items: center;
 }
 
-.search-box input {
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.filter-group label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+}
+
+.filter-group select,
+.filter-group input {
   padding: 10px;
   border: 1px solid #d1d5db;
   border-radius: 4px;
   font-size: 14px;
-  width: 300px;
-  margin-right: 10px;
+  min-width: 200px;
 }
 
-.search-box button {
+.filter-group button {
   padding: 10px 20px;
   background: #28a745;
   color: white;
@@ -55,15 +72,16 @@ h2 {
   font-size: 14px;
   font-weight: 600;
   transition: background 0.3s ease;
+  margin-top: 20px;
 }
 
-.search-box button:hover {
+.filter-group button:hover {
   background: #218838;
 }
 
 .kpis-section {
   background: white;
-  padding: 20px;
+  padding: 25px;
   border-radius: 8px;
   margin-bottom: 20px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -72,47 +90,93 @@ h2 {
 .kpis-section h3 {
   color: #2c2c2c;
   font-weight: 600;
-  margin-bottom: 5px;
+  margin-bottom: 20px;
+  font-size: 16px;
 }
 
 .kpis-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 15px;
-  margin-top: 15px;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+@media (max-width: 1200px) {
+  .kpis-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .kpis-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 .kpi-card {
-  padding: 20px;
-  border-radius: 8px;
+  padding: 20px 15px;
   text-align: center;
-  border: 2px solid #e5e7eb;
+  border-right: 1px solid #e5e7eb;
+  position: relative;
+  transition: background 0.2s;
 }
 
-.kpi-card.operando { background: #d4edda; border-color: #28a745; }
-.kpi-card.mantenimiento { background: #fff3cd; border-color: #ffc107; }
-.kpi-card.taller { background: #f8d7da; border-color: #dc3545; }
-.kpi-card.ineficiencias { background: #ffe5e5; border-color: #c82333; }
-.kpi-card.corralon { background: #cfe2ff; border-color: #0d6efd; }
+.kpi-card:last-child {
+  border-right: none;
+}
+
+.kpi-card:hover {
+  background: #f9fafb;
+}
+
+.kpi-card.operando { 
+  background: linear-gradient(to bottom, #f0fff4 0%, #ffffff 100%);
+}
+
+.kpi-card.mantenimiento { 
+  background: linear-gradient(to bottom, #fffbeb 0%, #ffffff 100%);
+}
+
+.kpi-card.taller { 
+  background: linear-gradient(to bottom, #fef2f2 0%, #ffffff 100%);
+}
+
+.kpi-card.ineficiencias { 
+  background: linear-gradient(to bottom, #fff5f5 0%, #ffffff 100%);
+}
+
+.kpi-card.corralon { 
+  background: linear-gradient(to bottom, #eff6ff 0%, #ffffff 100%);
+}
 
 .kpi-label {
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 11px;
+  font-weight: 700;
   text-transform: uppercase;
   color: #6b7280;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
+  letter-spacing: 0.5px;
 }
 
 .kpi-value {
-  font-size: 32px;
+  font-size: 36px;
   font-weight: 700;
-  color: #2c2c2c;
+  line-height: 1;
+  margin-bottom: 5px;
 }
 
+.kpi-card.operando .kpi-value { color: #16a34a; }
+.kpi-card.mantenimiento .kpi-value { color: #ca8a04; }
+.kpi-card.taller .kpi-value { color: #dc2626; }
+.kpi-card.ineficiencias .kpi-value { color: #b91c1c; }
+.kpi-card.corralon .kpi-value { color: #2563eb; }
+
 .kpi-percentage {
-  font-size: 14px;
+  font-size: 13px;
   color: #6b7280;
-  margin-top: 5px;
+  font-weight: 500;
 }
 
 .table-section {
@@ -149,57 +213,84 @@ th {
   top: 0;
 }
 
-tr:hover {
+tr.cliente-row {
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+tr.cliente-row:hover {
   background: #f8f9fa;
 }
 
-.modal {
-  display: none;
-  position: fixed;
-  z-index: 1000;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.5);
+tr.cliente-real {
+  background: #f0fff4;
 }
 
-.modal-content {
-  background: white;
-  margin: 10% auto;
-  padding: 30px;
-  border-radius: 8px;
-  width: 90%;
-  max-width: 500px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+tr.cliente-real:hover {
+  background: #dcfce7;
 }
 
-.modal-close {
-  float: right;
-  font-size: 28px;
-  font-weight: bold;
-  cursor: pointer;
-  color: #9ca3af;
+tr.no-cliente {
+  background: #fff7ed;
 }
 
-.modal-close:hover {
-  color: #1f2937;
+tr.no-cliente:hover {
+  background: #fed7aa;
 }
 
-.modal-info {
-  margin-top: 20px;
-}
-
-.modal-info p {
-  margin: 10px 0;
-  font-size: 14px;
-}
-
-.modal-info strong {
-  color: #374151;
+.expand-icon {
   display: inline-block;
-  width: 150px;
+  width: 20px;
+  text-align: center;
+  font-weight: bold;
+  color: #28a745;
 }
+
+.vehiculos-detalle {
+  background: #f9fafb;
+}
+
+.vehiculos-detalle td {
+  padding: 20px;
+}
+
+.vehiculos-table {
+  width: 100%;
+  margin-top: 10px;
+  background: white;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.vehiculos-table th {
+  background: #e5e7eb;
+  font-size: 11px;
+  padding: 8px;
+}
+
+.vehiculos-table td {
+  font-size: 12px;
+  padding: 8px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.status-operando { background: #d4edda; color: #155724; }
+.status-mantenimiento { background: #fff3cd; color: #856404; }
+.status-taller { background: #f8d7da; color: #721c24; }
+.status-ineficiencias { background: #ffe5e5; color: #a71d2a; }
+.status-corralon { background: #cfe2ff; color: #004085; }
+
+.pct-low { color: #dc3545; font-weight: bold; }
+.pct-medium { color: #ffc107; font-weight: bold; }
+.pct-high { color: #28a745; font-weight: bold; }
 </style>
 </head>
 
@@ -207,16 +298,33 @@ tr:hover {
 
 <div class="container">
   <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 10px;">
-    <h2 style="margin: 0; padding: 20px 0;">Dashboard Flota Vehicular</h2>
+    <h2 style="margin: 0; padding: 20px 0;">Dashboard Flota Vehicular - Traxión</h2>
   </div>
 
-  <div class="search-box">
-    <input id="searchVehicleId" placeholder="Buscar Vehicle ID" />
-    <button onclick="buscarVehiculo()">🔍 Buscar</button>
+  <!-- FILTERS -->
+  <div class="filters-section">
+    <div class="filter-group">
+      <label>Unidad de Negocio</label>
+      <select id="filterUDN">
+        <option value="">Todas las UDN</option>
+        <option value="SETTEPI SALTILLO">SETTEPI SALTILLO</option>
+        <option value="LIPU SALTILLO">LIPU SALTILLO</option>
+      </select>
+    </div>
+    
+    <div class="filter-group">
+      <label>Buscar Vehicle ID</label>
+      <input id="searchVehicleId" placeholder="Ej: 5002" />
+    </div>
+    
+    <div class="filter-group">
+      <button onclick="aplicarFiltros()">🔍 Buscar / Filtrar</button>
+    </div>
   </div>
 
+  <!-- KPIs -->
   <div class="kpis-section">
-    <h3>KPIs Generales</h3>
+    <h3>KPIs Generales <span id="kpi-subtitle" style="font-weight: normal; font-size: 14px; color: #6b7280;"></span></h3>
     <div class="kpis-grid">
       <div class="kpi-card operando">
         <div class="kpi-label">Operando</div>
@@ -250,11 +358,17 @@ tr:hover {
     </div>
   </div>
 
+  <!-- TABLE -->
   <div class="table-section">
-    <h3>Resumen por Cliente</h3>
-    <table>
+    <h3>Resumen por Cliente <span style="font-weight: normal; font-size: 14px; color: #6b7280;">(ordenado por % Operando - menor a mayor)</span></h3>
+    <div style="margin-bottom: 10px; font-size: 12px; color: #6b7280;">
+      <span style="background: #f0fff4; padding: 4px 8px; border-radius: 4px; margin-right: 10px;">■ Clientes reales</span>
+      <span style="background: #fff7ed; padding: 4px 8px; border-radius: 4px;">■ No-clientes / Otros</span>
+    </div>
+    <table id="tablaClientes">
       <thead>
         <tr>
+          <th width="30"></th>
           <th>Cliente</th>
           <th>Total</th>
           <th>Operando</th>
@@ -270,41 +384,34 @@ tr:hover {
   </div>
 </div>
 
-<!-- Modal -->
-<div id="modalVehiculo" class="modal">
-  <div class="modal-content">
-    <span class="modal-close" onclick="cerrarModal()">&times;</span>
-    <h3>Información del Vehículo</h3>
-    <div class="modal-info" id="modalInfo"></div>
-  </div>
-</div>
-
 <script>
 /* ================= CONFIG ================= */
 const SHEET_ID = "1l3QYg7N050BScrtNhKkHQ-hHNDgaK9Prw95Dzb2-DRE";
-const SHEET_NAME = "FlotaVeh";
 
-// Mapeo correcto según la imagen de la hoja
 const STATUS_MAPPING = {
   "Operando": "Operando",
   "Mantenimiento": "Mantenimiento",
-  "Alto Rezago Mantenimiento": "Mantenimiento",  // Agrupado con Mantenimiento
+  "Alto Rezago Mantenimiento": "Mantenimiento",
   "Ineficiencias": "Ineficiencias",
   "Taller Externo": "Taller Externo",
-  "Corralon Grave": "Corralón",  // Agrupado como Corralón
-  "Corralon Media": "Corralón"   // Agrupado como Corralón
+  "Corralon Grave": "Corralón",
+  "Corralon Media": "Corralón"
 };
 
+const CLIENTES_REALES = [
+  "YF RAMOS", "TUPY RAMOS", "VASCOR", "MAGNA CLOUSURES", "DAIMLER", "MABE",
+  "JOHN DEERE", "GANFER SALTILLO", "TUPY SALTILLO", "YF SANTA MARIA 1",
+  "POWERTRAIN", "CVG", "NOVA STEEL", "BECARIOS DAIMLER", "YF DERRAMADERO",
+  "WOOBOTECH", "WINDSOR MACHINE", "AURRENAK", "MFG", "YF SANTA MARIA 2",
+  "MAHLE PISTONES", "APTIV 2", "ACCIONA", "SAINT-GOBAIN", "YF TO",
+  "OIEGSA", "MERCADO LIBRE", "UTS", "APTIV 1", "MAHLE BEHR 1",
+  "MAHLE BEHR 2", "APTIV 3", "MAPESA", "GRIMALDI"
+];
+
 let todosLosVehiculos = [];
+let vehiculosFiltrados = [];
 let resumenPorCliente = [];
-let kpisGlobales = {
-  total: 0,
-  operando: 0,
-  mantenimiento: 0,
-  taller: 0,
-  ineficiencias: 0,
-  corralon: 0
-};
+let kpisGlobales = { total: 0, operando: 0, mantenimiento: 0, taller: 0, ineficiencias: 0, corralon: 0 };
 
 /* ================= DATA LOADING ================= */
 async function cargarDatos() {
@@ -313,10 +420,7 @@ async function cargarDatos() {
     const res = await fetch(url);
     const csv = await res.text();
     return new Promise((resolve) => {
-      Papa.parse(csv, {
-        skipEmptyLines: true,
-        complete: (result) => resolve(result.data)
-      });
+      Papa.parse(csv, { skipEmptyLines: true, complete: (result) => resolve(result.data) });
     });
   } catch (error) {
     console.error("Error cargando datos:", error);
@@ -333,27 +437,12 @@ async function actualizar() {
     return;
   }
 
-  let clientes = {};
   todosLosVehiculos = [];
-  
-  // Resetear KPIs globales
-  kpisGlobales = {
-    total: 0,
-    operando: 0,
-    mantenimiento: 0,
-    taller: 0,
-    ineficiencias: 0,
-    corralon: 0
-  };
 
-  // Procesar cada fila (empezando desde índice 1 para saltar encabezados)
   for (let i = 1; i < rows.length; i++) {
     const r = rows[i];
     if (!r || r.length < 11) continue;
 
-    // Columnas según la imagen:
-    // A=UDN, B=Vehicle ID, C=Cliente, D=Comentario, E=Chasis, F=Marca, 
-    // G=Modelo, H=Año, I=Uso, J=Status, K=Aire
     const udn = r[0]?.trim() || "";
     const vehicleId = r[1]?.trim() || "";
     const cliente = r[2]?.trim() || "";
@@ -366,113 +455,140 @@ async function actualizar() {
     const status = r[9]?.trim() || "";
     const aire = r[10]?.trim() || "";
 
-    // Validar que tenga al menos Vehicle ID y Cliente
     if (!vehicleId || !cliente) continue;
 
-    // Mapear el estatus según la agrupación solicitada
     const estatusAgrupado = STATUS_MAPPING[status] || status;
 
-    // Guardar vehículo
     todosLosVehiculos.push({
-      vehicleId,
-      cliente,
-      udn,
-      comentario,
-      chasis,
-      marca,
-      modelo,
-      anio,
-      uso,
-      status,
-      estatusAgrupado,
-      aire
+      vehicleId, cliente, udn, comentario, chasis,
+      marca, modelo, anio, uso, status, estatusAgrupado, aire
     });
+  }
+  
+  aplicarFiltros();
+  
+  console.log(`✅ Datos cargados: ${todosLosVehiculos.length} vehículos`);
+}
 
-    // Actualizar totales por cliente
-    if (!clientes[cliente]) {
-      clientes[cliente] = {
-        cliente,
+/* ================= FILTROS ================= */
+function aplicarFiltros() {
+  const udnFilter = document.getElementById('filterUDN').value;
+  const searchId = document.getElementById('searchVehicleId').value.trim();
+  
+  vehiculosFiltrados = todosLosVehiculos.filter(v => {
+    const matchUDN = !udnFilter || v.udn === udnFilter;
+    const matchID = !searchId || v.vehicleId.includes(searchId);
+    return matchUDN && matchID;
+  });
+  
+  calcularKPIs();
+  calcularResumenClientes();
+  renderizarKPIs();
+  renderizarTabla();
+  
+  // Actualizar subtítulo
+  let subtitle = "";
+  if (udnFilter) subtitle += `- Filtrado por ${udnFilter}`;
+  if (searchId) subtitle += ` - Búsqueda: "${searchId}"`;
+  document.getElementById('kpi-subtitle').textContent = subtitle;
+}
+
+function calcularKPIs() {
+  kpisGlobales = { total: 0, operando: 0, mantenimiento: 0, taller: 0, ineficiencias: 0, corralon: 0 };
+  
+  vehiculosFiltrados.forEach(v => {
+    kpisGlobales.total++;
+    switch (v.estatusAgrupado) {
+      case "Operando": kpisGlobales.operando++; break;
+      case "Mantenimiento": kpisGlobales.mantenimiento++; break;
+      case "Taller Externo": kpisGlobales.taller++; break;
+      case "Ineficiencias": kpisGlobales.ineficiencias++; break;
+      case "Corralón": kpisGlobales.corralon++; break;
+    }
+  });
+}
+
+function calcularResumenClientes() {
+  let clientes = {};
+  
+  vehiculosFiltrados.forEach(v => {
+    if (!clientes[v.cliente]) {
+      clientes[v.cliente] = {
+        cliente: v.cliente,
         total: 0,
         operando: 0,
         mantenimiento: 0,
         taller: 0,
         ineficiencias: 0,
-        corralon: 0
+        corralon: 0,
+        vehiculos: []
       };
     }
-
-    clientes[cliente].total++;
-    kpisGlobales.total++;
-
-    // Incrementar contadores según estatus agrupado
-    switch (estatusAgrupado) {
-      case "Operando":
-        clientes[cliente].operando++;
-        kpisGlobales.operando++;
-        break;
-      case "Mantenimiento":
-        clientes[cliente].mantenimiento++;
-        kpisGlobales.mantenimiento++;
-        break;
-      case "Taller Externo":
-        clientes[cliente].taller++;
-        kpisGlobales.taller++;
-        break;
-      case "Ineficiencias":
-        clientes[cliente].ineficiencias++;
-        kpisGlobales.ineficiencias++;
-        break;
-      case "Corralón":
-        clientes[cliente].corralon++;
-        kpisGlobales.corralon++;
-        break;
+    
+    clientes[v.cliente].total++;
+    clientes[v.cliente].vehiculos.push(v);
+    
+    switch (v.estatusAgrupado) {
+      case "Operando": clientes[v.cliente].operando++; break;
+      case "Mantenimiento": clientes[v.cliente].mantenimiento++; break;
+      case "Taller Externo": clientes[v.cliente].taller++; break;
+      case "Ineficiencias": clientes[v.cliente].ineficiencias++; break;
+      case "Corralón": clientes[v.cliente].corralon++; break;
     }
-  }
-
-  // Convertir objeto de clientes a array y ordenar por total
-  resumenPorCliente = Object.values(clientes).sort((a, b) => b.total - a.total);
+  });
   
-  // Renderizar
-  renderizarKPIs();
-  renderizarTabla(resumenPorCliente);
-  
-  console.log(`✅ Datos cargados: ${todosLosVehiculos.length} vehículos, ${resumenPorCliente.length} clientes`);
+  // Ordenar por % operando (menor a mayor)
+  resumenPorCliente = Object.values(clientes).sort((a, b) => {
+    const pctA = a.total ? (a.operando / a.total) * 100 : 0;
+    const pctB = b.total ? (b.operando / b.total) * 100 : 0;
+    return pctA - pctB;
+  });
 }
 
 /* ================= UI RENDERING ================= */
 function renderizarKPIs() {
-  const total = kpisGlobales.total || 1; // Evitar división por cero
+  const total = kpisGlobales.total || 1;
   
   document.getElementById("kpi-operando").textContent = kpisGlobales.operando;
-  document.getElementById("kpi-operando-pct").textContent = 
-    `${((kpisGlobales.operando / total) * 100).toFixed(1)}% del total`;
+  document.getElementById("kpi-operando-pct").textContent = `${((kpisGlobales.operando / total) * 100).toFixed(1)}% del total`;
   
   document.getElementById("kpi-mantenimiento").textContent = kpisGlobales.mantenimiento;
-  document.getElementById("kpi-mantenimiento-pct").textContent = 
-    `${((kpisGlobales.mantenimiento / total) * 100).toFixed(1)}% del total`;
+  document.getElementById("kpi-mantenimiento-pct").textContent = `${((kpisGlobales.mantenimiento / total) * 100).toFixed(1)}% del total`;
   
   document.getElementById("kpi-taller").textContent = kpisGlobales.taller;
-  document.getElementById("kpi-taller-pct").textContent = 
-    `${((kpisGlobales.taller / total) * 100).toFixed(1)}% del total`;
+  document.getElementById("kpi-taller-pct").textContent = `${((kpisGlobales.taller / total) * 100).toFixed(1)}% del total`;
   
   document.getElementById("kpi-ineficiencias").textContent = kpisGlobales.ineficiencias;
-  document.getElementById("kpi-ineficiencias-pct").textContent = 
-    `${((kpisGlobales.ineficiencias / total) * 100).toFixed(1)}% del total`;
+  document.getElementById("kpi-ineficiencias-pct").textContent = `${((kpisGlobales.ineficiencias / total) * 100).toFixed(1)}% del total`;
   
   document.getElementById("kpi-corralon").textContent = kpisGlobales.corralon;
-  document.getElementById("kpi-corralon-pct").textContent = 
-    `${((kpisGlobales.corralon / total) * 100).toFixed(1)}% del total`;
+  document.getElementById("kpi-corralon-pct").textContent = `${((kpisGlobales.corralon / total) * 100).toFixed(1)}% del total`;
 }
 
-function renderizarTabla(data) {
+function renderizarTabla() {
   const tbody = document.getElementById("tablaDetalle");
   tbody.innerHTML = "";
 
-  data.forEach(c => {
+  if (resumenPorCliente.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 40px; color: #6b7280;">No hay datos para mostrar</td></tr>';
+    return;
+  }
+
+  resumenPorCliente.forEach((c, idx) => {
     const pctOperando = c.total ? ((c.operando / c.total) * 100).toFixed(1) : 0;
+    const esClienteReal = CLIENTES_REALES.includes(c.cliente);
+    const rowClass = esClienteReal ? 'cliente-real' : 'no-cliente';
+    
+    let pctClass = 'pct-low';
+    if (pctOperando >= 50 && pctOperando < 80) pctClass = 'pct-medium';
+    if (pctOperando >= 80) pctClass = 'pct-high';
+    
+    const rowId = `cliente-${idx}`;
+    const detalleId = `detalle-${idx}`;
     
     tbody.innerHTML += `
-      <tr>
+      <tr class="cliente-row ${rowClass}" onclick="toggleDetalle('${detalleId}', '${rowId}')">
+        <td><span class="expand-icon" id="icon-${rowId}">▶</span></td>
         <td><strong>${c.cliente}</strong></td>
         <td>${c.total}</td>
         <td>${c.operando}</td>
@@ -480,75 +596,86 @@ function renderizarTabla(data) {
         <td>${c.taller}</td>
         <td>${c.ineficiencias}</td>
         <td>${c.corralon}</td>
-        <td><strong>${pctOperando}%</strong></td>
+        <td><strong class="${pctClass}">${pctOperando}%</strong></td>
+      </tr>
+      <tr id="${detalleId}" class="vehiculos-detalle" style="display: none;">
+        <td colspan="9">
+          ${renderizarVehiculos(c.vehiculos)}
+        </td>
       </tr>
     `;
   });
 }
 
-/* ================= SEARCH ================= */
-function buscarVehiculo() {
-  const id = document.getElementById("searchVehicleId").value.trim();
-  
-  if (!id) {
-    alert("Por favor ingresa un Vehicle ID");
-    return;
-  }
-  
-  const v = todosLosVehiculos.find(x => x.vehicleId === id);
-  
-  if (!v) {
-    alert(`No se encontró el vehículo con ID: ${id}`);
-    return;
-  }
-  
-  // Mostrar modal con información
-  mostrarModal(v);
-}
-
-function mostrarModal(vehiculo) {
-  const modal = document.getElementById("modalVehiculo");
-  const modalInfo = document.getElementById("modalInfo");
-  
-  modalInfo.innerHTML = `
-    <p><strong>Vehicle ID:</strong> ${vehiculo.vehicleId}</p>
-    <p><strong>Cliente:</strong> ${vehiculo.cliente}</p>
-    <p><strong>UDN:</strong> ${vehiculo.udn}</p>
-    <p><strong>Status:</strong> ${vehiculo.status}</p>
-    <p><strong>Status Agrupado:</strong> ${vehiculo.estatusAgrupado}</p>
-    <p><strong>Marca:</strong> ${vehiculo.marca}</p>
-    <p><strong>Modelo:</strong> ${vehiculo.modelo}</p>
-    <p><strong>Año:</strong> ${vehiculo.anio}</p>
-    <p><strong>Chasis:</strong> ${vehiculo.chasis}</p>
-    <p><strong>Uso:</strong> ${vehiculo.uso}</p>
-    <p><strong>Aire Acondicionado:</strong> ${vehiculo.aire}</p>
-    ${vehiculo.comentario ? `<p><strong>Comentario:</strong> ${vehiculo.comentario}</p>` : ''}
+function renderizarVehiculos(vehiculos) {
+  let html = `
+    <table class="vehiculos-table">
+      <thead>
+        <tr>
+          <th>Vehicle ID</th>
+          <th>UDN</th>
+          <th>Marca</th>
+          <th>Modelo</th>
+          <th>Año</th>
+          <th>Chasis</th>
+          <th>Uso</th>
+          <th>Status</th>
+          <th>Aire</th>
+          <th>Comentario</th>
+        </tr>
+      </thead>
+      <tbody>
   `;
   
-  modal.style.display = "block";
+  vehiculos.forEach(v => {
+    let statusClass = 'status-operando';
+    if (v.estatusAgrupado === 'Mantenimiento') statusClass = 'status-mantenimiento';
+    if (v.estatusAgrupado === 'Taller Externo') statusClass = 'status-taller';
+    if (v.estatusAgrupado === 'Ineficiencias') statusClass = 'status-ineficiencias';
+    if (v.estatusAgrupado === 'Corralón') statusClass = 'status-corralon';
+    
+    html += `
+      <tr>
+        <td><strong>${v.vehicleId}</strong></td>
+        <td>${v.udn}</td>
+        <td>${v.marca}</td>
+        <td>${v.modelo}</td>
+        <td>${v.anio}</td>
+        <td style="font-size: 10px;">${v.chasis}</td>
+        <td>${v.uso}</td>
+        <td><span class="status-badge ${statusClass}">${v.status}</span></td>
+        <td>${v.aire}</td>
+        <td style="font-size: 11px;">${v.comentario}</td>
+      </tr>
+    `;
+  });
+  
+  html += '</tbody></table>';
+  return html;
 }
 
-function cerrarModal() {
-  document.getElementById("modalVehiculo").style.display = "none";
-}
-
-// Cerrar modal al hacer clic fuera
-window.onclick = function(event) {
-  const modal = document.getElementById("modalVehiculo");
-  if (event.target === modal) {
-    modal.style.display = "none";
+function toggleDetalle(detalleId, rowId) {
+  const detalleRow = document.getElementById(detalleId);
+  const icon = document.getElementById(`icon-${rowId}`);
+  
+  if (detalleRow.style.display === 'none') {
+    detalleRow.style.display = 'table-row';
+    icon.textContent = '▼';
+  } else {
+    detalleRow.style.display = 'none';
+    icon.textContent = '▶';
   }
 }
 
-// Permitir búsqueda con Enter
+// Permitir filtrar con Enter
 document.addEventListener("DOMContentLoaded", () => {
   actualizar();
   
   document.getElementById("searchVehicleId").addEventListener("keypress", (e) => {
-    if (e.key === "Enter") {
-      buscarVehiculo();
-    }
+    if (e.key === "Enter") aplicarFiltros();
   });
+  
+  document.getElementById("filterUDN").addEventListener("change", aplicarFiltros);
 });
 </script>
 
