@@ -8,41 +8,258 @@
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
 <style>
-/* ==== ESTILOS (sin cambios) ==== */
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Segoe UI',Tahoma,Verdana,sans-serif;background:#f3f4f6;color:#1f2937}
-table{width:100%;border-collapse:collapse;font-size:13px}
-th,td{padding:10px;border-bottom:1px solid #e5e7eb}
-th{background:#f9fafb;font-weight:700}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Segoe UI', Tahoma, Verdana, sans-serif;
+  background: #f3f4f6;
+  color: #1f2937;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+h2 {
+  padding: 20px 0;
+  color: #1f2937;
+}
+
+.search-box {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.search-box input {
+  padding: 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 14px;
+  width: 300px;
+  margin-right: 10px;
+}
+
+.search-box button {
+  padding: 10px 20px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.search-box button:hover {
+  background: #2563eb;
+}
+
+.kpis-section {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.kpis-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.kpi-card {
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  border: 2px solid #e5e7eb;
+}
+
+.kpi-card.operando { background: #dcfce7; border-color: #22c55e; }
+.kpi-card.mantenimiento { background: #fef3c7; border-color: #eab308; }
+.kpi-card.taller { background: #fed7aa; border-color: #f97316; }
+.kpi-card.ineficiencias { background: #fecaca; border-color: #ef4444; }
+.kpi-card.corralon { background: #e0e7ff; border-color: #6366f1; }
+
+.kpi-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #6b7280;
+  margin-bottom: 8px;
+}
+
+.kpi-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.kpi-percentage {
+  font-size: 14px;
+  color: #6b7280;
+  margin-top: 5px;
+}
+
+.table-section {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+th, td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+th {
+  background: #f9fafb;
+  font-weight: 700;
+  color: #374151;
+  position: sticky;
+  top: 0;
+}
+
+tr:hover {
+  background: #f9fafb;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+  background: white;
+  margin: 10% auto;
+  padding: 30px;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.modal-close {
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+  color: #9ca3af;
+}
+
+.modal-close:hover {
+  color: #1f2937;
+}
+
+.modal-info {
+  margin-top: 20px;
+}
+
+.modal-info p {
+  margin: 10px 0;
+  font-size: 14px;
+}
+
+.modal-info strong {
+  color: #374151;
+  display: inline-block;
+  width: 150px;
+}
 </style>
 </head>
 
 <body>
 
-<h2 style="padding:20px">Dashboard Flota Vehicular</h2>
+<div class="container">
+  <h2>Dashboard Flota Vehicular - Traxión</h2>
 
-<div style="padding:20px">
-<input id="searchVehicleId" placeholder="Buscar Vehicle ID">
-<button onclick="buscarVehiculo()">Buscar</button>
+  <div class="search-box">
+    <input id="searchVehicleId" placeholder="Buscar Vehicle ID" />
+    <button onclick="buscarVehiculo()">🔍 Buscar</button>
+  </div>
+
+  <div class="kpis-section">
+    <h3>KPIs Generales</h3>
+    <div class="kpis-grid">
+      <div class="kpi-card operando">
+        <div class="kpi-label">Operando</div>
+        <div class="kpi-value" id="kpi-operando">0</div>
+        <div class="kpi-percentage" id="kpi-operando-pct">0%</div>
+      </div>
+      
+      <div class="kpi-card mantenimiento">
+        <div class="kpi-label">Mantenimiento</div>
+        <div class="kpi-value" id="kpi-mantenimiento">0</div>
+        <div class="kpi-percentage" id="kpi-mantenimiento-pct">0%</div>
+      </div>
+      
+      <div class="kpi-card taller">
+        <div class="kpi-label">Taller Externo</div>
+        <div class="kpi-value" id="kpi-taller">0</div>
+        <div class="kpi-percentage" id="kpi-taller-pct">0%</div>
+      </div>
+      
+      <div class="kpi-card ineficiencias">
+        <div class="kpi-label">Ineficiencias</div>
+        <div class="kpi-value" id="kpi-ineficiencias">0</div>
+        <div class="kpi-percentage" id="kpi-ineficiencias-pct">0%</div>
+      </div>
+      
+      <div class="kpi-card corralon">
+        <div class="kpi-label">Corralón</div>
+        <div class="kpi-value" id="kpi-corralon">0</div>
+        <div class="kpi-percentage" id="kpi-corralon-pct">0%</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-section">
+    <h3>Resumen por Cliente</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Cliente</th>
+          <th>Total</th>
+          <th>Operando</th>
+          <th>Mantenimiento</th>
+          <th>Taller Externo</th>
+          <th>Ineficiencias</th>
+          <th>Corralón</th>
+          <th>% Operando</th>
+        </tr>
+      </thead>
+      <tbody id="tablaDetalle"></tbody>
+    </table>
+  </div>
 </div>
 
-<div style="padding:20px">
-<h3>Resumen por Cliente</h3>
-<table>
-<thead>
-<tr>
-<th>Cliente</th>
-<th>Total</th>
-<th>Operando</th>
-<th>Mantenimiento</th>
-<th>Ineficiencias</th>
-<th>Taller</th>
-<th>Corralón</th>
-<th>% Operando</th>
-</tr>
-</thead>
-<tbody id="tablaDetalle"></tbody>
-</table>
+<!-- Modal -->
+<div id="modalVehiculo" class="modal">
+  <div class="modal-content">
+    <span class="modal-close" onclick="cerrarModal()">&times;</span>
+    <h3>Información del Vehículo</h3>
+    <div class="modal-info" id="modalInfo"></div>
+  </div>
 </div>
 
 <script>
@@ -50,113 +267,272 @@ th{background:#f9fafb;font-weight:700}
 const SHEET_ID = "1l3QYg7N050BScrtNhKkHQ-hHNDgaK9Prw95Dzb2-DRE";
 const SHEET_NAME = "FlotaVeh";
 
+// Mapeo correcto según la imagen de la hoja
 const STATUS_MAPPING = {
   "Operando": "Operando",
   "Mantenimiento": "Mantenimiento",
-  "Alto Rezago Mantenimiento": "Mantenimiento",
+  "Alto Rezago Mantenimiento": "Mantenimiento",  // Agrupado con Mantenimiento
   "Ineficiencias": "Ineficiencias",
   "Taller Externo": "Taller Externo",
-  "Corralon Grave": "Corralon",
-  "Corralon Media": "Corralon"
+  "Corralon Grave": "Corralón",  // Agrupado como Corralón
+  "Corralon Media": "Corralón"   // Agrupado como Corralón
 };
 
 let todosLosVehiculos = [];
 let resumenPorCliente = [];
+let kpisGlobales = {
+  total: 0,
+  operando: 0,
+  mantenimiento: 0,
+  taller: 0,
+  ineficiencias: 0,
+  corralon: 0
+};
 
-/* ================= DATA ================= */
-async function cargarDatos(){
-  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&sheet=${SHEET_NAME}`;
-  const res = await fetch(url);
-  const csv = await res.text();
-  return new Promise(r=>{
-    Papa.parse(csv,{skipEmptyLines:true,complete:x=>r(x.data)});
-  });
+/* ================= DATA LOADING ================= */
+async function cargarDatos() {
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=0`;
+  try {
+    const res = await fetch(url);
+    const csv = await res.text();
+    return new Promise((resolve) => {
+      Papa.parse(csv, {
+        skipEmptyLines: true,
+        complete: (result) => resolve(result.data)
+      });
+    });
+  } catch (error) {
+    console.error("Error cargando datos:", error);
+    alert("Error al cargar los datos. Verifica la conexión y permisos del Google Sheet.");
+    return [];
+  }
 }
 
-async function actualizar(){
+async function actualizar() {
   const rows = await cargarDatos();
+  
+  if (rows.length === 0) {
+    console.error("No se cargaron datos");
+    return;
+  }
+
   let clientes = {};
-
   todosLosVehiculos = [];
+  
+  // Resetear KPIs globales
+  kpisGlobales = {
+    total: 0,
+    operando: 0,
+    mantenimiento: 0,
+    taller: 0,
+    ineficiencias: 0,
+    corralon: 0
+  };
 
-  for(let i=1;i<rows.length;i++){
+  // Procesar cada fila (empezando desde índice 1 para saltar encabezados)
+  for (let i = 1; i < rows.length; i++) {
     const r = rows[i];
-    if(!r || r.length < 11) continue;
+    if (!r || r.length < 11) continue;
 
-    const udn = r[0]?.trim();
-    const vehicleId = r[1]?.trim();
-    const cliente = r[2]?.trim();
-    const comentario = r[3]?.trim();
-    const chasis = r[4]?.trim();
-    const marca = r[5]?.trim();
-    const modelo = r[6]?.trim();
-    const anio = r[7]?.trim();
-    const uso = r[8]?.trim();
-    const status = r[9]?.trim();
-    const aire = r[10]?.trim();
+    // Columnas según la imagen:
+    // A=UDN, B=Vehicle ID, C=Cliente, D=Comentario, E=Chasis, F=Marca, 
+    // G=Modelo, H=Año, I=Uso, J=Status, K=Aire
+    const udn = r[0]?.trim() || "";
+    const vehicleId = r[1]?.trim() || "";
+    const cliente = r[2]?.trim() || "";
+    const comentario = r[3]?.trim() || "";
+    const chasis = r[4]?.trim() || "";
+    const marca = r[5]?.trim() || "";
+    const modelo = r[6]?.trim() || "";
+    const anio = r[7]?.trim() || "";
+    const uso = r[8]?.trim() || "";
+    const status = r[9]?.trim() || "";
+    const aire = r[10]?.trim() || "";
 
-    if(!vehicleId || !cliente) continue;
+    // Validar que tenga al menos Vehicle ID y Cliente
+    if (!vehicleId || !cliente) continue;
 
+    // Mapear el estatus según la agrupación solicitada
     const estatusAgrupado = STATUS_MAPPING[status] || status;
 
+    // Guardar vehículo
     todosLosVehiculos.push({
-      vehicleId, cliente, udn, comentario, chasis,
-      marca, modelo, anio, uso, status, estatusAgrupado, aire
+      vehicleId,
+      cliente,
+      udn,
+      comentario,
+      chasis,
+      marca,
+      modelo,
+      anio,
+      uso,
+      status,
+      estatusAgrupado,
+      aire
     });
 
-    if(!clientes[cliente]){
+    // Actualizar totales por cliente
+    if (!clientes[cliente]) {
       clientes[cliente] = {
         cliente,
-        total:0, operando:0, mantenimiento:0,
-        ineficiencias:0, taller:0, corralon:0
+        total: 0,
+        operando: 0,
+        mantenimiento: 0,
+        taller: 0,
+        ineficiencias: 0,
+        corralon: 0
       };
     }
 
     clientes[cliente].total++;
+    kpisGlobales.total++;
 
-    switch(estatusAgrupado){
-      case "Operando": clientes[cliente].operando++; break;
-      case "Mantenimiento": clientes[cliente].mantenimiento++; break;
-      case "Ineficiencias": clientes[cliente].ineficiencias++; break;
-      case "Taller Externo": clientes[cliente].taller++; break;
-      case "Corralon": clientes[cliente].corralon++; break;
+    // Incrementar contadores según estatus agrupado
+    switch (estatusAgrupado) {
+      case "Operando":
+        clientes[cliente].operando++;
+        kpisGlobales.operando++;
+        break;
+      case "Mantenimiento":
+        clientes[cliente].mantenimiento++;
+        kpisGlobales.mantenimiento++;
+        break;
+      case "Taller Externo":
+        clientes[cliente].taller++;
+        kpisGlobales.taller++;
+        break;
+      case "Ineficiencias":
+        clientes[cliente].ineficiencias++;
+        kpisGlobales.ineficiencias++;
+        break;
+      case "Corralón":
+        clientes[cliente].corralon++;
+        kpisGlobales.corralon++;
+        break;
     }
   }
 
-  resumenPorCliente = Object.values(clientes).sort((a,b)=>b.total-a.total);
+  // Convertir objeto de clientes a array y ordenar por total
+  resumenPorCliente = Object.values(clientes).sort((a, b) => b.total - a.total);
+  
+  // Renderizar
+  renderizarKPIs();
   renderizarTabla(resumenPorCliente);
+  
+  console.log(`✅ Datos cargados: ${todosLosVehiculos.length} vehículos, ${resumenPorCliente.length} clientes`);
 }
 
-/* ================= UI ================= */
-function renderizarTabla(data){
+/* ================= UI RENDERING ================= */
+function renderizarKPIs() {
+  const total = kpisGlobales.total || 1; // Evitar división por cero
+  
+  document.getElementById("kpi-operando").textContent = kpisGlobales.operando;
+  document.getElementById("kpi-operando-pct").textContent = 
+    `${((kpisGlobales.operando / total) * 100).toFixed(1)}% del total`;
+  
+  document.getElementById("kpi-mantenimiento").textContent = kpisGlobales.mantenimiento;
+  document.getElementById("kpi-mantenimiento-pct").textContent = 
+    `${((kpisGlobales.mantenimiento / total) * 100).toFixed(1)}% del total`;
+  
+  document.getElementById("kpi-taller").textContent = kpisGlobales.taller;
+  document.getElementById("kpi-taller-pct").textContent = 
+    `${((kpisGlobales.taller / total) * 100).toFixed(1)}% del total`;
+  
+  document.getElementById("kpi-ineficiencias").textContent = kpisGlobales.ineficiencias;
+  document.getElementById("kpi-ineficiencias-pct").textContent = 
+    `${((kpisGlobales.ineficiencias / total) * 100).toFixed(1)}% del total`;
+  
+  document.getElementById("kpi-corralon").textContent = kpisGlobales.corralon;
+  document.getElementById("kpi-corralon-pct").textContent = 
+    `${((kpisGlobales.corralon / total) * 100).toFixed(1)}% del total`;
+}
+
+function renderizarTabla(data) {
   const tbody = document.getElementById("tablaDetalle");
   tbody.innerHTML = "";
 
-  data.forEach(c=>{
-    const pct = c.total ? ((c.operando/c.total)*100).toFixed(1) : 0;
+  data.forEach(c => {
+    const pctOperando = c.total ? ((c.operando / c.total) * 100).toFixed(1) : 0;
+    
     tbody.innerHTML += `
       <tr>
-        <td>${c.cliente}</td>
+        <td><strong>${c.cliente}</strong></td>
         <td>${c.total}</td>
         <td>${c.operando}</td>
         <td>${c.mantenimiento}</td>
-        <td>${c.ineficiencias}</td>
         <td>${c.taller}</td>
+        <td>${c.ineficiencias}</td>
         <td>${c.corralon}</td>
-        <td>${pct}%</td>
+        <td><strong>${pctOperando}%</strong></td>
       </tr>
     `;
   });
 }
 
-function buscarVehiculo(){
+/* ================= SEARCH ================= */
+function buscarVehiculo() {
   const id = document.getElementById("searchVehicleId").value.trim();
-  const v = todosLosVehiculos.find(x=>x.vehicleId===id);
-  if(!v) return alert("No encontrado");
-  alert(`Cliente: ${v.cliente}\nStatus: ${v.status}\nModelo: ${v.modelo}`);
+  
+  if (!id) {
+    alert("Por favor ingresa un Vehicle ID");
+    return;
+  }
+  
+  const v = todosLosVehiculos.find(x => x.vehicleId === id);
+  
+  if (!v) {
+    alert(`No se encontró el vehículo con ID: ${id}`);
+    return;
+  }
+  
+  // Mostrar modal con información
+  mostrarModal(v);
 }
 
-document.addEventListener("DOMContentLoaded",actualizar);
+function mostrarModal(vehiculo) {
+  const modal = document.getElementById("modalVehiculo");
+  const modalInfo = document.getElementById("modalInfo");
+  
+  modalInfo.innerHTML = `
+    <p><strong>Vehicle ID:</strong> ${vehiculo.vehicleId}</p>
+    <p><strong>Cliente:</strong> ${vehiculo.cliente}</p>
+    <p><strong>UDN:</strong> ${vehiculo.udn}</p>
+    <p><strong>Status:</strong> ${vehiculo.status}</p>
+    <p><strong>Status Agrupado:</strong> ${vehiculo.estatusAgrupado}</p>
+    <p><strong>Marca:</strong> ${vehiculo.marca}</p>
+    <p><strong>Modelo:</strong> ${vehiculo.modelo}</p>
+    <p><strong>Año:</strong> ${vehiculo.anio}</p>
+    <p><strong>Chasis:</strong> ${vehiculo.chasis}</p>
+    <p><strong>Uso:</strong> ${vehiculo.uso}</p>
+    <p><strong>Aire Acondicionado:</strong> ${vehiculo.aire}</p>
+    ${vehiculo.comentario ? `<p><strong>Comentario:</strong> ${vehiculo.comentario}</p>` : ''}
+  `;
+  
+  modal.style.display = "block";
+}
+
+function cerrarModal() {
+  document.getElementById("modalVehiculo").style.display = "none";
+}
+
+// Cerrar modal al hacer clic fuera
+window.onclick = function(event) {
+  const modal = document.getElementById("modalVehiculo");
+  if (event.target === modal) {
+    modal.style.display = "none";
+  }
+}
+
+// Permitir búsqueda con Enter
+document.addEventListener("DOMContentLoaded", () => {
+  actualizar();
+  
+  document.getElementById("searchVehicleId").addEventListener("keypress", (e) => {
+    if (e.key === "Enter") {
+      buscarVehiculo();
+    }
+  });
+});
 </script>
 
 </body>
