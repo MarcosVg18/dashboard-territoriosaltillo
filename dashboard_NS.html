@@ -463,6 +463,7 @@ function parseCSV(text){
     console.log('Muestra fila 1:', JSON.stringify(rows[0]));
     const fechaMuestra = rows[0][C.fecha];
     console.log('Fecha raw:', fechaMuestra, '→ norm:', norm(fechaMuestra));
+    console.log('getFecha row[0]:', rows[0]['Año'], rows[0]['Mes'], rows[0]['Dia'], '→', getFecha(rows[0]));
   }
   return rows;
 }
@@ -501,15 +502,23 @@ function norm(s){
   const p=s.split('/');
   if(p.length===3){
     const a=p[0], b=p[1], c=p[2];
-    // DD/MM/YYYY o D/M/YYYY (formato del Sheet)
     if(c.length===4) return c+'-'+b.padStart(2,'0')+'-'+a.padStart(2,'0');
-    // YYYY/MM/DD
     if(a.length===4) return a+'-'+b.padStart(2,'0')+'-'+c.padStart(2,'0');
   }
-  // Intento con guiones DD-MM-YYYY
   const g=s.split('-');
   if(g.length===3&&g[2].length===4) return g[2]+'-'+g[1].padStart(2,'0')+'-'+g[0].padStart(2,'0');
   return s;
+}
+
+// Construye fecha desde columnas Año/Mes/Dia si existen
+function getFecha(r){
+  if(r['Año']&&r['Mes']&&r['Dia']){
+    const y=String(r['Año']).trim();
+    const m=String(r['Mes']).trim().padStart(2,'0');
+    const d=String(r['Dia']).trim().padStart(2,'0');
+    if(y&&m&&d) return `${y}-${m}-${d}`;
+  }
+  return getFecha(r);
 }
 function normMonth(s){ const d=norm(s); return d?d.slice(0,7):''; }
 const MESES_ES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
@@ -522,7 +531,7 @@ function pctColorLlegadas(p){ return p>=98?'#16a34a':'#e53e3e'; }
 // ─── FILTERS ─────────────────────────────────────────────────
 function fillSelects(){
   fill('fSem', uniq(DATA.map(r=>r[C.semana])));
-  const meses=uniq(DATA.map(r=>normMonth(r[C.fecha])));
+  const meses=uniq(DATA.map(r=>normMonth(getFecha(r))));
   const sel=document.getElementById('fMes');
   const cur=sel.value;
   sel.innerHTML='<option value="">Todos</option>';
@@ -559,11 +568,11 @@ function filterRows(){
   const f=getF();
   return DATA.filter(r=>{
     if(f.sem&&r[C.semana]!==f.sem) return false;
-    if(f.mes&&normMonth(r[C.fecha])!==f.mes) return false;
+    if(f.mes&&normMonth(getFecha(r))!==f.mes) return false;
     if(f.cli&&r[C.cliente]!==f.cli) return false;
     if(f.ger&&r[C.gerente]!==f.ger) return false;
     if(f.jef&&r[C.jefe]!==f.jef) return false;
-    const d=norm(r[C.fecha]);
+    const d=getFecha(r);
     if(f.fi&&d<f.fi) return false;
     if(f.ff&&d>f.ff) return false;
     return true;
@@ -641,7 +650,7 @@ function buildTable(rows, field, tbl, retardoField){
 function buildChart(canvasId, rows, retardoField, lateLbl, existingChart){
   const by={};
   rows.forEach(r=>{
-    const d=norm(r[C.fecha]); if(!d) return;
+    const d=getFecha(r); if(!d) return;
     if(!by[d]) by[d]={t:0,l:0};
     by[d].t+=parseInt(r[C.viajes])||1;
     by[d].l+=parseInt(r[retardoField])||0;
