@@ -459,7 +459,11 @@ function parseCSV(text){
     if(hasData) rows.push(obj);
   }
   console.log('Total filas cargadas:',rows.length);
-  if(rows.length>0) console.log('Muestra fila 1:', JSON.stringify(rows[0]));
+  if(rows.length>0){
+    console.log('Muestra fila 1:', JSON.stringify(rows[0]));
+    const fechaMuestra = rows[0][C.fecha];
+    console.log('Fecha raw:', fechaMuestra, '→ norm:', norm(fechaMuestra));
+  }
   return rows;
 }
 async function loadSheet(){
@@ -492,10 +496,19 @@ async function loadSheet(){
 function norm(s){
   if(!s) return '';
   s=s.trim();
+  // YYYY-MM-DD
   if(/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0,10);
   const p=s.split('/');
-  if(p.length===3&&p[2].length===4) return p[2]+'-'+p[1].padStart(2,'0')+'-'+p[0].padStart(2,'0');
-  if(p.length===3&&p[0].length===4) return p[0]+'-'+p[1].padStart(2,'0')+'-'+p[2].padStart(2,'0');
+  if(p.length===3){
+    const a=p[0], b=p[1], c=p[2];
+    // DD/MM/YYYY o D/M/YYYY (formato del Sheet)
+    if(c.length===4) return c+'-'+b.padStart(2,'0')+'-'+a.padStart(2,'0');
+    // YYYY/MM/DD
+    if(a.length===4) return a+'-'+b.padStart(2,'0')+'-'+c.padStart(2,'0');
+  }
+  // Intento con guiones DD-MM-YYYY
+  const g=s.split('-');
+  if(g.length===3&&g[2].length===4) return g[2]+'-'+g[1].padStart(2,'0')+'-'+g[0].padStart(2,'0');
   return s;
 }
 function normMonth(s){ const d=norm(s); return d?d.slice(0,7):''; }
@@ -616,7 +629,8 @@ function buildTable(rows, field, tbl, retardoField){
     const k=(r[field]||'').trim()||'(Sin asignar)';
     if(!byKey[k]) byKey[k]={t:0,l:0};
     byKey[k].t+=parseInt(r[C.viajes])||1;
-    byKey[k].l+=parseInt(r[retardoField])||0;
+    const v=parseInt(r[retardoField])||0;
+    byKey[k].l+=v<0?1:v>0?v:0; // negativo = 1 llegada tarde, positivo = valor directo, 0 = a tiempo
   });
   tableData[tbl]=Object.entries(byKey).map(([k,d])=>({k,t:d.t,l:d.l,pct:d.t>0?(d.t-d.l)/d.t*100:0}));
   colFilters[tbl]={};
