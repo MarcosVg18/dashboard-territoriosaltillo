@@ -296,6 +296,8 @@ html,body{background:var(--bg);color:var(--text);font-family:"Inter",sans-serif;
   </aside>
 
   <main class="main">
+    <div class="err hidden" id="errBanner" style="margin-bottom:.8rem">⚠️ <span id="errMsg"></span></div>
+
     <!-- TAB BAR -->
     <div class="tab-bar">
       <button class="tab-btn active" onclick="switchTab('inicios')">🚀 Inicios</button>
@@ -439,32 +441,51 @@ function parseCSVLine(line){
   cols.push(cur.trim()); return cols;
 }
 function parseCSV(text){
-  const lines=text.trim().split('\n');
+  // Handle both Windows (CRLF) and Unix (LF) line endings
+  const lines=text.trim().split(/\r?\n/);
   if(lines.length<2) return [];
   const hdrs=parseCSVLine(lines[0]);
-  console.log('Columnas:',hdrs.join(' | '));
+  console.log('Columnas detectadas:', hdrs.join(' | '));
+  console.log('¿Tiene start_date?', hdrs.includes('start_date'));
+  console.log('¿Tiene Semana?', hdrs.includes('Semana'));
   const rows=[];
   for(let i=1;i<lines.length;i++){
     if(!lines[i].trim()) continue;
     const cols=parseCSVLine(lines[i]);
     const obj={};
     hdrs.forEach((h,idx)=>{ obj[h]=cols[idx]!==undefined?cols[idx]:''; });
-    if(obj[C.fecha]&&obj[C.fecha].trim()!=='') rows.push(obj);
+    // Accept row if ANY of the key columns have data
+    const hasData = hdrs.some(h=>obj[h]&&obj[h].trim()!=='');
+    if(hasData) rows.push(obj);
   }
-  console.log('Filas:',rows.length);
+  console.log('Total filas cargadas:',rows.length);
+  if(rows.length>0) console.log('Muestra fila 1:', JSON.stringify(rows[0]));
   return rows;
 }
 async function loadSheet(){
-  
+  const banner = document.getElementById('errBanner');
+  const errMsg = document.getElementById('errMsg');
   try{
     const res=await fetch(CSV_URL);
-    if(!res.ok) throw new Error('HTTP '+res.status);
-    
-    DATA=parseCSV(await res.text());
-    if(!DATA.length) throw new Error('Sin filas válidas.');
-    setStatus('Conectado · '+DATA.length.toLocaleString('es-MX')+' registros',true);
+    if(!res.ok) throw new Error('HTTP '+res.status+' al cargar el Sheet. Verifica que sea público.');
+    const text = await res.text();
+    console.log('CSV primeras 500 chars:', text.slice(0,500));
+    DATA=parseCSV(text);
+    if(!DATA.length) throw new Error('Sin filas válidas. Abre la consola (F12) para ver las columnas detectadas.');
+    // Auto-detect fecha column if start_date not found
+    if(DATA.length>0 && !DATA[0].hasOwnProperty(C.fecha)){
+      const keys=Object.keys(DATA[0]);
+      console.warn('Columna "start_date" no encontrada. Columnas disponibles:', keys.join(', '));
+      // Try to find a date-like column
+      const dateCol=keys.find(k=>k.toLowerCase().includes('date')||k.toLowerCase().includes('fecha'));
+      if(dateCol){ C.fecha=dateCol; console.log('Usando columna fecha:', dateCol); }
+    }
+    if(banner) banner.classList.add('hidden');
     fillSelects(); draw();
-  }catch(e){ console.error(e); }
+  }catch(e){
+    console.error('Error loadSheet:', e);
+    if(banner && errMsg){ errMsg.textContent=e.message; banner.classList.remove('hidden'); }
+  }
 }
 
 // ─── UTILS ───────────────────────────────────────────────────
