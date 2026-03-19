@@ -277,7 +277,7 @@ html,body{background:var(--bg);color:var(--text);font-family:"Inter",sans-serif;
           <div><div class="chart-title" id="chartTitle">Inicios Tarde por Día</div><div class="chart-sub">Verde = viajes a tiempo · Gris = inicios tarde · Línea = % cumplimiento (eje derecho)</div></div>
           <div class="chart-legend">
             <div class="leg"><div class="leg-sq" style="background:#4a4a4a"></div>En tiempo</div>
-            <div class="leg"><div class="leg-sq" style="background:#c0c0c0"></div>Inicios tarde</div>
+            <div class="leg"><div class="leg-sq" style="background:#e8a055"></div>Inicios tarde</div>
             <div class="leg"><div class="leg-line" style="background:#2a2a2a"></div>% Cumplimiento</div>
           </div>
         </div>
@@ -329,7 +329,7 @@ html,body{background:var(--bg);color:var(--text);font-family:"Inter",sans-serif;
           <div><div class="chart-title" id="lChartTitle">Llegadas Tarde por Día</div><div class="chart-sub">Verde = viajes a tiempo · Gris = llegadas tarde · Línea = % cumplimiento (eje derecho)</div></div>
           <div class="chart-legend">
             <div class="leg"><div class="leg-sq" style="background:#4a4a4a"></div>En tiempo</div>
-            <div class="leg"><div class="leg-sq" style="background:#c0c0c0"></div>Llegadas tarde</div>
+            <div class="leg"><div class="leg-sq" style="background:#e8a055"></div>Llegadas tarde</div>
             <div class="leg"><div class="leg-line" style="background:#2a2a2a"></div>% Cumplimiento</div>
           </div>
         </div>
@@ -626,7 +626,7 @@ function buildChart(canvasId, rows, lateField, lateLbl, existing){
   const ctx=document.getElementById(canvasId).getContext('2d');
   return new Chart(ctx,{type:'bar',data:{labels,datasets:[
     {label:'En tiempo',data:tots.map((t,i)=>t-lates[i]),backgroundColor:'#4a4a4a',stack:'s',order:2,borderRadius:{topLeft:0,topRight:0,bottomLeft:4,bottomRight:4},barPercentage:.6},
-    {label:lateLbl,data:lates,backgroundColor:'#c0c0c0',stack:'s',order:2,borderRadius:{topLeft:4,topRight:4,bottomLeft:0,bottomRight:0},barPercentage:.6},
+    {label:lateLbl,data:lates,backgroundColor:'#e8a055',stack:'s',order:2,borderRadius:{topLeft:4,topRight:4,bottomLeft:0,bottomRight:0},barPercentage:.6},
     {label:'% Cumplimiento',data:pcts,type:'line',yAxisID:'yP',order:1,borderColor:'#2a2a2a',backgroundColor:'rgba(42,42,42,.07)',borderWidth:2.5,pointBackgroundColor:'#2a2a2a',pointBorderColor:'#fff',pointBorderWidth:2,pointRadius:5,pointHoverRadius:7,tension:.3,fill:true},
   ]},options:{
     responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
@@ -648,7 +648,7 @@ function buildChart(canvasId, rows, lateField, lateLbl, existing){
       const bi=chart.data.datasets.findIndex(d=>d.label===lbl);
       chart.getDatasetMeta(bi).data.forEach((bar,i)=>{
         const v=chart.data.datasets[bi].data[i]; if(!v||bar.height<14) return;
-        c2.save();c2.fillStyle=idx===0?'#fff':'rgba(0,0,0,.5)';c2.font='bold 10px Inter';
+        c2.save();c2.fillStyle=idx===0?'#d97706':'#ffffff';c2.font='bold 10px Inter';
         c2.textAlign='center';c2.textBaseline='middle';c2.fillText(v.toLocaleString('es-MX'),bar.x,bar.y+bar.height/2);c2.restore();
       });
     });
