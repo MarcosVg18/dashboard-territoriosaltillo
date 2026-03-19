@@ -276,9 +276,9 @@ html,body{background:var(--bg);color:var(--text);font-family:"Inter",sans-serif;
         <div class="chart-hdr">
           <div><div class="chart-title" id="chartTitle">Inicios Tarde por Día</div><div class="chart-sub">Verde = viajes a tiempo · Gris = inicios tarde · Línea = % cumplimiento (eje derecho)</div></div>
           <div class="chart-legend">
-            <div class="leg"><div class="leg-sq" style="background:#7ed321"></div>En tiempo</div>
-            <div class="leg"><div class="leg-sq" style="background:#b0bac9"></div>Inicios tarde</div>
-            <div class="leg"><div class="leg-line" style="background:#5cb800"></div>% Cumplimiento</div>
+            <div class="leg"><div class="leg-sq" style="background:#4a4a4a"></div>En tiempo</div>
+            <div class="leg"><div class="leg-sq" style="background:#c0c0c0"></div>Inicios tarde</div>
+            <div class="leg"><div class="leg-line" style="background:#2a2a2a"></div>% Cumplimiento</div>
           </div>
         </div>
         <div class="chart-wrap"><canvas id="chart-ini"></canvas></div>
@@ -328,9 +328,9 @@ html,body{background:var(--bg);color:var(--text);font-family:"Inter",sans-serif;
         <div class="chart-hdr">
           <div><div class="chart-title" id="lChartTitle">Llegadas Tarde por Día</div><div class="chart-sub">Verde = viajes a tiempo · Gris = llegadas tarde · Línea = % cumplimiento (eje derecho)</div></div>
           <div class="chart-legend">
-            <div class="leg"><div class="leg-sq" style="background:#7ed321"></div>En tiempo</div>
-            <div class="leg"><div class="leg-sq" style="background:#b0bac9"></div>Llegadas tarde</div>
-            <div class="leg"><div class="leg-line" style="background:#5cb800"></div>% Cumplimiento</div>
+            <div class="leg"><div class="leg-sq" style="background:#4a4a4a"></div>En tiempo</div>
+            <div class="leg"><div class="leg-sq" style="background:#c0c0c0"></div>Llegadas tarde</div>
+            <div class="leg"><div class="leg-line" style="background:#2a2a2a"></div>% Cumplimiento</div>
           </div>
         </div>
         <div class="chart-wrap"><canvas id="chart-lle"></canvas></div>
@@ -625,9 +625,9 @@ function buildChart(canvasId, rows, lateField, lateLbl, existing){
   if(existing) existing.destroy();
   const ctx=document.getElementById(canvasId).getContext('2d');
   return new Chart(ctx,{type:'bar',data:{labels,datasets:[
-    {label:'En tiempo',data:tots.map((t,i)=>t-lates[i]),backgroundColor:'#7ed321',stack:'s',order:2,borderRadius:{topLeft:0,topRight:0,bottomLeft:4,bottomRight:4},barPercentage:.6},
-    {label:lateLbl,data:lates,backgroundColor:'#b0bac9',stack:'s',order:2,borderRadius:{topLeft:4,topRight:4,bottomLeft:0,bottomRight:0},barPercentage:.6},
-    {label:'% Cumplimiento',data:pcts,type:'line',yAxisID:'yP',order:1,borderColor:'#5cb800',backgroundColor:'rgba(92,184,0,.07)',borderWidth:2.5,pointBackgroundColor:'#5cb800',pointBorderColor:'#fff',pointBorderWidth:2,pointRadius:5,pointHoverRadius:7,tension:.3,fill:true},
+    {label:'En tiempo',data:tots.map((t,i)=>t-lates[i]),backgroundColor:'#4a4a4a',stack:'s',order:2,borderRadius:{topLeft:0,topRight:0,bottomLeft:4,bottomRight:4},barPercentage:.6},
+    {label:lateLbl,data:lates,backgroundColor:'#c0c0c0',stack:'s',order:2,borderRadius:{topLeft:4,topRight:4,bottomLeft:0,bottomRight:0},barPercentage:.6},
+    {label:'% Cumplimiento',data:pcts,type:'line',yAxisID:'yP',order:1,borderColor:'#2a2a2a',backgroundColor:'rgba(42,42,42,.07)',borderWidth:2.5,pointBackgroundColor:'#2a2a2a',pointBorderColor:'#fff',pointBorderWidth:2,pointRadius:5,pointHoverRadius:7,tension:.3,fill:true},
   ]},options:{
     responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
     plugins:{legend:{display:false},tooltip:{backgroundColor:'#1a2236',borderColor:'#7ed321',borderWidth:1,titleColor:'#fff',bodyColor:'rgba(255,255,255,.65)',padding:12,
@@ -635,14 +635,14 @@ function buildChart(canvasId, rows, lateField, lateLbl, existing){
     scales:{
       x:{stacked:true,ticks:{color:'#6b7a99',font:{size:10,family:'Inter'}},grid:{color:'rgba(0,0,0,.05)'}},
       y:{stacked:true,ticks:{color:'#6b7a99',font:{size:10}},grid:{color:'rgba(0,0,0,.05)'}},
-      yP:{position:'right',ticks:{color:'#5cb800',font:{size:10},callback:v=>v+'%'},grid:{display:false}},
+      yP:{position:'right',ticks:{color:'#2a2a2a',font:{size:10},callback:v=>v+'%'},grid:{display:false}},
     }
   },plugins:[{id:'lbl',afterDatasetsDraw(chart){
     const c2=chart.ctx;
     const li=chart.data.datasets.findIndex(d=>d.label==='% Cumplimiento');
     chart.getDatasetMeta(li).data.forEach((pt,i)=>{
       const v=chart.data.datasets[li].data[i]; if(v==null) return;
-      c2.save();c2.fillStyle='#5a7a00';c2.font='bold 10px Inter';c2.textAlign='center';c2.fillText(v+'%',pt.x,pt.y-10);c2.restore();
+      c2.save();c2.fillStyle='#2a2a2a';c2.font='bold 10px Inter';c2.textAlign='center';c2.fillText(v+'%',pt.x,pt.y-10);c2.restore();
     });
     [lateLbl,'En tiempo'].forEach((lbl,idx)=>{
       const bi=chart.data.datasets.findIndex(d=>d.label===lbl);
