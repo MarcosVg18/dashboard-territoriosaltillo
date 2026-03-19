@@ -269,7 +269,7 @@ html,body{background:var(--bg);color:var(--text);font-family:"Inter",sans-serif;
     <div class="tab-panel active" id="panel-inicios">
       <div class="kpi-grid">
         <div class="kpi" style="--kc:#1a2236"><div class="kpi-icon">🚛</div><div class="kpi-val" id="kTotal">–</div><div class="kpi-lbl">Total Viajes</div></div>
-        <div class="kpi" style="--kc:#e53e3e"><div class="kpi-icon">⏰</div><div class="kpi-val" id="kTarde">–</div><div class="kpi-lbl">Inicios Tarde</div></div>
+        <div class="kpi" style="--kc:#d97706"><div class="kpi-icon">⏰</div><div class="kpi-val" id="kTarde">–</div><div class="kpi-lbl">Inicios Tarde</div></div>
         <div class="kpi" style="--kc:#7ed321"><div class="kpi-icon">📊</div><div class="kpi-val" id="kPct">–</div><div class="kpi-lbl">% Cumplimiento</div></div>
       </div>
       <div class="chart-card">
@@ -648,7 +648,7 @@ function buildChart(canvasId, rows, lateField, lateLbl, existing){
       const bi=chart.data.datasets.findIndex(d=>d.label===lbl);
       chart.getDatasetMeta(bi).data.forEach((bar,i)=>{
         const v=chart.data.datasets[bi].data[i]; if(!v||bar.height<14) return;
-        c2.save();c2.fillStyle=idx===0?'#d97706':'#ffffff';c2.font='bold 10px Inter';
+        c2.save();c2.fillStyle=idx===0?'#1a1a1a':'#ffffff';c2.font='bold 10px Inter';
         c2.textAlign='center';c2.textBaseline='middle';c2.fillText(v.toLocaleString('es-MX'),bar.x,bar.y+bar.height/2);c2.restore();
       });
     });
