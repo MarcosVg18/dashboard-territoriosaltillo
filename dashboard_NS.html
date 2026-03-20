@@ -763,7 +763,15 @@ function buildChart(canvasId, rows, lateField, lateLbl, existing, chartId){
     by[key].t += parseInt(r[C.viajes])||1;
     by[key].l += countLate(r[lateField]);
   });
-  const keys = Object.keys(by).sort();
+  const keys = Object.keys(by).sort((a,b)=>{
+    // Si es semana, ordenar numéricamente
+    if(group==='semana'){
+      const na=parseInt(a)||0, nb=parseInt(b)||0;
+      return na-nb;
+    }
+    // Para dia, mes, año: orden lexicográfico es correcto (YYYY-MM-DD / YYYY-MM / YYYY)
+    return a.localeCompare(b);
+  });
   const tots  = keys.map(k=>by[k].t);
   const lates = keys.map(k=>by[k].l);
   const pcts  = keys.map(k=>by[k].t>0?+((by[k].t-by[k].l)/by[k].t*100).toFixed(1):0);
