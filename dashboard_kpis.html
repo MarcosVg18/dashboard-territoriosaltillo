@@ -3,325 +3,436 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard Dif Km Cargas vs GPS | Traxión</title>
-
-<!-- ================== ESTILOS ================== -->
+<title>Dashboard KPIs | Traxión</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
+/* ===== RESET & BASE ===== */
 *{margin:0;padding:0;box-sizing:border-box}
-body{
-    font-family:'Segoe UI',Tahoma,Verdana,sans-serif;
-    background:#f3f4f6;
-    color:#1f2937;
-    min-height:100vh;
-}
+body{font-family:'Inter',sans-serif;background:#f3f4f6;color:#1f2937;min-height:100vh;}
 
 /* ===== NAVEGACIÓN ===== */
-nav{
-    background:#1f2937;
-    padding:15px 30px;
-    display:flex;
-    gap:25px;
-    align-items:center;
-    box-shadow:0 2px 8px rgba(0,0,0,0.1);
-    position:relative;
-    flex-wrap:wrap;
-}
-nav > a{
-    color:#e5e7eb;
-    text-decoration:none;
-    font-weight:600;
-    padding:8px 16px;
-    border-radius:8px;
-    transition:all 0.3s;
-    white-space:nowrap;
-}
-nav > a:first-child{
-    color:#84cc16;
-    font-weight:800;
-    font-size:18px;
-}
-nav > a:hover{
-    background:#374151;
-}
-
-/* ===== MENÚ DROPDOWN ===== */
-.dropdown{
-    position:relative;
-    display:inline-block;
-}
-
-.dropdown-toggle{
-    color:#e5e7eb;
-    text-decoration:none;
-    font-weight:600;
-    padding:8px 16px;
-    border-radius:8px;
-    transition:all 0.3s;
-    cursor:pointer;
-    display:flex;
-    align-items:center;
-    gap:6px;
-    background:transparent;
-    border:none;
-    font-size:14px;
-    font-family:inherit;
-}
-
-.dropdown-toggle:hover{
-    background:#374151;
-}
-
-.dropdown-arrow{
-    font-size:12px;
-    transition:transform 0.3s;
-}
-
-.dropdown.open .dropdown-arrow{
-    transform:rotate(180deg);
-}
-
-.dropdown-menu{
-    display:none;
-    position:absolute;
-    top:100%;
-    left:0;
-    background:#374151;
-    min-width:220px;
-    border-radius:8px;
-    box-shadow:0 4px 12px rgba(0,0,0,0.3);
-    margin-top:8px;
-    z-index:1000;
-    overflow:hidden;
-}
-
-.dropdown.open .dropdown-menu{
-    display:block;
-}
-
-.dropdown-menu a{
-    display:block;
-    padding:12px 20px;
-    color:#e5e7eb;
-    text-decoration:none;
-    font-weight:600;
-    transition:all 0.3s;
-    border-radius:0;
-}
-
-.dropdown-menu a:hover{
-    background:#4b5563;
-    padding-left:25px;
-}
-
-.dropdown-menu a.active{
-    background:#84cc16;
-    color:#1f2937;
-}
+nav{background:#1f2937;padding:15px 30px;display:flex;gap:25px;align-items:center;
+    box-shadow:0 2px 8px rgba(0,0,0,0.3);position:sticky;top:0;z-index:300;flex-wrap:wrap;}
+nav>a{color:#e5e7eb;text-decoration:none;font-weight:600;padding:8px 16px;border-radius:8px;transition:all .3s;white-space:nowrap;}
+nav>a:first-child{color:#84cc16;font-weight:800;font-size:18px;}
+nav>a:hover{background:#374151;}
+.dropdown{position:relative;display:inline-block;}
+.dropdown-toggle{color:#e5e7eb;text-decoration:none;font-weight:600;padding:8px 16px;border-radius:8px;
+    transition:all .3s;cursor:pointer;display:flex;align-items:center;gap:6px;
+    background:transparent;border:none;font-size:14px;font-family:inherit;}
+.dropdown-toggle:hover{background:#374151;}
+.dropdown-arrow{font-size:12px;transition:transform .3s;}
+.dropdown.open .dropdown-arrow{transform:rotate(180deg);}
+.dropdown-menu{display:none;position:absolute;top:100%;left:0;background:#374151;min-width:220px;
+    border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.3);margin-top:8px;z-index:1000;overflow:hidden;}
+.dropdown.open .dropdown-menu{display:block;}
+.dropdown-menu a{display:block;padding:12px 20px;color:#e5e7eb;text-decoration:none;font-weight:600;transition:all .3s;}
+.dropdown-menu a:hover{background:#4b5563;padding-left:25px;}
+.dropdown-menu a.active{background:#84cc16;color:#1f2937;}
 
 /* ===== CONTENIDO ===== */
-.content{
-    padding:30px;
-    max-width:1600px;
-    margin:0 auto;
+.content{padding:30px;max-width:1400px;margin:0 auto;}
+
+/* ===== HEADER ===== */
+.page-header{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  flex-wrap:wrap;gap:1rem;margin-bottom:2rem;
+}
+.page-header h1{font-size:1.6rem;font-weight:800;color:#1f2937;letter-spacing:-.02em;}
+.page-header p{font-size:.85rem;color:#6b7280;margin-top:.2rem;}
+.periodo-badge{
+  background:#1f2937;color:#84cc16;padding:.4rem 1rem;
+  border-radius:20px;font-size:.75rem;font-weight:700;letter-spacing:.05em;
+  white-space:nowrap;align-self:flex-start;margin-top:.3rem;
 }
 
-header{
-    background:linear-gradient(135deg,#1f2937,#374151);
-    padding:30px;
-    border-radius:14px;
-    margin-bottom:20px;
+/* ===== SECCIÓN TÍTULO ===== */
+.section-title{
+  font-size:.65rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;
+  color:#9ca3af;margin-bottom:.9rem;padding-left:.25rem;
+  display:flex;align-items:center;gap:.5rem;
 }
-header h1{
-    color:#84cc16;
-    font-size:32px;
-    margin-bottom:8px;
-}
-.subtitle{
-    color:#d1d5db;
-    font-size:16px;
+.section-title::after{content:'';flex:1;height:1px;background:#e5e7eb;}
+
+/* ===== GRID DE KPIs ===== */
+.kpi-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:1.1rem;
+  margin-bottom:2rem;
 }
 
-/* ===== EN CONSTRUCCIÓN ===== */
-.construccion-container{
-    background:#ffffff;
-    border:2px solid #e5e7eb;
-    border-radius:14px;
-    padding:80px 40px;
-    text-align:center;
-    margin-top:60px;
+/* ===== TARJETA KPI ===== */
+.kpi-card{
+  background:#fff;border-radius:14px;
+  padding:1.4rem 1.5rem;
+  position:relative;overflow:hidden;
+  box-shadow:0 1px 6px rgba(0,0,0,.07);
+  border:2px solid transparent;
+  transition:transform .15s,box-shadow .2s;
 }
+.kpi-card:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.1);}
 
-.construccion-icon{
-    font-size:120px;
-    margin-bottom:30px;
-    animation:float 3s ease-in-out infinite;
+/* Estado: verde */
+.kpi-card.ok{border-color:#16a34a;}
+.kpi-card.ok::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:#16a34a;border-radius:14px 14px 0 0;}
+
+/* Estado: amarillo */
+.kpi-card.warn{border-color:#d97706;}
+.kpi-card.warn::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:#d97706;border-radius:14px 14px 0 0;}
+
+/* Estado: rojo */
+.kpi-card.danger{border-color:#dc2626;}
+.kpi-card.danger::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:#dc2626;border-radius:14px 14px 0 0;}
+
+/* Estado: azul (neutro/info) */
+.kpi-card.info{border-color:#2563eb;}
+.kpi-card.info::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:#2563eb;border-radius:14px 14px 0 0;}
+
+.kpi-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:.85rem;}
+.kpi-icon-wrap{
+  width:42px;height:42px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.2rem;flex-shrink:0;
 }
+.ok .kpi-icon-wrap{background:#dcfce7;}
+.warn .kpi-icon-wrap{background:#fef3c7;}
+.danger .kpi-icon-wrap{background:#fee2e2;}
+.info .kpi-icon-wrap{background:#dbeafe;}
 
-@keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-20px); }
+.kpi-badge{
+  font-size:.65rem;font-weight:700;padding:.2rem .55rem;
+  border-radius:20px;letter-spacing:.04em;white-space:nowrap;
 }
+.ok .kpi-badge{background:#dcfce7;color:#15803d;}
+.warn .kpi-badge{background:#fef3c7;color:#92400e;}
+.danger .kpi-badge{background:#fee2e2;color:#991b1b;}
+.info .kpi-badge{background:#dbeafe;color:#1d4ed8;}
 
-.construccion-container h2{
-    color:#1f2937;
-    font-size:36px;
-    margin-bottom:15px;
+.kpi-label{font-size:.72rem;font-weight:600;color:#6b7280;letter-spacing:.04em;text-transform:uppercase;margin-bottom:.35rem;}
+.kpi-value{font-size:2.4rem;font-weight:800;line-height:1;letter-spacing:-.03em;margin-bottom:.3rem;}
+.ok .kpi-value{color:#16a34a;}
+.warn .kpi-value{color:#d97706;}
+.danger .kpi-value{color:#dc2626;}
+.info .kpi-value{color:#2563eb;}
+
+.kpi-meta{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-top:.5rem;}
+.kpi-obj{font-size:.72rem;color:#9ca3af;}
+.kpi-obj strong{color:#6b7280;}
+.kpi-delta{
+  font-size:.72rem;font-weight:700;padding:.15rem .4rem;border-radius:5px;
 }
+.delta-pos{background:#dcfce7;color:#16a34a;}
+.delta-neg{background:#fee2e2;color:#dc2626;}
+.delta-neutral{background:#fef3c7;color:#d97706;}
 
-.construccion-container p{
-    color:#6b7280;
-    font-size:18px;
-    margin-bottom:10px;
-    line-height:1.6;
+/* ===== BARRA DE PROGRESO ===== */
+.kpi-bar-wrap{margin-top:.8rem;}
+.kpi-bar-labels{display:flex;justify-content:space-between;font-size:.65rem;color:#9ca3af;margin-bottom:.3rem;}
+.kpi-bar-track{height:6px;background:#f3f4f6;border-radius:3px;overflow:hidden;}
+.kpi-bar-fill{height:100%;border-radius:3px;transition:width .6s ease;}
+.ok .kpi-bar-fill{background:#16a34a;}
+.warn .kpi-bar-fill{background:#d97706;}
+.danger .kpi-bar-fill{background:#dc2626;}
+.info .kpi-bar-fill{background:#2563eb;}
+
+/* ===== RESUMEN GLOBAL ===== */
+.summary-row{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:1rem;margin-bottom:2rem;
 }
-
-.construccion-container .highlight{
-    color:#84cc16;
-    font-weight:700;
+.summary-card{
+  background:#1f2937;border-radius:12px;padding:1.1rem 1.3rem;
+  display:flex;flex-direction:column;gap:.3rem;
 }
+.summary-card .s-label{font-size:.65rem;font-weight:600;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.08em;}
+.summary-card .s-val{font-size:1.6rem;font-weight:800;color:#fff;letter-spacing:-.02em;}
+.summary-card .s-sub{font-size:.7rem;color:rgba(255,255,255,.4);}
+.s-green .s-val{color:#84cc16;}
+.s-red .s-val{color:#f87171;}
+.s-yellow .s-val{color:#fbbf24;}
 
-.status-badge{
-    display:inline-block;
-    background:#fef3c7;
-    color:#92400e;
-    padding:8px 20px;
-    border-radius:20px;
-    font-weight:700;
-    font-size:14px;
-    margin-top:20px;
-}
+/* ===== TABLA HISTÓRICO ===== */
+.hist-card{background:#fff;border-radius:14px;box-shadow:0 1px 6px rgba(0,0,0,.07);overflow:hidden;margin-bottom:1.5rem;}
+.hist-header{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:.8rem;padding:1.1rem 1.4rem;border-bottom:1px solid #f3f4f6;}
+.hist-title{font-size:.92rem;font-weight:700;color:#1f2937;}
+.hist-sub{font-size:.7rem;color:#9ca3af;margin-top:.2rem;}
+.hist-legend{display:flex;align-items:center;gap:.5rem;font-size:.72rem;color:#6b7280;flex-wrap:wrap;}
+.hl-dot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-left:.3rem;}
+.hl-dot.ok{background:#16a34a;}
+.hl-dot.warn{background:#d97706;}
+.hl-dot.danger{background:#dc2626;}
+.hist-table{width:100%;border-collapse:collapse;font-size:.78rem;}
+.hist-table thead th{background:#1f2937;color:rgba(255,255,255,.8);font-size:.65rem;font-weight:600;
+  letter-spacing:.07em;text-transform:uppercase;padding:.6rem .9rem;text-align:center;white-space:nowrap;}
+.hist-table thead th:first-child{text-align:left;}
+.hist-table thead th:nth-child(2){text-align:center;color:#84cc16;}
+.hist-table tbody tr{border-bottom:1px solid #f3f4f6;transition:background .1s;}
+.hist-table tbody tr:last-child{border-bottom:none;}
+.hist-table tbody tr:hover{background:#f9fafb;}
+.hist-table tbody td{padding:.55rem .9rem;text-align:center;white-space:nowrap;}
+.hist-table tbody td:first-child{text-align:left;font-weight:600;color:#374151;}
+.hist-table tbody td:nth-child(2){color:#6b7280;font-size:.72rem;}
+.cell-ok{background:#dcfce7;color:#15803d;font-weight:700;border-radius:5px;padding:.18rem .45rem;display:inline-block;min-width:52px;}
+.cell-warn{background:#fef3c7;color:#92400e;font-weight:700;border-radius:5px;padding:.18rem .45rem;display:inline-block;min-width:52px;}
+.cell-danger{background:#fee2e2;color:#991b1b;font-weight:700;border-radius:5px;padding:.18rem .45rem;display:inline-block;min-width:52px;}
+.cell-neutral{color:#6b7280;font-size:.75rem;}
 
-.progress-bar{
-    background:#e5e7eb;
-    height:8px;
-    border-radius:10px;
-    margin-top:40px;
-    overflow:hidden;
-}
+/* ===== NOTA AL PIE ===== */
+.footnote{font-size:.72rem;color:#9ca3af;margin-top:1.5rem;text-align:center;padding-bottom:2rem;}
 
-.progress-fill{
-    background:linear-gradient(90deg, #84cc16, #65a30d);
-    height:100%;
-    width:15%;
-    border-radius:10px;
-    animation:progress 2s ease-in-out;
-}
-
-@keyframes progress {
-    from { width: 0%; }
-    to { width: 15%; }
-}
-
-@media (max-width: 640px){
-    nav{
-        gap:10px;
-    }
-    .content{
-        padding:15px;
-    }
-    header{
-        padding:20px;
-    }
-    header h1{
-        font-size:24px;
-    }
-    .construccion-container{
-        padding:40px 20px;
-    }
-    .construccion-icon{
-        font-size:80px;
-    }
-    .construccion-container h2{
-        font-size:28px;
-    }
-    .construccion-container p{
-        font-size:16px;
-    }
+/* ===== RESPONSIVE ===== */
+@media(max-width:640px){
+  nav{gap:10px;padding:10px 16px;}
+  nav>a:first-child{font-size:15px;}
+  .content{padding:16px;}
+  .kpi-grid{grid-template-columns:1fr;}
+  .kpi-value{font-size:2rem;}
 }
 </style>
 </head>
-
 <body>
 
-<!-- ================== NAVEGACIÓN ================== -->
+<!-- NAVEGACIÓN -->
 <nav>
     <a href="index.html">🚛 TRAXIÓN</a>
-    
-    <!-- DROPDOWN LOGÍSTICA -->
     <div class="dropdown" id="dropdownLogistica">
         <button class="dropdown-toggle" onclick="toggleDropdown('dropdownLogistica')">
             📦 Logística <span class="dropdown-arrow">▼</span>
         </button>
         <div class="dropdown-menu">
+            <a href="dashboard_NS.html">📈 Nivel de Servicio</a>
             <a href="dashboard_kilometros.html">📊 Kilómetros</a>
             <a href="dashboard_flota.html">🚗 Flota</a>
-            <a href="dashboard_difkm.html" class="active">📏 Dif Km cargas vs GPS</a>
-            <a href="dashboard_NS.html">📈 Nivel de Servicio</a>
-        </div>
-    </div>
-    
-    <!-- DROPDOWN SEGURIDAD VIAL -->
-    <div class="dropdown" id="dropdownSeguridad">
-        <button class="dropdown-toggle" onclick="toggleDropdown('dropdownSeguridad')">
-            🛡️ Seguridad Vial <span class="dropdown-arrow">▼</span>
-        </button>
-        <div class="dropdown-menu">
-            <a href="dashboard_scoreseg.html">⚠️ Score de Seguridad</a>
+            <a href="dashboard_difkm.html" class="active">🎯 KPIs</a>
         </div>
     </div>
 </nav>
 
-<!-- ================== CONTENIDO ================== -->
 <main class="content">
 
-    <header>
-        <h1>Dashboard Diferencia Km Cargas vs GPS</h1>
-        <p class="subtitle">Análisis y comparativa de kilometrajes</p>
-    </header>
-
-    <div class="construccion-container">
-        <div class="construccion-icon">📏</div>
-        
-        <h2>Sección en Construcción</h2>
-        
-        <p>Estamos trabajando en traerte el mejor dashboard de <span class="highlight">Diferencia de Kilómetros</span></p>
-        <p>Pronto podrás comparar y analizar las diferencias entre cargas y GPS</p>
-        
-        <div class="status-badge">⚙️ En Desarrollo - 15% Completado</div>
-        
-        <div class="progress-bar">
-            <div class="progress-fill"></div>
-        </div>
+  <!-- HEADER -->
+  <div class="page-header">
+    <div>
+      <h1>Dashboard de KPIs Operativos</h1>
+      <p>Indicadores clave de desempeño · Semana 11 · 2026</p>
     </div>
+    <span class="periodo-badge">📅 SEM 11 · 2026</span>
+  </div>
+  <!-- KPIs -->
+  <div class="section-title">Indicadores de Desempeño</div>
+  <div class="kpi-grid">
+
+    <!-- % Inicios en Tiempo -->
+    <div class="kpi-card danger">
+      <div class="kpi-top">
+        <div class="kpi-icon-wrap">🚀</div>
+        <span class="kpi-badge">⚠ ALERTA</span>
+      </div>
+      <div class="kpi-label">% Inicios en Tiempo</div>
+      <div class="kpi-value">65.1%</div>
+      <div class="kpi-meta">
+        <span class="kpi-obj">Objetivo: <strong>≥ 98%</strong></span>
+        <span class="kpi-delta delta-neg">-32.9 pp</span>
+      </div>
+      <div class="kpi-bar-wrap">
+        <div class="kpi-bar-labels"><span>0%</span><span>Meta 98%</span><span>100%</span></div>
+        <div class="kpi-bar-track"><div class="kpi-bar-fill" style="width:65.1%"></div></div>
+      </div>
+    </div>
+
+    <!-- % Llegadas en Tiempo -->
+    <div class="kpi-card danger">
+      <div class="kpi-top">
+        <div class="kpi-icon-wrap">🏁</div>
+        <span class="kpi-badge">⚠ ALERTA</span>
+      </div>
+      <div class="kpi-label">% Llegadas en Tiempo</div>
+      <div class="kpi-value">92.0%</div>
+      <div class="kpi-meta">
+        <span class="kpi-obj">Objetivo: <strong>≥ 98%</strong></span>
+        <span class="kpi-delta delta-neg">-6.0 pp</span>
+      </div>
+      <div class="kpi-bar-wrap">
+        <div class="kpi-bar-labels"><span>0%</span><span>Meta 98%</span><span>100%</span></div>
+        <div class="kpi-bar-track"><div class="kpi-bar-fill" style="width:92%"></div></div>
+      </div>
+    </div>
+
+    <!-- Productividad de la Flota -->
+    <div class="kpi-card warn">
+      <div class="kpi-top">
+        <div class="kpi-icon-wrap">🚛</div>
+        <span class="kpi-badge">↗ EN RIESGO</span>
+      </div>
+      <div class="kpi-label">Productividad de la Flota</div>
+      <div class="kpi-value">94.3%</div>
+      <div class="kpi-meta">
+        <span class="kpi-obj">Objetivo: <strong>≥ 95%</strong></span>
+        <span class="kpi-delta delta-neutral">-0.7 pp</span>
+      </div>
+      <div class="kpi-bar-wrap">
+        <div class="kpi-bar-labels"><span>0%</span><span>Meta 95%</span><span>100%</span></div>
+        <div class="kpi-bar-track"><div class="kpi-bar-fill" style="width:94.3%"></div></div>
+      </div>
+    </div>
+
+    <!-- Kilómetros vs KM Marginal -->
+    <div class="kpi-card danger">
+      <div class="kpi-top">
+        <div class="kpi-icon-wrap">📍</div>
+        <span class="kpi-badge">⚠ ALERTA</span>
+      </div>
+      <div class="kpi-label">Kilómetros vs KM Marginal</div>
+      <div class="kpi-value">+145K</div>
+      <div class="kpi-meta">
+        <span class="kpi-obj">Excedido: <strong>145,000 km arriba del marginal</strong></span>
+        <span class="kpi-delta delta-neg">↑ Por encima</span>
+      </div>
+      <div class="kpi-bar-wrap">
+        <div class="kpi-bar-labels"><span>Marginal</span><span>Real</span><span>+145k</span></div>
+        <div class="kpi-bar-track">
+          <div class="kpi-bar-fill" style="width:100%"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rendimiento Diesel -->
+    <div class="kpi-card danger">
+      <div class="kpi-top">
+        <div class="kpi-icon-wrap">⛽</div>
+        <span class="kpi-badge">⚠ ALERTA</span>
+      </div>
+      <div class="kpi-label">Rendimiento Diesel (km/l)</div>
+      <div class="kpi-value">4.5</div>
+      <div class="kpi-meta">
+        <span class="kpi-obj">Presupuesto: <strong>4.6 km/l</strong></span>
+        <span class="kpi-delta delta-neg">-0.1 km/l</span>
+      </div>
+      <div class="kpi-bar-wrap">
+        <div class="kpi-bar-labels"><span>0</span><span>Ppto 4.6</span><span>5.0</span></div>
+        <div class="kpi-bar-track">
+          <div class="kpi-bar-fill" style="width:90%"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- TABLA HISTÓRICO POR SEMANA -->
+  <div class="section-title" style="margin-top:2rem;">Histórico por Semana</div>
+  <div class="hist-card">
+    <div class="hist-header">
+      <div>
+        <div class="hist-title">Tendencia de Indicadores · Ene – Mar 2026</div>
+        <div class="hist-sub">Datos de ejemplo · Se actualizará con cifras reales</div>
+      </div>
+      <div class="hist-legend">
+        <span class="hl-dot ok"></span><span>En objetivo</span>
+        <span class="hl-dot warn"></span><span>En riesgo</span>
+        <span class="hl-dot danger"></span><span>Alerta</span>
+      </div>
+    </div>
+    <div style="overflow-x:auto">
+      <table class="hist-table">
+        <thead>
+          <tr>
+            <th>Indicador</th>
+            <th>Objetivo</th>
+            <th>Enero</th><th>Febrero</th><th>Marzo</th>
+          </tr>
+        </thead>
+        <tbody id="histBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <p class="footnote">
+    🟢 En objetivo &nbsp;·&nbsp; 🟡 En riesgo (cerca del objetivo) &nbsp;·&nbsp; 🔴 Fuera de objetivo<br>
+    Datos de ejemplo · Los valores exactos se actualizarán próximamente
+  </p>
 
 </main>
 
-<!-- ================== JAVASCRIPT ================== -->
 <script>
-function toggleDropdown(dropdownId) {
-    const dropdown = document.getElementById(dropdownId);
-    const allDropdowns = document.querySelectorAll('.dropdown');
-    
-    // Cerrar todos los demás dropdowns
-    allDropdowns.forEach(d => {
-        if (d.id !== dropdownId) {
-            d.classList.remove('open');
-        }
-    });
-    
-    // Toggle el dropdown actual
-    dropdown.classList.toggle('open');
+function toggleDropdown(id){
+  const d=document.getElementById(id);
+  document.querySelectorAll('.dropdown').forEach(x=>{if(x.id!==id)x.classList.remove('open');});
+  d.classList.toggle('open');
+}
+document.addEventListener('click',function(e){
+  if(!e.target.closest('.dropdown'))
+    document.querySelectorAll('.dropdown').forEach(d=>d.classList.remove('open'));
+});
+
+// ─── DATOS HISTÓRICOS (tendencia de ejemplo) ───────────────
+// null = sin dato aún
+const HIST = [
+  {
+    name: '% Inicios en Tiempo',
+    obj: 98, higher: true, unit: '%',
+    vals: [66.2, 64.5, 65.1]
+  },
+  {
+    name: '% Llegadas en Tiempo',
+    obj: 98, higher: true, unit: '%',
+    vals: [95.2, 94.8, 92.0]
+  },
+  {
+    name: 'Productividad Flota',
+    obj: 95, higher: true, unit: '%',
+    warnThreshold: 0.7,
+    vals: [93.5, 94.1, 94.3]
+  },
+  {
+    name: 'KM vs Marginal (miles)',
+    obj: 0, higher: false, unit: 'K', absCompare: true,
+    vals: [+95, +110, +145]
+  },
+  {
+    name: 'Rendimiento Diesel (km/l)',
+    obj: 4.6, higher: true, unit: '',
+    vals: [4.6, 4.5, 4.5]
+  }
+];
+
+function cellClass(ind, val){
+  if(val === null) return 'neutral';
+  if(ind.absCompare){
+    // KM: positivo = excedido = danger, 0 = ok
+    if(val > 0) return 'danger';
+    if(val === 0) return 'ok';
+    return 'ok';
+  }
+  if(ind.higher){
+    const diff = val - ind.obj;
+    if(diff >= 0) return 'ok';
+    if(ind.warnThreshold && Math.abs(diff) <= ind.warnThreshold) return 'warn';
+    if(Math.abs(diff) <= 1.5) return 'warn';
+    return 'danger';
+  } else {
+    if(val <= ind.obj) return 'ok';
+    return 'danger';
+  }
 }
 
-// Cerrar dropdowns al hacer click fuera
-document.addEventListener('click', function(event) {
-    if (!event.target.closest('.dropdown')) {
-        document.querySelectorAll('.dropdown').forEach(d => {
-            d.classList.remove('open');
-        });
-    }
+function formatVal(ind, val){
+  if(val === null) return '<span class="cell-neutral">—</span>';
+  let display = '';
+  if(ind.absCompare) display = (val > 0 ? '+' : '') + val + ind.unit;
+  else display = val + ind.unit;
+  const cls = cellClass(ind, val);
+  return `<span class="cell-${cls}">${display}</span>`;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const tbody = document.getElementById('histBody');
+  tbody.innerHTML = HIST.map(ind => {
+    const cells = ind.vals.map(v => `<td>${formatVal(ind, v)}</td>`).join('');
+    const objStr = ind.absCompare ? '≤ 0K excedido' : ind.higher ? `≥ ${ind.obj}${ind.unit}` : `≤ ${ind.obj}${ind.unit}`;
+    return `<tr><td>${ind.name}</td><td style="font-size:.7rem;color:#6b7280;">${objStr}</td>${cells}</tr>`;
+  }).join('');
 });
 </script>
-
 </body>
 </html>
