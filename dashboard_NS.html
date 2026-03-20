@@ -113,6 +113,50 @@ html,body{background:var(--bg);color:var(--text);font-family:"Inter",sans-serif;
 .err{background:#fff5f5;border-left:4px solid var(--red);border-radius:0 8px 8px 0;padding:.75rem 1rem;font-size:.8rem;color:#c53030;display:flex;align-items:flex-start;gap:.5rem}
 .err.hidden{display:none}
 
+/* ── MODAL DRILL-DOWN ── */
+.modal-overlay{
+  display:none;position:fixed;inset:0;z-index:800;
+  background:rgba(0,0,0,.45);backdrop-filter:blur(3px);
+  align-items:center;justify-content:center;padding:1rem;
+}
+.modal-overlay.open{display:flex;}
+.modal-box{
+  background:var(--white);border-radius:14px;
+  box-shadow:0 16px 48px rgba(0,0,0,.25);
+  width:100%;max-width:720px;max-height:85vh;
+  display:flex;flex-direction:column;overflow:hidden;
+}
+.modal-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:.9rem 1.25rem;border-bottom:1px solid var(--border);
+  background:var(--navy2);
+}
+.modal-head h3{font-size:.92rem;font-weight:700;color:#fff;}
+.modal-head span{font-size:.72rem;color:rgba(255,255,255,.5);margin-top:.1rem;}
+.modal-close{
+  background:none;border:none;color:rgba(255,255,255,.6);
+  font-size:1.2rem;cursor:pointer;padding:.2rem .4rem;border-radius:4px;
+  transition:color .15s;line-height:1;
+}
+.modal-close:hover{color:#fff;}
+.modal-body{overflow-y:auto;padding:0;}
+.modal-table{width:100%;border-collapse:collapse;}
+.modal-table thead th{
+  background:var(--navy2);color:rgba(255,255,255,.85);
+  font-size:.68rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  padding:.55rem .9rem;text-align:left;white-space:nowrap;position:sticky;top:0;
+}
+.modal-table thead th:nth-child(n+2){text-align:right;}
+.modal-table tbody tr{border-bottom:1px solid var(--border);}
+.modal-table tbody tr:last-child{border-bottom:none;}
+.modal-table tbody tr:hover{background:#f7f9ff;}
+.modal-table tbody td{padding:.5rem .9rem;font-size:.78rem;color:var(--text);}
+.modal-table tbody td:nth-child(n+2){text-align:right;font-variant-numeric:tabular-nums;}
+.td-ruta{font-weight:600;color:var(--navy);}
+.modal-foot{padding:.7rem 1.25rem;border-top:1px solid var(--border);font-size:.72rem;color:var(--muted);text-align:right;}
+.row-clickable{cursor:pointer;}
+.row-clickable .td-cli{color:var(--navy);text-decoration:underline dotted;}
+
 /* ── FILTROS MÓVIL: botón toggle ── */
 .filter-toggle-btn{
   display:none;
@@ -237,11 +281,11 @@ html,body{background:var(--bg);color:var(--text);font-family:"Inter",sans-serif;
     <div class="sb-title">Filtros</div>
     <div class="sidebar-filters">
     <div class="fg"><label>Mes</label>
-      <select id="fMes" onchange="draw()"><option value="">Todos</option></select></div>
+      <select id="fMes" onchange="fillSelects();draw()"><option value="">Todos</option></select></div>
     <div class="fg"><label>Semana</label>
-      <select id="fSem" onchange="draw()"><option value="">Todas</option></select></div>
+      <select id="fSem" onchange="fillSelects();draw()"><option value="">Todas</option></select></div>
     <div class="fg"><label>Unidad de Negocio</label>
-      <select id="fUdn" onchange="draw()"><option value="">Todas</option></select></div>
+      <select id="fUdn" onchange="fillSelects();draw()"><option value="">Todas</option></select></div>
     <div class="fg"><label>Cliente / Grupo</label>
       <select id="fCli" onchange="draw()"><option value="">Todos</option></select></div>
     <div class="fg"><label>Gerente</label>
@@ -369,6 +413,39 @@ html,body{background:var(--bg);color:var(--text);font-family:"Inter",sans-serif;
       </div>
     </div>
   </main>
+</div>
+
+<!-- ── MODAL DRILL-DOWN ── -->
+<div class="modal-overlay" id="drillModal" onclick="closeDrill(event)">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div>
+        <h3 id="drillTitle">Detalle por Ruta</h3>
+        <span id="drillSub"></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:.6rem">
+        <button id="drillSortBtn" onclick="toggleDrillSort()"
+          style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;
+                 border-radius:6px;padding:.28rem .7rem;font-size:.72rem;cursor:pointer;
+                 font-family:'Inter',sans-serif;font-weight:600;white-space:nowrap;">
+          ↑ Menor → Mayor
+        </button>
+        <button class="modal-close" onclick="document.getElementById('drillModal').classList.remove('open')">✕</button>
+      </div>
+    </div>
+    <div class="modal-body">
+      <table class="modal-table">
+        <thead><tr>
+          <th>Ruta / Descripción</th>
+          <th>Total Viajes</th>
+          <th>Tarde</th>
+          <th>% Cumplimiento</th>
+        </tr></thead>
+        <tbody id="drillBody"></tbody>
+      </table>
+    </div>
+    <div class="modal-foot" id="drillFoot"></div>
+  </div>
 </div>
 
 <script>
@@ -499,6 +576,7 @@ function countLate(v){
 
 // ─── FILTROS ─────────────────────────────────────────────────
 function fillSelects(){
+  // Siempre poblar Mes, Semana y UDN desde todos los datos
   const meses=uniq(DATA.map(r=>normMonth(getFecha(r))));
   const selM=document.getElementById('fMes');
   const curM=selM.value;
@@ -507,9 +585,18 @@ function fillSelects(){
   if(meses.includes(curM)) selM.value=curM;
   fill('fSem', uniq(DATA.map(r=>r[C.semana])));
   fill('fUdn', uniq(DATA.map(r=>r[C.udn])));
-  fill('fCli', uniq(DATA.map(r=>r[C.cliente])));
-  fill('fGer', uniq(DATA.map(r=>r[C.gerente])));
-  fill('fJef', uniq(DATA.map(r=>r[C.jefe])));
+
+  // Cliente, Gerente, Jefe se filtran según UDN activa
+  const f=getF();
+  const base=DATA.filter(r=>{
+    if(f.udn&&r[C.udn]!==f.udn) return false;
+    if(f.mes&&normMonth(getFecha(r))!==f.mes) return false;
+    if(f.sem&&r[C.semana]!==f.sem) return false;
+    return true;
+  });
+  fill('fCli', uniq(base.map(r=>r[C.cliente])));
+  fill('fGer', uniq(base.map(r=>r[C.gerente])));
+  fill('fJef', uniq(base.map(r=>r[C.jefe])));
 }
 function fill(id,vals){
   const sel=document.getElementById(id); if(!sel) return;
@@ -582,9 +669,11 @@ function renderTable(tbl){
   document.getElementById(bodyId).innerHTML=rows.map((row,i)=>{
     const pctFmt=row.pct.toFixed(1)+'%', color=colorFn(row.pct), barW=Math.min(100,row.pct).toFixed(1);
     const bg=i<3?badges[i]:'#e5e7eb', fg=i<3?'#fff':'#6b7a99';
-    return `<tr>
+    const isCliTable = (tbl==='cli'||tbl==='lcli');
+    const clickAttr = isCliTable ? `onclick="openDrill('${row.k.replace(/'/g,"\\'")}','${tbl}')" class="row-clickable"` : '';
+    return `<tr ${clickAttr}>
       <td style="width:44px"><span class="rank-badge" style="background:${bg};color:${fg}">${i+1}</span></td>
-      <td class="td-cli" title="${row.k}">${row.k}</td>
+      <td class="td-cli" title="${row.k}">${row.k}${isCliTable?' <span style="font-size:.6rem;color:var(--muted)">▶</span>':''}</td>
       <td class="td-num">${N(row.t)}</td>
       <td class="td-late">${N(row.l)}</td>
       <td><div class="pct-cell"><div class="pct-bar-wrap"><div class="pct-bar" style="width:${barW}%;background:${color}"></div></div><span class="pct-val" style="color:${color}">${pctFmt}</span></div></td>
@@ -706,6 +795,82 @@ async function captureTable(cardId,label){
     link.href=canvas.toDataURL('image/png'); link.click();
   }catch(err){alert('Error al capturar: '+err.message);}
 }
+
+// ─── DRILL-DOWN POR CLIENTE ──────────────────────────────────
+let drillSortDir = 1; // 1 = menor a mayor, -1 = mayor a menor
+let lastDrillArgs = null;
+
+function openDrill(clienteK, tbl){
+  drillSortDir = 1; // reset a menor→mayor cada vez que abres
+  lastDrillArgs = [clienteK, tbl];
+  renderDrill(clienteK, tbl);
+  document.getElementById('drillModal').classList.add('open');
+}
+
+function toggleDrillSort(){
+  drillSortDir *= -1;
+  const btn = document.getElementById('drillSortBtn');
+  btn.textContent = drillSortDir===1 ? '↑ Menor → Mayor' : '↓ Mayor → Menor';
+  if(lastDrillArgs) renderDrill(...lastDrillArgs);
+}
+
+function renderDrill(clienteK, tbl){
+  const isLlegadas = tbl==='lcli';
+  const lateField  = isLlegadas ? C.llegada : C.retardo;
+  const lateLbl    = isLlegadas ? 'Llegadas Tarde' : 'Inicios Tarde';
+  const colorFn    = isLlegadas ? pctColorLlegadas : pctColor;
+
+  // Filtrar solo filas de este cliente
+  const rows = filterRows().filter(r=>(r[C.cliente]||'').trim()===clienteK);
+
+  // Agrupar por ruta
+  const byRuta={};
+  rows.forEach(r=>{
+    const ruta=(r['desc_adicional']||r['ID Ruta']||'Sin ruta').trim()||'Sin ruta';
+    if(!byRuta[ruta]) byRuta[ruta]={t:0,l:0};
+    byRuta[ruta].t += parseInt(r[C.viajes])||1;
+    byRuta[ruta].l += countLate(r[lateField]);
+  });
+
+  // Ordenar por % cumplimiento según dirección actual
+  const sorted = Object.entries(byRuta)
+    .map(([k,d])=>({k, t:d.t, l:d.l, pct:d.t>0?(d.t-d.l)/d.t*100:0}))
+    .sort((a,b)=> (a.pct - b.pct) * drillSortDir);
+
+  const totT=sorted.reduce((s,r)=>s+r.t,0);
+  const totL=sorted.reduce((s,r)=>s+r.l,0);
+  const pctG=totT>0?(totT-totL)/totT*100:0;
+
+  document.getElementById('drillTitle').textContent=clienteK;
+  document.getElementById('drillSub').textContent=
+    `${lateLbl} · ${sorted.length} rutas · ${N(totT)} viajes · ${pctG.toFixed(1)}% cumplimiento`;
+  document.getElementById('drillSortBtn').textContent =
+    drillSortDir===1 ? '↑ Menor → Mayor' : '↓ Mayor → Menor';
+
+  document.getElementById('drillBody').innerHTML = sorted.map((r,i)=>{
+    const pctFmt=r.pct.toFixed(1)+'%';
+    const color=colorFn(r.pct);
+    const barW=Math.min(100,r.pct).toFixed(1);
+    const bg = i%2===0?'#ffffff':'#f7f9ff';
+    return `<tr style="background:${bg}">
+      <td class="td-ruta">${r.k}</td>
+      <td>${N(r.t)}</td>
+      <td style="color:${r.l>0?'#d97706':'#16a34a'};font-weight:600">${N(r.l)}</td>
+      <td><div class="pct-cell"><div class="pct-bar-wrap"><div class="pct-bar" style="width:${barW}%;background:${color}"></div></div><span class="pct-val" style="color:${color}">${pctFmt}</span></div></td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('drillFoot').textContent =
+    `Total: ${N(totT)} viajes · ${N(totL)} ${lateLbl.toLowerCase()} · ${pctG.toFixed(1)}% cumplimiento`;
+}
+
+function closeDrill(e){
+  if(e.target===document.getElementById('drillModal'))
+    document.getElementById('drillModal').classList.remove('open');
+}
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape') document.getElementById('drillModal').classList.remove('open');
+});
 </script>
 
 <script>
