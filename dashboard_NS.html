@@ -280,12 +280,12 @@ html,body{background:var(--bg);color:var(--text);font-family:"Inter",sans-serif;
     </button>
     <div class="sb-title">Filtros</div>
     <div class="sidebar-filters">
+    <div class="fg"><label>Unidad de Negocio</label>
+      <select id="fUdn" onchange="fillSelects();draw()"><option value="">Todas</option></select></div>
     <div class="fg"><label>Mes</label>
       <select id="fMes" onchange="fillSelects();draw()"><option value="">Todos</option></select></div>
     <div class="fg"><label>Semana</label>
       <select id="fSem" onchange="fillSelects();draw()"><option value="">Todas</option></select></div>
-    <div class="fg"><label>Unidad de Negocio</label>
-      <select id="fUdn" onchange="fillSelects();draw()"><option value="">Todas</option></select></div>
     <div class="fg"><label>Cliente / Grupo</label>
       <select id="fCli" onchange="draw()"><option value="">Todos</option></select></div>
     <div class="fg"><label>Gerente</label>
