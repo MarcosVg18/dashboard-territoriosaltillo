@@ -113,6 +113,17 @@ html,body{background:var(--bg);color:var(--text);font-family:"Inter",sans-serif;
 .err{background:#fff5f5;border-left:4px solid var(--red);border-radius:0 8px 8px 0;padding:.75rem 1rem;font-size:.8rem;color:#c53030;display:flex;align-items:flex-start;gap:.5rem}
 .err.hidden{display:none}
 
+/* ── AGRUPACIÓN GRÁFICA ── */
+.chart-group-btns{display:flex;gap:2px;background:var(--bg);border-radius:7px;padding:2px;}
+.grp-btn{
+  background:transparent;border:none;cursor:pointer;
+  padding:.22rem .55rem;font-size:.72rem;font-weight:600;
+  font-family:"Inter",sans-serif;color:var(--muted);border-radius:5px;
+  transition:all .15s;white-space:nowrap;
+}
+.grp-btn:hover{color:var(--text);background:rgba(0,0,0,.06);}
+.grp-btn.active{background:var(--white);color:var(--navy);box-shadow:0 1px 4px rgba(0,0,0,.12);}
+
 /* ── MODAL DRILL-DOWN ── */
 .modal-overlay{
   display:none;position:fixed;inset:0;z-index:800;
@@ -318,11 +329,19 @@ html,body{background:var(--bg);color:var(--text);font-family:"Inter",sans-serif;
       </div>
       <div class="chart-card">
         <div class="chart-hdr">
-          <div><div class="chart-title" id="chartTitle">Inicios Tarde por Día</div><div class="chart-sub">Verde = viajes a tiempo · Gris = inicios tarde · Línea = % cumplimiento (eje derecho)</div></div>
-          <div class="chart-legend">
-            <div class="leg"><div class="leg-sq" style="background:#4a4a4a"></div>En tiempo</div>
-            <div class="leg"><div class="leg-sq" style="background:#e8a055"></div>Inicios tarde</div>
-            <div class="leg"><div class="leg-line" style="background:#2a2a2a"></div>% Cumplimiento</div>
+          <div><div class="chart-title" id="chartTitle">Inicios Tarde por Día</div><div class="chart-sub">Gris oscuro = viajes a tiempo · Naranja = inicios tarde · Línea = % cumplimiento (eje derecho)</div></div>
+          <div style="display:flex;align-items:center;gap:.8rem;flex-wrap:wrap">
+            <div class="chart-group-btns" id="grp-ini">
+              <button class="grp-btn active" onclick="setGroup('ini','dia')">Día</button>
+              <button class="grp-btn" onclick="setGroup('ini','semana')">Sem</button>
+              <button class="grp-btn" onclick="setGroup('ini','mes')">Mes</button>
+              <button class="grp-btn" onclick="setGroup('ini','año')">Año</button>
+            </div>
+            <div class="chart-legend">
+              <div class="leg"><div class="leg-sq" style="background:#4a4a4a"></div>En tiempo</div>
+              <div class="leg"><div class="leg-sq" style="background:#e8a055"></div>Inicios tarde</div>
+              <div class="leg"><div class="leg-line" style="background:#2a2a2a"></div>% Cumplimiento</div>
+            </div>
           </div>
         </div>
         <div class="chart-wrap"><canvas id="chart-ini"></canvas></div>
@@ -370,11 +389,19 @@ html,body{background:var(--bg);color:var(--text);font-family:"Inter",sans-serif;
       </div>
       <div class="chart-card">
         <div class="chart-hdr">
-          <div><div class="chart-title" id="lChartTitle">Llegadas Tarde por Día</div><div class="chart-sub">Verde = viajes a tiempo · Gris = llegadas tarde · Línea = % cumplimiento (eje derecho)</div></div>
-          <div class="chart-legend">
-            <div class="leg"><div class="leg-sq" style="background:#4a4a4a"></div>En tiempo</div>
-            <div class="leg"><div class="leg-sq" style="background:#e8a055"></div>Llegadas tarde</div>
-            <div class="leg"><div class="leg-line" style="background:#2a2a2a"></div>% Cumplimiento</div>
+          <div><div class="chart-title" id="lChartTitle">Llegadas Tarde por Día</div><div class="chart-sub">Gris oscuro = viajes a tiempo · Naranja = llegadas tarde · Línea = % cumplimiento (eje derecho)</div></div>
+          <div style="display:flex;align-items:center;gap:.8rem;flex-wrap:wrap">
+            <div class="chart-group-btns" id="grp-lle">
+              <button class="grp-btn active" onclick="setGroup('lle','dia')">Día</button>
+              <button class="grp-btn" onclick="setGroup('lle','semana')">Sem</button>
+              <button class="grp-btn" onclick="setGroup('lle','mes')">Mes</button>
+              <button class="grp-btn" onclick="setGroup('lle','año')">Año</button>
+            </div>
+            <div class="chart-legend">
+              <div class="leg"><div class="leg-sq" style="background:#4a4a4a"></div>En tiempo</div>
+              <div class="leg"><div class="leg-sq" style="background:#e8a055"></div>Llegadas tarde</div>
+              <div class="leg"><div class="leg-line" style="background:#2a2a2a"></div>% Cumplimiento</div>
+            </div>
           </div>
         </div>
         <div class="chart-wrap"><canvas id="chart-lle"></canvas></div>
@@ -692,25 +719,63 @@ function buildTable(rows, field, tbl, lateField){
   renderTable(tbl);
 }
 
+// ─── AGRUPACIÓN GRÁFICA ──────────────────────────────────────
+const chartGroup = { ini: 'dia', lle: 'dia' };
+
+function setGroup(chart, group){
+  chartGroup[chart] = group;
+  // Update button styles
+  document.querySelectorAll(`#grp-${chart} .grp-btn`).forEach(b=>{
+    b.classList.toggle('active', b.textContent.toLowerCase().startsWith(group==='dia'?'d':group==='semana'?'s':group==='mes'?'m':'a'));
+  });
+  // Rebuild only this chart
+  const rows = filterRows();
+  if(chart==='ini'){
+    myChartIni = buildChart('chart-ini', rows, C.retardo, 'Inicios tarde', myChartIni, 'ini');
+  } else {
+    myChartLle = buildChart('chart-lle', rows, C.llegada, 'Llegadas tarde', myChartLle, 'lle');
+  }
+}
+
+function getGroupKey(r, group){
+  const f = getFecha(r);
+  if(!f) return '?';
+  if(group==='dia')    return f;                        // YYYY-MM-DD
+  if(group==='semana') return r[C.semana]||f.slice(0,7); // Semana col
+  if(group==='mes')    return f.slice(0,7);             // YYYY-MM
+  if(group==='año')    return f.slice(0,4);             // YYYY
+  return f;
+}
+
+function formatGroupLabel(key, group){
+  if(group==='dia'){
+    const dt = new Date(key+'T12:00:00');
+    if(isNaN(dt.getTime())) return key;
+    return dt.toLocaleDateString('es-MX',{day:'2-digit',month:'short'});
+  }
+  if(group==='mes'){
+    const [y,m] = key.split('-');
+    return (MESES[parseInt(m,10)-1]||m)+' '+y;
+  }
+  return key; // semana o año: mostrar tal cual
+}
+
 // ─── GRÁFICA ─────────────────────────────────────────────────
-function buildChart(canvasId, rows, lateField, lateLbl, existing){
+function buildChart(canvasId, rows, lateField, lateLbl, existing, chartId){
+  const group = chartGroup[chartId||'ini'];
   const by={};
   rows.forEach(r=>{
-    const d=getFecha(r); if(!d) return;
-    if(!by[d]) by[d]={t:0,l:0};
-    by[d].t+=parseInt(r[C.viajes])||1;
-    by[d].l+=countLate(r[lateField]);
+    const key = getGroupKey(r, group);
+    if(!key||key==='?') return;
+    if(!by[key]) by[key]={t:0,l:0};
+    by[key].t += parseInt(r[C.viajes])||1;
+    by[key].l += countLate(r[lateField]);
   });
-  const dates=Object.keys(by).sort();
-  const tots=dates.map(d=>by[d].t);
-  const lates=dates.map(d=>by[d].l);
-  const pcts=dates.map(d=>by[d].t>0?+((by[d].t-by[d].l)/by[d].t*100).toFixed(1):0);
-  const labels=dates.map(d=>{
-    if(!d||d.length<10) return d||'?';
-    const dt=new Date(d+'T12:00:00');
-    if(isNaN(dt.getTime())) return d;
-    return dt.toLocaleDateString('es-MX',{day:'2-digit',month:'short'});
-  });
+  const keys = Object.keys(by).sort();
+  const tots  = keys.map(k=>by[k].t);
+  const lates = keys.map(k=>by[k].l);
+  const pcts  = keys.map(k=>by[k].t>0?+((by[k].t-by[k].l)/by[k].t*100).toFixed(1):0);
+  const labels = keys.map(k=>formatGroupLabel(k, group));
   if(existing) existing.destroy();
   const ctx=document.getElementById(canvasId).getContext('2d');
   return new Chart(ctx,{type:'bar',data:{labels,datasets:[
@@ -776,8 +841,8 @@ function draw(){
   ['lChartTitle','ltCliTitle','ltGerTitle','ltJefTitle'].forEach((id,i)=>
     document.getElementById(id).textContent=['Llegadas Tarde por Día','Resumen por Cliente','Resumen por Gerente','Resumen por Jefe'][i]+sfx);
 
-  myChartIni=buildChart('chart-ini',rows,C.retardo,'Inicios tarde',myChartIni);
-  myChartLle=buildChart('chart-lle',rows,C.llegada,'Llegadas tarde',myChartLle);
+  myChartIni=buildChart('chart-ini',rows,C.retardo,'Inicios tarde',myChartIni,'ini');
+  myChartLle=buildChart('chart-lle',rows,C.llegada,'Llegadas tarde',myChartLle,'lle');
   buildTable(rows,C.cliente,'cli',C.retardo);
   buildTable(rows,C.gerente,'ger',C.retardo);
   buildTable(rows,C.jefe,   'jef',C.retardo);
