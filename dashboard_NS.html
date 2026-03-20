@@ -826,7 +826,7 @@ function renderDrill(clienteK, tbl){
   // Agrupar por ruta
   const byRuta={};
   rows.forEach(r=>{
-    const ruta=(r['desc_adicional']||r['ID Ruta']||'Sin ruta').trim()||'Sin ruta';
+    const ruta=(r['des']||'Sin ruta').trim()||'Sin ruta';
     if(!byRuta[ruta]) byRuta[ruta]={t:0,l:0};
     byRuta[ruta].t += parseInt(r[C.viajes])||1;
     byRuta[ruta].l += countLate(r[lateField]);
