@@ -284,6 +284,7 @@ html,body{background:var(--bg);color:var(--text);font-family:"Inter",sans-serif;
     <div class="tab-bar">
       <button class="tab-btn active" onclick="switchTab('inicios')">🚀 Inicios</button>
       <button class="tab-btn" onclick="switchTab('llegadas')">🏁 Llegadas</button>
+      <button class="tab-btn" onclick="switchTab('mua')">⚠️ Llegadas MUA</button>
     </div>
 
     <!-- PANEL INICIOS -->
@@ -405,6 +406,66 @@ html,body{background:var(--bg);color:var(--text);font-family:"Inter",sans-serif;
         </div>
       </div>
     </div>
+    <!-- PANEL LLEGADAS MUA -->
+    <div class="tab-panel" id="panel-mua">
+      <div class="kpi-grid">
+        <div class="kpi" style="--kc:#1a2236"><div class="kpi-icon">🚛</div><div class="kpi-val" id="mkTotal">–</div><div class="kpi-lbl">Total Viajes</div></div>
+        <div class="kpi" style="--kc:#7c3aed"><div class="kpi-icon">⚠️</div><div class="kpi-val" id="mkTarde">–</div><div class="kpi-lbl">Llegadas +5 min</div></div>
+        <div class="kpi" style="--kc:#7ed321"><div class="kpi-icon">📊</div><div class="kpi-val" id="mkPct">–</div><div class="kpi-lbl">% Cumplimiento</div></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-hdr">
+          <div><div class="chart-title" id="mChartTitle">Llegadas MUA (+5 min) por Día</div><div class="chart-sub">Gris oscuro = viajes a tiempo · Naranja = llegadas +5 min · Línea = % cumplimiento (eje derecho)</div></div>
+          <div style="display:flex;align-items:center;gap:.8rem;flex-wrap:wrap">
+            <div class="chart-group-btns" id="grp-mua">
+              <button class="grp-btn active" onclick="setGroup('mua','dia')">Día</button>
+              <button class="grp-btn" onclick="setGroup('mua','semana')">Sem</button>
+              <button class="grp-btn" onclick="setGroup('mua','mes')">Mes</button>
+              <button class="grp-btn" onclick="setGroup('mua','año')">Año</button>
+            </div>
+            <div class="chart-legend">
+              <div class="leg"><div class="leg-sq" style="background:#4a4a4a"></div>En tiempo</div>
+              <div class="leg"><div class="leg-sq" style="background:#e8a055"></div>Llegadas +5 min</div>
+              <div class="leg"><div class="leg-line" style="background:#2a2a2a"></div>% Cumplimiento</div>
+            </div>
+          </div>
+        </div>
+        <div class="chart-wrap"><canvas id="chart-mua"></canvas></div>
+      </div>
+      <div class="table-card" id="mcard-cli">
+        <div class="table-hdr">
+          <div><div class="table-hdr-title"><span class="table-hdr-icon">🏢</span><span id="mtCliTitle">Resumen por Cliente</span></div><div class="table-hdr-sub">Ordenado por % cumplimiento</div></div>
+          <div class="table-hdr-actions"><span class="table-count" id="mtCliCount">0 clientes</span><button class="btn-capture" onclick="captureTable('mcard-cli','MUA_Clientes')">📷 Capturar</button></div>
+        </div>
+        <div style="overflow-x:auto"><table class="data-table"><thead><tr>
+          <th style="width:44px">#</th><th>Cliente / Grupo</th><th>Total Viajes</th><th>Llegadas +5 min</th>
+          <th style="cursor:pointer" onclick="sortTable('mcli')"><div class="th-inner"><span>% Cumplimiento</span><button class="sort-btn" id="sort-mcli" style="pointer-events:none">↓</button></div></th>
+        </tr></thead><tbody id="mtCliBody"></tbody></table></div>
+      </div>
+      <div class="tables-grid section-end">
+        <div class="table-card" id="mcard-ger">
+          <div class="table-hdr">
+            <div><div class="table-hdr-title"><span class="table-hdr-icon">👔</span><span id="mtGerTitle">Resumen por Gerente</span></div><div class="table-hdr-sub">Ordenado por % cumplimiento</div></div>
+            <div class="table-hdr-actions"><span class="table-count" id="mtGerCount">0 gerentes</span><button class="btn-capture" onclick="captureTable('mcard-ger','MUA_Gerentes')">📷 Capturar</button></div>
+          </div>
+          <div style="overflow-x:auto"><table class="data-table"><thead><tr>
+            <th style="width:44px">#</th><th>Gerente</th><th>Total Viajes</th><th>Llegadas +5 min</th>
+            <th style="cursor:pointer" onclick="sortTable('mger')"><div class="th-inner"><span>% Cumplimiento</span><button class="sort-btn" id="sort-mger" style="pointer-events:none">↓</button></div></th>
+          </tr></thead><tbody id="mtGerBody"></tbody></table></div>
+        </div>
+        <div class="table-card" id="mcard-jef">
+          <div class="table-hdr">
+            <div><div class="table-hdr-title"><span class="table-hdr-icon">🗂️</span><span id="mtJefTitle">Resumen por Jefe</span></div><div class="table-hdr-sub">Ordenado por % cumplimiento</div></div>
+            <div class="table-hdr-actions"><span class="table-count" id="mtJefCount">0 jefes</span><button class="btn-capture" onclick="captureTable('mcard-jef','MUA_Jefes')">📷 Capturar</button></div>
+          </div>
+          <div style="overflow-x:auto"><table class="data-table"><thead><tr>
+            <th style="width:44px">#</th><th>Jefe</th><th>Total Viajes</th><th>Llegadas +5 min</th>
+            <th style="cursor:pointer" onclick="sortTable('mjef')"><div class="th-inner"><span>% Cumplimiento</span><button class="sort-btn" id="sort-mjef" style="pointer-events:none">↓</button></div></th>
+          </tr></thead><tbody id="mtJefBody"></tbody></table></div>
+        </div>
+      </div>
+    </div>
+
   </main>
 </div>
 
@@ -456,6 +517,7 @@ const C = {
   jefe:    'Jefe',
   retardo: 'Retardos',
   llegada: 'Llegadas',
+  mua:     'Llegadas MUA',
   viajes:  'Cantidad de viajes',
 };
 
@@ -467,6 +529,7 @@ let allMonthsMap = {};        // { "2026-03": [rows...] } — mapa completo desd
 let bgLoadDone   = false;
 let myChartIni   = null;
 let myChartLle   = null;
+let myChartMua   = null;
 
 // ─── MINI MODAL ──────────────────────────────────────────────────────────────
 function showMini(msg) {
@@ -551,19 +614,18 @@ function parseCSV(text) {
 // ─── CARGA INICIAL (server-side filter por mes, columna L = start_date) ───────
 // Col L = start_date. La query filtra en Google Sheets ANTES de descargar.
 // 144k filas totales → ~12k filas del mes actual en la primera carga.
-const DATE_COL = 'L'; // <-- cambia esto si start_date se mueve de columna
+const DATE_COL = 'L'; // columna start_date (DD/MM/YYYY en Sheets)
 
+// Usa MONTH() y YEAR() — funciona con DD/MM/YYYY, no depende del formato exacto
 function csvUrlMes(yyyymm) {
   const [y, m] = yyyymm.split('-');
-  const desde  = `${y}-${m.padStart(2,'0')}-01`;
-  const hasta  = `${y}-${m.padStart(2,'0')}-31`;
-  const tq     = encodeURIComponent(
-    `SELECT * WHERE ${DATE_COL} >= date '${desde}' AND ${DATE_COL} <= date '${hasta}'`
+  const tq = encodeURIComponent(
+    `SELECT * WHERE MONTH(${DATE_COL}) = ${parseInt(m,10)} AND YEAR(${DATE_COL}) = ${parseInt(y,10)}`
   );
   return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${GID}&tq=${tq}`;
 }
 
-// Para descubrir qué meses existen: descarga solo la columna L (liviano)
+// Descubrir meses disponibles: solo descarga col L — muy liviano
 function csvUrlDescubrirMeses() {
   const tq = encodeURIComponent(`SELECT ${DATE_COL}`);
   return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${GID}&tq=${tq}`;
@@ -800,20 +862,22 @@ function filterRows() {
 // ─── TABS ─────────────────────────────────────────────────────────────────────
 function switchTab(tab) {
   document.querySelectorAll('.tab-btn').forEach((b,i) =>
-    b.classList.toggle('active', i===(tab==='inicios'?0:1)));
+    b.classList.toggle('active', i===(tab==='inicios'?0:tab==='llegadas'?1:2)));
   document.getElementById('panel-inicios').classList.toggle('active',  tab==='inicios');
   document.getElementById('panel-llegadas').classList.toggle('active', tab==='llegadas');
+  document.getElementById('panel-mua').classList.toggle('active',      tab==='mua');
 }
 
 // ─── TABLAS ───────────────────────────────────────────────────────────────────
 const sortState = {
   cli:{col:3,dir:-1}, ger:{col:3,dir:-1}, jef:{col:3,dir:-1},
-  lcli:{col:3,dir:-1}, lger:{col:3,dir:-1}, ljef:{col:3,dir:-1}
+  lcli:{col:3,dir:-1}, lger:{col:3,dir:-1}, ljef:{col:3,dir:-1},
+  mcli:{col:3,dir:-1}, mger:{col:3,dir:-1}, mjef:{col:3,dir:-1}
 };
-const tableData = { cli:[], ger:[], jef:[], lcli:[], lger:[], ljef:[] };
-const TABLE_BODY = { cli:'tCliBody', ger:'tGerBody', jef:'tJefBody', lcli:'ltCliBody', lger:'ltGerBody', ljef:'ltJefBody' };
-const TABLE_CNT  = { cli:'tCliCount', ger:'tGerCount', jef:'tJefCount', lcli:'ltCliCount', lger:'ltGerCount', ljef:'ltJefCount' };
-const TABLE_WORD = { cli:'cliente', ger:'gerente', jef:'jefe', lcli:'cliente', lger:'gerente', ljef:'jefe' };
+const tableData = { cli:[], ger:[], jef:[], lcli:[], lger:[], ljef:[], mcli:[], mger:[], mjef:[] };
+const TABLE_BODY = { cli:'tCliBody', ger:'tGerBody', jef:'tJefBody', lcli:'ltCliBody', lger:'ltGerBody', ljef:'ltJefBody', mcli:'mtCliBody', mger:'mtGerBody', mjef:'mtJefBody' };
+const TABLE_CNT  = { cli:'tCliCount', ger:'tGerCount', jef:'tJefCount', lcli:'ltCliCount', lger:'ltGerCount', ljef:'ltJefCount', mcli:'mtCliCount', mger:'mtGerCount', mjef:'mtJefCount' };
+const TABLE_WORD = { cli:'cliente', ger:'gerente', jef:'jefe', lcli:'cliente', lger:'gerente', ljef:'jefe', mcli:'cliente', mger:'gerente', mjef:'jefe' };
 
 function sortTable(tbl) {
   sortState[tbl].dir *= -1;
@@ -874,7 +938,7 @@ function buildTable(rows, field, tbl, lateField) {
 }
 
 // ─── AGRUPACIÓN GRÁFICA ───────────────────────────────────────────────────────
-const chartGroup = { ini:'dia', lle:'dia' };
+const chartGroup = { ini:'dia', lle:'dia', mua:'dia' };
 
 function setGroup(chart, group) {
   chartGroup[chart] = group;
@@ -886,8 +950,9 @@ function setGroup(chart, group) {
     );
   });
   const rows = filterRows();
-  if (chart==='ini') myChartIni = buildChart('chart-ini', rows, C.retardo, 'Inicios tarde',  myChartIni, 'ini');
-  else               myChartLle = buildChart('chart-lle', rows, C.llegada, 'Llegadas tarde', myChartLle, 'lle');
+  if (chart==='ini')      myChartIni = buildChart('chart-ini', rows, C.retardo, 'Inicios tarde',    myChartIni, 'ini');
+  else if (chart==='lle') myChartLle = buildChart('chart-lle', rows, C.llegada, 'Llegadas tarde',  myChartLle, 'lle');
+  else                    myChartMua = buildChart('chart-mua', rows, C.mua,     'Llegadas +5 min', myChartMua, 'mua');
 }
 
 function getGroupKey(r, group) {
@@ -1007,10 +1072,14 @@ function draw() {
   const totI  = rows.reduce((s,r) => s+countLate(r[C.retardo]), 0);
   const totLL = rows.reduce((s,r) => s+countLate(r[C.llegada]), 0);
 
+  const totMUA = rows.reduce((s,r) => s+countLate(r[C.mua]), 0);
+
   document.getElementById('kTotal').textContent  = N(totT);
   document.getElementById('kTarde').textContent  = N(totI);
   document.getElementById('lkTotal').textContent = N(totT);
   document.getElementById('lkTarde').textContent = N(totLL);
+  document.getElementById('mkTotal').textContent = N(totT);
+  document.getElementById('mkTarde').textContent = N(totMUA);
 
   const pI = totT>0 ? (totT-totI)/totT*100  : 0;
   const pL = totT>0 ? (totT-totLL)/totT*100 : 0;
@@ -1018,6 +1087,9 @@ function draw() {
   kp.textContent = totT>0 ? pI.toFixed(1)+'%' : '–'; kp.style.color = pctColor(pI);
   const lp = document.getElementById('lkPct');
   lp.textContent = totT>0 ? pL.toFixed(1)+'%' : '–'; lp.style.color = pctColorLlegadas(pL);
+  const pM = totT>0 ? (totT-totMUA)/totT*100 : 0;
+  const mp = document.getElementById('mkPct');
+  mp.textContent = totT>0 ? pM.toFixed(1)+'%' : '–'; mp.style.color = pctColorLlegadas(pM);
 
   ['chartTitle','tCliTitle','tGerTitle','tJefTitle'].forEach((id,i) =>
     document.getElementById(id).textContent =
@@ -1025,6 +1097,9 @@ function draw() {
   ['lChartTitle','ltCliTitle','ltGerTitle','ltJefTitle'].forEach((id,i) =>
     document.getElementById(id).textContent =
       ['Llegadas Tarde por Día','Resumen por Cliente','Resumen por Gerente','Resumen por Jefe'][i]+sfx);
+  ['mChartTitle','mtCliTitle','mtGerTitle','mtJefTitle'].forEach((id,i) =>
+    document.getElementById(id).textContent =
+      ['Llegadas MUA (+5 min) por Día','Resumen por Cliente','Resumen por Gerente','Resumen por Jefe'][i]+sfx);
 
   myChartIni = buildChart('chart-ini', rows, C.retardo, 'Inicios tarde',  myChartIni, 'ini');
   myChartLle = buildChart('chart-lle', rows, C.llegada, 'Llegadas tarde', myChartLle, 'lle');
@@ -1034,6 +1109,10 @@ function draw() {
   buildTable(rows, C.cliente, 'lcli', C.llegada);
   buildTable(rows, C.gerente, 'lger', C.llegada);
   buildTable(rows, C.jefe,    'ljef', C.llegada);
+  myChartMua = buildChart('chart-mua', rows, C.mua, 'Llegadas +5 min', myChartMua, 'mua');
+  buildTable(rows, C.cliente, 'mcli', C.mua);
+  buildTable(rows, C.gerente, 'mger', C.mua);
+  buildTable(rows, C.jefe,    'mjef', C.mua);
 }
 
 // ─── CAPTURA ──────────────────────────────────────────────────────────────────
