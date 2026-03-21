@@ -114,78 +114,48 @@ html,body{background:var(--bg);color:var(--text);font-family:"Inter",sans-serif;
 .err.hidden{display:none}
 
 /* ── PANTALLA DE CARGA ── */
-.loading-overlay{
-  position:fixed;inset:0;z-index:999;
-  background:#f0f2f7;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:1.5rem;transition:opacity .4s ease;
-}
+.loading-overlay{position:fixed;inset:0;z-index:999;background:#f0f2f7;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.5rem;transition:opacity .4s ease;}
 .loading-overlay.hidden{opacity:0;pointer-events:none;}
 .loading-logo{font-size:1.1rem;font-weight:800;color:#1a2236;letter-spacing:.02em;display:flex;align-items:center;gap:.5rem;}
 .loading-logo span{color:#7ed321;}
-.loading-box{
-  background:#fff;border-radius:16px;padding:2.2rem 3rem;
-  box-shadow:0 4px 24px rgba(26,34,54,.1);
-  display:flex;flex-direction:column;align-items:center;gap:1.1rem;
-  min-width:280px;text-align:center;
-}
-.loading-spinner{
-  width:48px;height:48px;border-radius:50%;
-  border:4px solid #dde3f0;
-  border-top-color:#7ed321;
-  animation:spin .75s linear infinite;
-}
+.loading-box{background:#fff;border-radius:16px;padding:2.2rem 3rem;box-shadow:0 4px 24px rgba(26,34,54,.1);display:flex;flex-direction:column;align-items:center;gap:1.1rem;min-width:280px;text-align:center;}
+.loading-spinner{width:48px;height:48px;border-radius:50%;border:4px solid #dde3f0;border-top-color:#7ed321;animation:spin .75s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg)}}
 .loading-title{font-size:.95rem;font-weight:700;color:#1a2236;}
 .loading-sub{font-size:.78rem;color:#6b7a99;line-height:1.5;}
 .loading-bar-track{width:100%;height:5px;background:#dde3f0;border-radius:3px;overflow:hidden;}
-.loading-bar-fill{height:100%;width:0%;background:#7ed321;border-radius:3px;animation:loadbar 45s ease-out forwards;}
-@keyframes loadbar{0%{width:0%}30%{width:35%}60%{width:60%}85%{width:80%}100%{width:92%}}
+.loading-bar-fill{height:100%;width:0%;background:#7ed321;border-radius:3px;animation:loadbar 20s ease-out forwards;}
+@keyframes loadbar{0%{width:0%}40%{width:60%}80%{width:85%}100%{width:95%}}
+
+/* ── MINI MODAL ── */
+.mini-modal{display:none;position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.35);
+  backdrop-filter:blur(2px);align-items:center;justify-content:center;}
+.mini-modal.open{display:flex;}
+.mini-modal-box{background:#fff;border-radius:12px;padding:1.5rem 2rem;
+  box-shadow:0 8px 32px rgba(0,0,0,.2);text-align:center;min-width:200px;}
+.mini-spinner{width:32px;height:32px;border-radius:50%;border:3px solid #dde3f0;
+  border-top-color:#7ed321;animation:spin .75s linear infinite;margin:0 auto .75rem;}
+.mini-msg{font-size:.88rem;font-weight:600;color:#1a2236;}
 
 /* ── AGRUPACIÓN GRÁFICA ── */
 .chart-group-btns{display:flex;gap:2px;background:var(--bg);border-radius:7px;padding:2px;}
-.grp-btn{
-  background:transparent;border:none;cursor:pointer;
-  padding:.22rem .55rem;font-size:.72rem;font-weight:600;
-  font-family:"Inter",sans-serif;color:var(--muted);border-radius:5px;
-  transition:all .15s;white-space:nowrap;
-}
+.grp-btn{background:transparent;border:none;cursor:pointer;padding:.22rem .55rem;font-size:.72rem;font-weight:600;
+  font-family:"Inter",sans-serif;color:var(--muted);border-radius:5px;transition:all .15s;white-space:nowrap;}
 .grp-btn:hover{color:var(--text);background:rgba(0,0,0,.06);}
 .grp-btn.active{background:var(--white);color:var(--navy);box-shadow:0 1px 4px rgba(0,0,0,.12);}
 
 /* ── MODAL DRILL-DOWN ── */
-.modal-overlay{
-  display:none;position:fixed;inset:0;z-index:800;
-  background:rgba(0,0,0,.45);backdrop-filter:blur(3px);
-  align-items:center;justify-content:center;padding:1rem;
-}
+.modal-overlay{display:none;position:fixed;inset:0;z-index:800;background:rgba(0,0,0,.45);backdrop-filter:blur(3px);align-items:center;justify-content:center;padding:1rem;}
 .modal-overlay.open{display:flex;}
-.modal-box{
-  background:var(--white);border-radius:14px;
-  box-shadow:0 16px 48px rgba(0,0,0,.25);
-  width:100%;max-width:720px;max-height:85vh;
-  display:flex;flex-direction:column;overflow:hidden;
-}
-.modal-head{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:.9rem 1.25rem;border-bottom:1px solid var(--border);
-  background:var(--navy2);
-}
+.modal-box{background:var(--white);border-radius:14px;box-shadow:0 16px 48px rgba(0,0,0,.25);width:100%;max-width:720px;max-height:85vh;display:flex;flex-direction:column;overflow:hidden;}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:.9rem 1.25rem;border-bottom:1px solid var(--border);background:var(--navy2);}
 .modal-head h3{font-size:.92rem;font-weight:700;color:#fff;}
 .modal-head span{font-size:.72rem;color:rgba(255,255,255,.5);margin-top:.1rem;}
-.modal-close{
-  background:none;border:none;color:rgba(255,255,255,.6);
-  font-size:1.2rem;cursor:pointer;padding:.2rem .4rem;border-radius:4px;
-  transition:color .15s;line-height:1;
-}
+.modal-close{background:none;border:none;color:rgba(255,255,255,.6);font-size:1.2rem;cursor:pointer;padding:.2rem .4rem;border-radius:4px;transition:color .15s;line-height:1;}
 .modal-close:hover{color:#fff;}
 .modal-body{overflow-y:auto;padding:0;}
 .modal-table{width:100%;border-collapse:collapse;}
-.modal-table thead th{
-  background:var(--navy2);color:rgba(255,255,255,.85);
-  font-size:.68rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
-  padding:.55rem .9rem;text-align:left;white-space:nowrap;position:sticky;top:0;
-}
+.modal-table thead th{background:var(--navy2);color:rgba(255,255,255,.85);font-size:.68rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:.55rem .9rem;text-align:left;white-space:nowrap;position:sticky;top:0;}
 .modal-table thead th:nth-child(n+2){text-align:right;}
 .modal-table tbody tr{border-bottom:1px solid var(--border);}
 .modal-table tbody tr:last-child{border-bottom:none;}
@@ -197,112 +167,68 @@ html,body{background:var(--bg);color:var(--text);font-family:"Inter",sans-serif;
 .row-clickable{cursor:pointer;}
 .row-clickable .td-cli{color:var(--navy);text-decoration:underline dotted;}
 
-/* ── FILTROS MÓVIL: botón toggle ── */
-.filter-toggle-btn{
-  display:none;
-  width:100%;background:var(--navy2);color:var(--white);
-  border:none;border-radius:8px;padding:.65rem 1rem;
-  font-size:.82rem;font-weight:600;font-family:"Inter",sans-serif;
-  cursor:pointer;align-items:center;justify-content:space-between;
-  margin-bottom:.5rem;
-}
+/* ── FILTROS MÓVIL ── */
+.filter-toggle-btn{display:none;width:100%;background:var(--navy2);color:var(--white);border:none;border-radius:8px;padding:.65rem 1rem;font-size:.82rem;font-weight:600;font-family:"Inter",sans-serif;cursor:pointer;align-items:center;justify-content:space-between;margin-bottom:.5rem;}
 .filter-toggle-btn span{font-size:.75rem;opacity:.6}
-.sidebar.collapsed .fg,
-.sidebar.collapsed .btn-reset,
-.sidebar.collapsed .sb-title{display:none}
+.sidebar.collapsed .fg,.sidebar.collapsed .btn-reset,.sidebar.collapsed .sb-title{display:none}
 .sidebar.collapsed{padding:.5rem .95rem}
 
 /* ══════════════ RESPONSIVE ══════════════ */
 @media(max-width:768px){
-
-  /* Nav */
   nav{padding:10px 16px;gap:10px;}
   nav>a:first-child{font-size:15px;}
   .dropdown-toggle{padding:6px 10px;font-size:13px;}
-
-  /* Layout: sidebar encima del main */
   .layout{flex-direction:column;}
-
-  /* Sidebar como panel colapsable */
-  .sidebar{
-    width:100%;height:auto;position:relative;top:0;
-    border-right:none;border-bottom:1px solid var(--border);
-    padding:.75rem 1rem;gap:.75rem;overflow:visible;
-  }
+  .sidebar{width:100%;height:auto;position:relative;top:0;border-right:none;border-bottom:1px solid var(--border);padding:.75rem 1rem;gap:.75rem;overflow:visible;}
   .filter-toggle-btn{display:flex;}
-
-  /* Filtros en grid 2 columnas en móvil */
-  .sidebar-filters{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:.5rem;
-  }
+  .sidebar-filters{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;}
   .sidebar-filters .date-row{grid-column:1/-1;}
   .sidebar-filters .btn-reset{grid-column:1/-1;}
-
-  /* Main */
   .main{padding:.85rem .75rem;gap:.85rem;}
-
-  /* KPIs: 1 columna en móvil muy pequeño, 3 en móvil normal */
   .kpi-grid{grid-template-columns:repeat(3,1fr);gap:.5rem;}
   .kpi{padding:.75rem .85rem;}
   .kpi-val{font-size:1.5rem;}
   .kpi-lbl{font-size:.6rem;}
   .kpi-icon{font-size:1.1rem;margin-bottom:.2rem;}
-
-  /* Gráfica más baja */
   .chart-wrap{height:200px;}
   .chart-hdr{flex-direction:column;gap:.3rem;}
   .chart-legend{flex-wrap:wrap;gap:.5rem;}
-
-  /* Tablas side-by-side → una columna */
   .tables-grid{grid-template-columns:1fr;}
-
-  /* Tab bar */
   .tab-bar{padding:0 .75rem;}
   .tab-btn{padding:.55rem .9rem;font-size:.78rem;}
-
-  /* Table headers y celdas más compactos */
   .data-table thead th{padding:.5rem .6rem;font-size:.65rem;}
   .data-table tbody td{padding:.45rem .6rem;font-size:.75rem;}
   .table-hdr{padding:.65rem .85rem;flex-wrap:wrap;gap:.4rem;}
   .table-hdr-actions{width:100%;justify-content:space-between;}
-
-  /* Barra de porcentaje más pequeña */
   .pct-bar-wrap{width:45px;}
-
-  /* Captura */
   .btn-capture{font-size:.65rem;padding:.22rem .5rem;}
 }
-
 @media(max-width:480px){
-  /* KPIs en 1 columna en pantallas muy pequeñas */
   .kpi-grid{grid-template-columns:1fr;}
   .kpi{padding:.85rem 1rem;}
   .kpi-val{font-size:1.8rem;}
-
   nav>a:first-child{font-size:14px;}
   .dropdown-toggle{font-size:12px;padding:5px 8px;}
-
   .chart-wrap{height:180px;}
   .main{padding:.65rem .6rem;}
 }
 </style>
 </head>
 <body>
+
 <nav>
-    <a href="index.html">🚛 TRAXIÓN</a>
-    <div class="dropdown" id="dropdownLogistica">
-        <button class="dropdown-toggle" onclick="toggleDropdown('dropdownLogistica')">
-            📦 Logística <span class="dropdown-arrow">▼</span>
-        </button>
-        <div class="dropdown-menu">
-            <a href="dashboard_NS.html" class="active">📈 Nivel de Servicio</a>
-            <a href="dashboard_kilometros.html">📊 Kilómetros</a>
-            <a href="dashboard_flota.html">🚗 Flota</a>
-            <a href="dashboard_kpis.html">🎯 KPIs</a>
-        </div>
+  <a href="index.html">🚛 TRAXIÓN</a>
+  <div class="dropdown" id="dropdownLogistica">
+    <button class="dropdown-toggle" onclick="toggleDropdown('dropdownLogistica')">
+      📦 Logística <span class="dropdown-arrow">▼</span>
+    </button>
+    <div class="dropdown-menu">
+      <a href="dashboard_NS.html" class="active">📈 Nivel de Servicio</a>
+      <a href="dashboard_kilometros.html">📊 Kilómetros</a>
+      <a href="dashboard_flota.html">🚗 Flota</a>
+      <a href="dashboard_kpis.html">🎯 KPIs</a>
     </div>
+  </div>
 </nav>
 
 <!-- PANTALLA DE CARGA -->
@@ -316,6 +242,14 @@ html,body{background:var(--bg);color:var(--text);font-family:"Inter",sans-serif;
   </div>
 </div>
 
+<!-- MINI MODAL para carga de mes en background -->
+<div class="mini-modal" id="miniModal">
+  <div class="mini-modal-box">
+    <div class="mini-spinner"></div>
+    <div class="mini-msg" id="miniModalMsg">Cargando mes...</div>
+  </div>
+</div>
+
 <div class="layout">
   <aside class="sidebar" id="sidebar">
     <button class="filter-toggle-btn" onclick="toggleSidebar()">
@@ -323,25 +257,25 @@ html,body{background:var(--bg);color:var(--text);font-family:"Inter",sans-serif;
     </button>
     <div class="sb-title">Filtros</div>
     <div class="sidebar-filters">
-    <div class="fg"><label>Unidad de Negocio</label>
-      <select id="fUdn" onchange="fillSelects();draw()"><option value="">Todas</option></select></div>
-    <div class="fg"><label>Mes</label>
-      <select id="fMes" onchange="fillSelects();draw()"><option value="">Todos</option></select></div>
-    <div class="fg"><label>Semana</label>
-      <select id="fSem" onchange="fillSelects();draw()"><option value="">Todas</option></select></div>
-    <div class="fg"><label>Cliente / Grupo</label>
-      <select id="fCli" onchange="draw()"><option value="">Todos</option></select></div>
-    <div class="fg"><label>Gerente</label>
-      <select id="fGer" onchange="draw()"><option value="">Todos</option></select></div>
-    <div class="fg"><label>Jefe</label>
-      <select id="fJef" onchange="draw()"><option value="">Todos</option></select></div>
-    <div class="fg"><label>Rango de fechas</label>
-      <div class="date-row">
-        <input type="date" id="fFi" onchange="draw()" title="Desde">
-        <input type="date" id="fFf" onchange="draw()" title="Hasta">
+      <div class="fg"><label>Unidad de Negocio</label>
+        <select id="fUdn" onchange="onFilterChange('fUdn')"><option value="">Todas</option></select></div>
+      <div class="fg"><label>Mes</label>
+        <select id="fMes" onchange="onFilterChange('fMes')"><option value="">Todos</option></select></div>
+      <div class="fg"><label>Semana</label>
+        <select id="fSem" onchange="onFilterChange('fSem')"><option value="">Todas</option></select></div>
+      <div class="fg"><label>Cliente / Grupo</label>
+        <select id="fCli" onchange="onFilterChange('fCli')"><option value="">Todos</option></select></div>
+      <div class="fg"><label>Gerente</label>
+        <select id="fGer" onchange="onFilterChange('fGer')"><option value="">Todos</option></select></div>
+      <div class="fg"><label>Jefe</label>
+        <select id="fJef" onchange="onFilterChange('fJef')"><option value="">Todos</option></select></div>
+      <div class="fg"><label>Rango de fechas</label>
+        <div class="date-row">
+          <input type="date" id="fFi" onchange="onFilterChange('fFi')" title="Desde">
+          <input type="date" id="fFf" onchange="onFilterChange('fFf')" title="Hasta">
+        </div>
       </div>
-    </div>
-    <button class="btn-reset" onclick="resetFilters()">↺ Limpiar filtros</button>
+      <button class="btn-reset" onclick="resetFilters()">↺ Limpiar filtros</button>
     </div>
   </aside>
 
@@ -385,7 +319,7 @@ html,body{background:var(--bg);color:var(--text);font-family:"Inter",sans-serif;
         </div>
         <div style="overflow-x:auto"><table class="data-table"><thead><tr>
           <th style="width:44px">#</th><th>Cliente / Grupo</th><th>Total Viajes</th><th>Inicios Tarde</th>
-          <th style="cursor:pointer" onclick="sortTable('cli',3)"><div class="th-inner"><span>% Cumplimiento</span><button class="sort-btn" id="sort-cli" style="pointer-events:none">↓</button></div></th>
+          <th style="cursor:pointer" onclick="sortTable('cli')"><div class="th-inner"><span>% Cumplimiento</span><button class="sort-btn" id="sort-cli" style="pointer-events:none">↓</button></div></th>
         </tr></thead><tbody id="tCliBody"></tbody></table></div>
       </div>
       <div class="tables-grid section-end">
@@ -396,7 +330,7 @@ html,body{background:var(--bg);color:var(--text);font-family:"Inter",sans-serif;
           </div>
           <div style="overflow-x:auto"><table class="data-table"><thead><tr>
             <th style="width:44px">#</th><th>Gerente</th><th>Total Viajes</th><th>Inicios Tarde</th>
-            <th style="cursor:pointer" onclick="sortTable('ger',3)"><div class="th-inner"><span>% Cumplimiento</span><button class="sort-btn" id="sort-ger" style="pointer-events:none">↓</button></div></th>
+            <th style="cursor:pointer" onclick="sortTable('ger')"><div class="th-inner"><span>% Cumplimiento</span><button class="sort-btn" id="sort-ger" style="pointer-events:none">↓</button></div></th>
           </tr></thead><tbody id="tGerBody"></tbody></table></div>
         </div>
         <div class="table-card" id="card-jef">
@@ -406,7 +340,7 @@ html,body{background:var(--bg);color:var(--text);font-family:"Inter",sans-serif;
           </div>
           <div style="overflow-x:auto"><table class="data-table"><thead><tr>
             <th style="width:44px">#</th><th>Jefe</th><th>Total Viajes</th><th>Inicios Tarde</th>
-            <th style="cursor:pointer" onclick="sortTable('jef',3)"><div class="th-inner"><span>% Cumplimiento</span><button class="sort-btn" id="sort-jef" style="pointer-events:none">↓</button></div></th>
+            <th style="cursor:pointer" onclick="sortTable('jef')"><div class="th-inner"><span>% Cumplimiento</span><button class="sort-btn" id="sort-jef" style="pointer-events:none">↓</button></div></th>
           </tr></thead><tbody id="tJefBody"></tbody></table></div>
         </div>
       </div>
@@ -445,7 +379,7 @@ html,body{background:var(--bg);color:var(--text);font-family:"Inter",sans-serif;
         </div>
         <div style="overflow-x:auto"><table class="data-table"><thead><tr>
           <th style="width:44px">#</th><th>Cliente / Grupo</th><th>Total Viajes</th><th>Llegadas Tarde</th>
-          <th style="cursor:pointer" onclick="sortTable('lcli',3)"><div class="th-inner"><span>% Cumplimiento</span><button class="sort-btn" id="sort-lcli" style="pointer-events:none">↓</button></div></th>
+          <th style="cursor:pointer" onclick="sortTable('lcli')"><div class="th-inner"><span>% Cumplimiento</span><button class="sort-btn" id="sort-lcli" style="pointer-events:none">↓</button></div></th>
         </tr></thead><tbody id="ltCliBody"></tbody></table></div>
       </div>
       <div class="tables-grid section-end">
@@ -456,7 +390,7 @@ html,body{background:var(--bg);color:var(--text);font-family:"Inter",sans-serif;
           </div>
           <div style="overflow-x:auto"><table class="data-table"><thead><tr>
             <th style="width:44px">#</th><th>Gerente</th><th>Total Viajes</th><th>Llegadas Tarde</th>
-            <th style="cursor:pointer" onclick="sortTable('lger',3)"><div class="th-inner"><span>% Cumplimiento</span><button class="sort-btn" id="sort-lger" style="pointer-events:none">↓</button></div></th>
+            <th style="cursor:pointer" onclick="sortTable('lger')"><div class="th-inner"><span>% Cumplimiento</span><button class="sort-btn" id="sort-lger" style="pointer-events:none">↓</button></div></th>
           </tr></thead><tbody id="ltGerBody"></tbody></table></div>
         </div>
         <div class="table-card" id="lcard-jef">
@@ -466,7 +400,7 @@ html,body{background:var(--bg);color:var(--text);font-family:"Inter",sans-serif;
           </div>
           <div style="overflow-x:auto"><table class="data-table"><thead><tr>
             <th style="width:44px">#</th><th>Jefe</th><th>Total Viajes</th><th>Llegadas Tarde</th>
-            <th style="cursor:pointer" onclick="sortTable('ljef',3)"><div class="th-inner"><span>% Cumplimiento</span><button class="sort-btn" id="sort-ljef" style="pointer-events:none">↓</button></div></th>
+            <th style="cursor:pointer" onclick="sortTable('ljef')"><div class="th-inner"><span>% Cumplimiento</span><button class="sort-btn" id="sort-ljef" style="pointer-events:none">↓</button></div></th>
           </tr></thead><tbody id="ltJefBody"></tbody></table></div>
         </div>
       </div>
@@ -474,7 +408,7 @@ html,body{background:var(--bg);color:var(--text);font-family:"Inter",sans-serif;
   </main>
 </div>
 
-<!-- ── MODAL DRILL-DOWN ── -->
+<!-- MODAL DRILL-DOWN -->
 <div class="modal-overlay" id="drillModal" onclick="closeDrill(event)">
   <div class="modal-box">
     <div class="modal-head">
@@ -508,16 +442,15 @@ html,body{background:var(--bg);color:var(--text);font-family:"Inter",sans-serif;
 </div>
 
 <script>
-// ─── CONFIGURACIÓN ── cambia aquí liga y hoja ─────────────────
+// ─── CONFIGURACIÓN ───────────────────────────────────────────────────────────
 const SHEET_ID = '1l3QYg7N050BScrtNhKkHQ-hHNDgaK9Prw95Dzb2-DRE';
-const GID      = '1297993336'; // Hoja: NS
-const CSV_URL  = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID}`;
+const GID      = '1297993336';
 
-// ─── NOMBRES DE COLUMNAS ─────────────────────────────────────
+// ─── NOMBRES DE COLUMNAS ─────────────────────────────────────────────────────
 const C = {
   fecha:   'start_date',
   semana:  'Semana',
-  udn:     'business_unit',      // Unidad de Negocio
+  udn:     'business_unit',
   cliente: 'group',
   gerente: 'Gerente',
   jefe:    'Jefe',
@@ -526,152 +459,276 @@ const C = {
   viajes:  'Cantidad de viajes',
 };
 
-let DATA=[], myChartIni=null, myChartLle=null;
-window.addEventListener('DOMContentLoaded', loadSheet);
+// ─── ESTADO ──────────────────────────────────────────────────────────────────
+let DATA         = [];
+let monthCache   = {};        // { "2026-03": [rows...] }
+let loadedMonths = new Set();
+let allMonthsMap = {};        // { "2026-03": [rows...] } — mapa completo desde carga inicial
+let bgLoadDone   = false;
+let myChartIni   = null;
+let myChartLle   = null;
 
-// ─── CSV ─────────────────────────────────────────────────────
-function parseCSVLine(line){
-  const cols=[]; let cur='', inQ=false;
-  for(let i=0;i<line.length;i++){
-    const ch=line[i];
-    if(ch==='"'){if(inQ&&line[i+1]==='"'){cur+='"';i++;}else inQ=!inQ;}
-    else if(ch===','&&!inQ){cols.push(cur.trim());cur='';}
-    else cur+=ch;
-  }
-  cols.push(cur.trim()); return cols;
+// ─── MINI MODAL ──────────────────────────────────────────────────────────────
+function showMini(msg) {
+  document.getElementById('miniModalMsg').textContent = msg || 'Cargando...';
+  document.getElementById('miniModal').classList.add('open');
 }
-function parseCSV(text){
-  const lines=text.trim().split(/\r?\n/);
-  if(lines.length<2) return [];
-  const hdrs=parseCSVLine(lines[0]);
-  console.log('Columnas:', hdrs.join(' | '));
-  // Auto-detectar columna UDN
-  if(!hdrs.includes(C.udn)){
-    const found=hdrs.find(h=>
-      h==='business_unit'||
-      h.toLowerCase().includes('business')||
-      h.toLowerCase().includes('unidad')||
-      h.toLowerCase().includes('udn')||
-      h.toLowerCase().includes('negocio')
-    );
-    if(found){ console.log('UDN auto-detectada:', found); C.udn=found; }
-    else { console.warn('⚠️ No se encontró columna UDN. Columnas disponibles:', hdrs.join(', ')); }
-  } else {
-    console.log('UDN columna:', C.udn);
-  }
-  const rows=[];
-  for(let i=1;i<lines.length;i++){
-    if(!lines[i].trim()) continue;
-    const cols=parseCSVLine(lines[i]);
-    const obj={};
-    hdrs.forEach((h,idx)=>{ obj[h]=cols[idx]!==undefined?cols[idx]:''; });
-    if(hdrs.some(h=>obj[h]&&obj[h].trim()!=='')) rows.push(obj);
-  }
-  console.log('Filas:', rows.length);
-  if(rows.length) console.log('Muestra:', JSON.stringify(rows[0]));
-  return rows;
-}
-async function loadSheet(){
-  const banner=document.getElementById('errBanner');
-  const errMsg=document.getElementById('errMsg');
-  const overlay=document.getElementById('loadingOverlay');
-  const loadMsg=document.getElementById('loadingMsg');
-  try{
-    loadMsg.innerHTML='Descargando datos del servidor...<br>Por favor espera';
-    const res=await fetch(CSV_URL);
-    if(!res.ok) throw new Error('HTTP '+res.status+'. Verifica que el Sheet sea público.');
-    loadMsg.innerHTML='Procesando información...<br>Ya casi termina';
-    DATA=parseCSV(await res.text());
-    if(!DATA.length) throw new Error('Sin filas válidas. Revisa la consola (F12).');
-    if(DATA.length>0){
-      const r0=DATA[0];
-      console.log('getFecha sample:', getFecha(r0), '| Año:',r0['Año'],'Mes:',r0['Mes'],'Dia:',r0['Dia']);
-      console.log('UDN col:', C.udn, '| sample value:', r0[C.udn]);
-      console.log('cliente col:', C.cliente, '| sample:', r0[C.cliente]);
-    }
-    if(banner) banner.classList.add('hidden');
-    fillSelects(); draw();
-    // Ocultar overlay con transición suave
-    if(overlay){ overlay.classList.add('hidden'); setTimeout(()=>overlay.style.display='none', 450); }
-  }catch(e){
-    console.error(e);
-    if(overlay) overlay.style.display='none';
-    if(banner&&errMsg){errMsg.textContent=e.message; banner.classList.remove('hidden');}
-  }
+function hideMini() {
+  document.getElementById('miniModal').classList.remove('open');
 }
 
-// ─── FECHA ───────────────────────────────────────────────────
-function norm(s){
-  if(!s) return '';
-  s=s.trim();
-  if(/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0,10);
-  const p=s.split('/');
-  if(p.length===3){
-    const [a,b,c]=p;
-    if(c.length===4) return c+'-'+b.padStart(2,'0')+'-'+a.padStart(2,'0'); // DD/MM/YYYY
-    if(a.length===4) return a+'-'+b.padStart(2,'0')+'-'+c.padStart(2,'0'); // YYYY/MM/DD
+// ─── UTILIDADES DE FECHA ─────────────────────────────────────────────────────
+function norm(s) {
+  if (!s) return '';
+  s = s.trim();
+  if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0,10);
+  const p = s.split('/');
+  if (p.length === 3) {
+    const [a,b,c] = p;
+    if (c.length===4) return c+'-'+b.padStart(2,'0')+'-'+a.padStart(2,'0');
+    if (a.length===4) return a+'-'+b.padStart(2,'0')+'-'+c.padStart(2,'0');
   }
   return s;
 }
-function getFecha(r){
-  // Usar columnas Año/Mes/Dia si existen — con padding correcto
-  const y=r['Año']  ? String(r['Año']).trim()  : '';
-  const m=r['Mes']  ? String(r['Mes']).trim()  : '';
-  const d=r['Dia']  ? String(r['Dia']).trim()  : '';
-  if(y && m && d && !isNaN(y) && !isNaN(m) && !isNaN(d)){
+function getFecha(r) {
+  const y = r['Año'] ? String(r['Año']).trim() : '';
+  const m = r['Mes'] ? String(r['Mes']).trim() : '';
+  const d = r['Dia'] ? String(r['Dia']).trim() : '';
+  if (y && m && d && !isNaN(y) && !isNaN(m) && !isNaN(d))
     return `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
-  }
   return norm(r[C.fecha]);
 }
-function normMonth(fecha){ return fecha?fecha.slice(0,7):''; }
-const MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-function mesLabel(ym){ if(!ym) return ''; const [y,m]=ym.split('-'); return (MESES[parseInt(m,10)-1]||m)+' '+y; }
-
-// ─── UTILS ───────────────────────────────────────────────────
-const uniq=arr=>[...new Set(arr.filter(v=>v&&v.trim()))].sort();
-const N=n=>n.toLocaleString('es-MX');
-function pctColor(p){ return p>=90?'#16a34a':'#e53e3e'; }
-function pctColorLlegadas(p){ return p>=98?'#16a34a':'#e53e3e'; }
-function countLate(v){
-  // Llegadas: negativo = llegada tarde (1 unidad), positivo = ya es conteo, 0 = a tiempo
-  // Retardos: positivo = conteo directo
-  const n=parseInt(v)||0;
-  return n<0?1:n;
+function normMonth(fecha) { return fecha ? fecha.slice(0,7) : ''; }
+const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+function mesLabel(ym) {
+  if (!ym) return '';
+  const [y,m] = ym.split('-');
+  return (MESES[parseInt(m,10)-1] || m) + ' ' + y;
+}
+function getCurrentMonth() {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
 }
 
-// ─── FILTROS ─────────────────────────────────────────────────
-function fillSelects(){
-  // Siempre poblar Mes, Semana y UDN desde todos los datos
-  const meses=uniq(DATA.map(r=>normMonth(getFecha(r))));
-  const selM=document.getElementById('fMes');
-  const curM=selM.value;
-  selM.innerHTML='<option value="">Todos</option>';
-  meses.forEach(v=>{ const o=document.createElement('option'); o.value=v; o.textContent=mesLabel(v); selM.appendChild(o); });
-  if(meses.includes(curM)) selM.value=curM;
-  fill('fSem', uniq(DATA.map(r=>r[C.semana])));
-  fill('fUdn', uniq(DATA.map(r=>r[C.udn])));
+// ─── PARSER CSV ──────────────────────────────────────────────────────────────
+function parseCSVLine(line) {
+  const cols=[]; let cur='', inQ=false;
+  for (let i=0; i<line.length; i++) {
+    const ch=line[i];
+    if (ch==='"') { if (inQ&&line[i+1]==='"') { cur+='"'; i++; } else inQ=!inQ; }
+    else if (ch===','&&!inQ) { cols.push(cur.trim()); cur=''; }
+    else cur+=ch;
+  }
+  cols.push(cur.trim());
+  return cols;
+}
+function parseCSV(text) {
+  const lines = text.trim().split(/\r?\n/);
+  if (lines.length < 2) return [];
+  const hdrs = parseCSVLine(lines[0]);
+  // Auto-detectar columna UDN
+  if (!hdrs.includes(C.udn)) {
+    const found = hdrs.find(h =>
+      h==='business_unit' ||
+      h.toLowerCase().includes('business') ||
+      h.toLowerCase().includes('unidad') ||
+      h.toLowerCase().includes('udn') ||
+      h.toLowerCase().includes('negocio')
+    );
+    if (found) { console.log('UDN auto-detectada:', found); C.udn = found; }
+  }
+  const rows = [];
+  for (let i=1; i<lines.length; i++) {
+    if (!lines[i].trim()) continue;
+    const cols = parseCSVLine(lines[i]);
+    const obj  = {};
+    hdrs.forEach((h,idx) => { obj[h] = cols[idx] !== undefined ? cols[idx] : ''; });
+    if (hdrs.some(h => obj[h] && obj[h].trim() !== '')) rows.push(obj);
+  }
+  return rows;
+}
 
-  // Cliente, Gerente, Jefe se filtran según UDN activa
-  const f=getF();
-  const base=DATA.filter(r=>{
-    if(f.udn&&r[C.udn]!==f.udn) return false;
-    if(f.mes&&normMonth(getFecha(r))!==f.mes) return false;
-    if(f.sem&&r[C.semana]!==f.sem) return false;
+// ─── CARGA INICIAL ───────────────────────────────────────────────────────────
+const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID}`;
+
+window.addEventListener('DOMContentLoaded', loadSheet);
+
+async function loadSheet() {
+  const overlay = document.getElementById('loadingOverlay');
+  const loadMsg = document.getElementById('loadingMsg');
+  const banner  = document.getElementById('errBanner');
+  const errMsg  = document.getElementById('errMsg');
+
+  try {
+    loadMsg.innerHTML = 'Descargando datos...<br>Por favor espera';
+    const res = await fetch(CSV_URL);
+    if (!res.ok) throw new Error('HTTP ' + res.status + '. Verifica que el Sheet sea público.');
+
+    loadMsg.innerHTML = 'Procesando información...<br>Ya casi termina';
+    const allRows = parseCSV(await res.text());
+    if (!allRows.length) throw new Error('Sin filas válidas. Revisa la consola (F12).');
+
+    // Separar todas las filas por mes
+    allRows.forEach(r => {
+      const mes = normMonth(getFecha(r));
+      if (!mes) return;
+      if (!allMonthsMap[mes]) allMonthsMap[mes] = [];
+      allMonthsMap[mes].push(r);
+    });
+
+    const mesActual  = getCurrentMonth();
+    const mesesDisp  = Object.keys(allMonthsMap).sort((a,b) => b.localeCompare(a));
+    const mesCarga   = allMonthsMap[mesActual] ? mesActual : mesesDisp[0];
+
+    // Cargar solo mes actual a DATA
+    DATA = [...(allMonthsMap[mesCarga] || [])];
+    monthCache[mesCarga] = allMonthsMap[mesCarga];
+    loadedMonths.add(mesCarga);
+
+    if (banner) banner.classList.add('hidden');
+    if (overlay) { overlay.classList.add('hidden'); setTimeout(() => overlay.style.display='none', 450); }
+
+    fillSelects();
+    draw();
+
+    // Cargar el resto en background sin bloquear
+    loadRemainingBackground(mesesDisp, mesCarga);
+
+  } catch(e) {
+    console.error(e);
+    if (overlay) overlay.style.display = 'none';
+    if (banner && errMsg) { errMsg.textContent = e.message; banner.classList.remove('hidden'); }
+  }
+}
+
+// Agrega los meses restantes a DATA en background, de más reciente a más antiguo
+async function loadRemainingBackground(mesesDisp, mesCargado) {
+  const pending = mesesDisp.filter(m => m !== mesCargado);
+  for (const mes of pending) {
+    if (loadedMonths.has(mes)) continue;
+    await new Promise(r => setTimeout(r, 200)); // pequeña pausa para no bloquear UI
+    const rows = allMonthsMap[mes] || [];
+    DATA.push(...rows);
+    monthCache[mes] = rows;
+    loadedMonths.add(mes);
+    updateMesSelect(); // actualizar select sin perder selección
+    console.log(`⬇️ BG: ${mes} (${rows.length} filas) — Total: ${DATA.length}`);
+  }
+  bgLoadDone = true;
+  console.log('✅ Todos los meses disponibles en DATA');
+}
+
+// Actualiza el select de mes silenciosamente
+function updateMesSelect() {
+  const selM   = document.getElementById('fMes');
+  const curVal = selM.value;
+  const meses  = [...loadedMonths].sort((a,b) => b.localeCompare(a));
+  selM.innerHTML = '<option value="">Todos</option>';
+  meses.forEach(v => {
+    const o = document.createElement('option');
+    o.value = v; o.textContent = mesLabel(v);
+    selM.appendChild(o);
+  });
+  if (curVal && loadedMonths.has(curVal)) selM.value = curVal;
+}
+
+// ─── FILTROS EN CASCADA ──────────────────────────────────────────────────────
+function fillSelects() {
+  updateMesSelect();
+  fill('fSem', uniq(DATA.map(r => r[C.semana])));
+  fill('fUdn', uniq(DATA.map(r => r[C.udn])));
+  cascadeSelects();
+}
+
+// Recalcula Cliente → Gerente → Jefe según filtros superiores activos
+function cascadeSelects() {
+  const f = getF();
+
+  // Base: UDN + Mes + Semana
+  const base = DATA.filter(r => {
+    if (f.udn && r[C.udn] !== f.udn) return false;
+    if (f.mes && normMonth(getFecha(r)) !== f.mes) return false;
+    if (f.sem && r[C.semana] !== f.sem) return false;
     return true;
   });
-  fill('fCli', uniq(base.map(r=>r[C.cliente])));
-  fill('fGer', uniq(base.map(r=>r[C.gerente])));
-  fill('fJef', uniq(base.map(r=>r[C.jefe])));
+
+  // Clientes desde base
+  fill('fCli', uniq(base.map(r => r[C.cliente])));
+
+  // Gerentes: base + filtro de cliente si está seleccionado
+  const baseGer = f.cli ? base.filter(r => r[C.cliente] === f.cli) : base;
+  fill('fGer', uniq(baseGer.map(r => r[C.gerente])));
+
+  // Jefes: base + cliente + gerente
+  const baseJef = f.ger ? baseGer.filter(r => r[C.gerente] === f.ger) : baseGer;
+  fill('fJef', uniq(baseJef.map(r => r[C.jefe])));
 }
-function fill(id,vals){
-  const sel=document.getElementById(id); if(!sel) return;
-  const cur=sel.value;
-  sel.innerHTML='<option value="">Todos</option>';
-  vals.forEach(v=>{ const o=document.createElement('option'); o.value=v; o.textContent=v; sel.appendChild(o); });
-  if(vals.includes(cur)) sel.value=cur;
+
+// Manejador centralizado de cambios en filtros
+function onFilterChange(changedId) {
+  const f = getF();
+
+  // Si el usuario seleccionó un mes que aún no terminó de cargarse en BG
+  if (changedId === 'fMes' && f.mes && !loadedMonths.has(f.mes)) {
+    showMini('Cargando ' + mesLabel(f.mes) + '...');
+    const wait = setInterval(() => {
+      if (loadedMonths.has(f.mes)) {
+        clearInterval(wait);
+        hideMini();
+        cascadeSelects();
+        draw();
+      }
+    }, 150);
+    return;
+  }
+
+  // Recascadear según qué cambió
+  if (['fUdn','fMes','fSem'].includes(changedId)) {
+    cascadeSelects();
+  } else if (changedId === 'fCli') {
+    // Cliente cambió → recalcular Gerente y Jefe
+    const base = DATA.filter(r => {
+      if (f.udn && r[C.udn] !== f.udn) return false;
+      if (f.mes && normMonth(getFecha(r)) !== f.mes) return false;
+      if (f.sem && r[C.semana] !== f.sem) return false;
+      if (f.cli && r[C.cliente] !== f.cli) return false;
+      return true;
+    });
+    fill('fGer', uniq(base.map(r => r[C.gerente])));
+    fill('fJef', uniq(base.map(r => r[C.jefe])));
+  } else if (changedId === 'fGer') {
+    // Gerente cambió → recalcular solo Jefe
+    const base = DATA.filter(r => {
+      if (f.udn && r[C.udn] !== f.udn) return false;
+      if (f.mes && normMonth(getFecha(r)) !== f.mes) return false;
+      if (f.sem && r[C.semana] !== f.sem) return false;
+      if (f.cli && r[C.cliente] !== f.cli) return false;
+      if (f.ger && r[C.gerente] !== f.ger) return false;
+      return true;
+    });
+    fill('fJef', uniq(base.map(r => r[C.jefe])));
+  }
+
+  draw();
 }
-function getF(){
-  return{
+
+// ─── UTILIDADES ──────────────────────────────────────────────────────────────
+const uniq = arr => [...new Set(arr.filter(v => v && v.trim()))].sort();
+const N    = n   => n.toLocaleString('es-MX');
+function pctColor(p)         { return p >= 90 ? '#16a34a' : '#e53e3e'; }
+function pctColorLlegadas(p) { return p >= 98 ? '#16a34a' : '#e53e3e'; }
+function countLate(v) { const n = parseInt(v)||0; return n<0?1:n; }
+
+function fill(id, vals) {
+  const sel = document.getElementById(id); if (!sel) return;
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">Todos</option>';
+  vals.forEach(v => { const o=document.createElement('option'); o.value=v; o.textContent=v; sel.appendChild(o); });
+  if (vals.includes(cur)) sel.value = cur;
+}
+
+function getF() {
+  return {
     mes: document.getElementById('fMes').value,
     sem: document.getElementById('fSem').value,
     udn: document.getElementById('fUdn').value,
@@ -682,331 +739,369 @@ function getF(){
     ff:  document.getElementById('fFf').value,
   };
 }
-function resetFilters(){
-  ['fMes','fSem','fUdn','fCli','fGer','fJef'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('fFi').value=''; document.getElementById('fFf').value='';
+
+function resetFilters() {
+  ['fMes','fSem','fUdn','fCli','fGer','fJef'].forEach(id => document.getElementById(id).value='');
+  document.getElementById('fFi').value='';
+  document.getElementById('fFf').value='';
+  fillSelects();
   draw();
 }
-function filterRows(){
-  const f=getF();
-  return DATA.filter(r=>{
-    if(f.mes&&normMonth(getFecha(r))!==f.mes) return false;
-    if(f.sem&&r[C.semana]!==f.sem) return false;
-    if(f.udn&&r[C.udn]!==f.udn) return false;
-    if(f.cli&&r[C.cliente]!==f.cli) return false;
-    if(f.ger&&r[C.gerente]!==f.ger) return false;
-    if(f.jef&&r[C.jefe]!==f.jef) return false;
-    const d=getFecha(r);
-    if(f.fi&&d<f.fi) return false;
-    if(f.ff&&d>f.ff) return false;
+
+function filterRows() {
+  const f = getF();
+  return DATA.filter(r => {
+    if (f.mes && normMonth(getFecha(r)) !== f.mes) return false;
+    if (f.sem && r[C.semana]  !== f.sem) return false;
+    if (f.udn && r[C.udn]     !== f.udn) return false;
+    if (f.cli && r[C.cliente] !== f.cli) return false;
+    if (f.ger && r[C.gerente] !== f.ger) return false;
+    if (f.jef && r[C.jefe]    !== f.jef) return false;
+    const d = getFecha(r);
+    if (f.fi && d < f.fi) return false;
+    if (f.ff && d > f.ff) return false;
     return true;
   });
 }
 
-// ─── TABS ────────────────────────────────────────────────────
-function switchTab(tab){
-  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',i===(tab==='inicios'?0:1)));
-  document.getElementById('panel-inicios').classList.toggle('active',tab==='inicios');
-  document.getElementById('panel-llegadas').classList.toggle('active',tab==='llegadas');
+// ─── TABS ─────────────────────────────────────────────────────────────────────
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach((b,i) =>
+    b.classList.toggle('active', i===(tab==='inicios'?0:1)));
+  document.getElementById('panel-inicios').classList.toggle('active',  tab==='inicios');
+  document.getElementById('panel-llegadas').classList.toggle('active', tab==='llegadas');
 }
 
-// ─── TABLAS ──────────────────────────────────────────────────
-const sortState={cli:{col:3,dir:-1},ger:{col:3,dir:-1},jef:{col:3,dir:-1},lcli:{col:3,dir:-1},lger:{col:3,dir:-1},ljef:{col:3,dir:-1}};
-const tableData={cli:[],ger:[],jef:[],lcli:[],lger:[],ljef:[]};
-const TABLE_BODY={cli:'tCliBody',ger:'tGerBody',jef:'tJefBody',lcli:'ltCliBody',lger:'ltGerBody',ljef:'ltJefBody'};
-const TABLE_CNT={cli:'tCliCount',ger:'tGerCount',jef:'tJefCount',lcli:'ltCliCount',lger:'ltGerCount',ljef:'ltJefCount'};
-const TABLE_WORD={cli:'cliente',ger:'gerente',jef:'jefe',lcli:'cliente',lger:'gerente',ljef:'jefe'};
+// ─── TABLAS ───────────────────────────────────────────────────────────────────
+const sortState = {
+  cli:{col:3,dir:-1}, ger:{col:3,dir:-1}, jef:{col:3,dir:-1},
+  lcli:{col:3,dir:-1}, lger:{col:3,dir:-1}, ljef:{col:3,dir:-1}
+};
+const tableData = { cli:[], ger:[], jef:[], lcli:[], lger:[], ljef:[] };
+const TABLE_BODY = { cli:'tCliBody', ger:'tGerBody', jef:'tJefBody', lcli:'ltCliBody', lger:'ltGerBody', ljef:'ltJefBody' };
+const TABLE_CNT  = { cli:'tCliCount', ger:'tGerCount', jef:'tJefCount', lcli:'ltCliCount', lger:'ltGerCount', ljef:'ltJefCount' };
+const TABLE_WORD = { cli:'cliente', ger:'gerente', jef:'jefe', lcli:'cliente', lger:'gerente', ljef:'jefe' };
 
-function sortTable(tbl){
-  sortState[tbl].dir*=-1;
+function sortTable(tbl) {
+  sortState[tbl].dir *= -1;
   renderTable(tbl);
-  const btn=document.getElementById('sort-'+tbl);
-  if(btn) btn.textContent=sortState[tbl].dir===-1?'↓':'↑';
+  const btn = document.getElementById('sort-'+tbl);
+  if (btn) btn.textContent = sortState[tbl].dir===-1 ? '↓' : '↑';
 }
-function renderTable(tbl){
-  const isL=tbl.startsWith('l');
-  const colorFn=isL?pctColorLlegadas:pctColor;
-  let rows=[...tableData[tbl]].sort((a,b)=>(a.pct-b.pct)*sortState[tbl].dir);
-  const bodyId=TABLE_BODY[tbl], countId=TABLE_CNT[tbl], word=TABLE_WORD[tbl];
-  const badges=['#f59e0b','#9ca3af','#b45309'];
-  document.getElementById(countId).textContent=rows.length+(rows.length===1?' '+word:' '+word+'s');
-  if(!rows.length){document.getElementById(bodyId).innerHTML='<tr><td colspan="5" class="table-empty">Sin resultados</td></tr>';return;}
-  document.getElementById(bodyId).innerHTML=rows.map((row,i)=>{
-    const pctFmt=row.pct.toFixed(1)+'%', color=colorFn(row.pct), barW=Math.min(100,row.pct).toFixed(1);
-    const bg=i<3?badges[i]:'#e5e7eb', fg=i<3?'#fff':'#6b7a99';
+
+function renderTable(tbl) {
+  const isL     = tbl.startsWith('l');
+  const colorFn = isL ? pctColorLlegadas : pctColor;
+  const rows    = [...tableData[tbl]].sort((a,b) => (a.pct-b.pct)*sortState[tbl].dir);
+  const bodyId  = TABLE_BODY[tbl], countId=TABLE_CNT[tbl], word=TABLE_WORD[tbl];
+  const badges  = ['#f59e0b','#9ca3af','#b45309'];
+
+  document.getElementById(countId).textContent = rows.length+(rows.length===1?' '+word:' '+word+'s');
+
+  if (!rows.length) {
+    document.getElementById(bodyId).innerHTML = '<tr><td colspan="5" class="table-empty">Sin resultados</td></tr>';
+    return;
+  }
+
+  document.getElementById(bodyId).innerHTML = rows.map((row,i) => {
+    const pctFmt = row.pct.toFixed(1)+'%';
+    const color  = colorFn(row.pct);
+    const barW   = Math.min(100,row.pct).toFixed(1);
+    const bg     = i<3 ? badges[i] : '#e5e7eb';
+    const fg     = i<3 ? '#fff' : '#6b7a99';
     const isCliTable = (tbl==='cli'||tbl==='lcli');
-    const clickAttr = isCliTable ? `onclick="openDrill('${row.k.replace(/'/g,"\\'")}','${tbl}')" class="row-clickable"` : '';
+    const clickAttr  = isCliTable
+      ? `onclick="openDrill('${row.k.replace(/'/g,"\\'")}','${tbl}')" class="row-clickable"`
+      : '';
     return `<tr ${clickAttr}>
       <td style="width:44px"><span class="rank-badge" style="background:${bg};color:${fg}">${i+1}</span></td>
       <td class="td-cli" title="${row.k}">${row.k}${isCliTable?' <span style="font-size:.6rem;color:var(--muted)">▶</span>':''}</td>
       <td class="td-num">${N(row.t)}</td>
       <td class="td-late">${N(row.l)}</td>
-      <td><div class="pct-cell"><div class="pct-bar-wrap"><div class="pct-bar" style="width:${barW}%;background:${color}"></div></div><span class="pct-val" style="color:${color}">${pctFmt}</span></div></td>
+      <td><div class="pct-cell">
+        <div class="pct-bar-wrap"><div class="pct-bar" style="width:${barW}%;background:${color}"></div></div>
+        <span class="pct-val" style="color:${color}">${pctFmt}</span>
+      </div></td>
     </tr>`;
   }).join('');
 }
-function buildTable(rows, field, tbl, lateField){
-  const byKey={};
-  rows.forEach(r=>{
-    const k=(r[field]||'').trim()||'(Sin asignar)';
-    if(!byKey[k]) byKey[k]={t:0,l:0};
-    byKey[k].t+=parseInt(r[C.viajes])||1;
-    byKey[k].l+=countLate(r[lateField]);
+
+function buildTable(rows, field, tbl, lateField) {
+  const byKey = {};
+  rows.forEach(r => {
+    const k = (r[field]||'').trim()||'(Sin asignar)';
+    if (!byKey[k]) byKey[k] = {t:0, l:0};
+    byKey[k].t += parseInt(r[C.viajes])||1;
+    byKey[k].l += countLate(r[lateField]);
   });
-  tableData[tbl]=Object.entries(byKey).map(([k,d])=>({k,t:d.t,l:d.l,pct:d.t>0?(d.t-d.l)/d.t*100:0}));
+  tableData[tbl] = Object.entries(byKey).map(([k,d]) => ({
+    k, t:d.t, l:d.l, pct: d.t>0 ? (d.t-d.l)/d.t*100 : 0
+  }));
   renderTable(tbl);
 }
 
-// ─── AGRUPACIÓN GRÁFICA ──────────────────────────────────────
-const chartGroup = { ini: 'dia', lle: 'dia' };
+// ─── AGRUPACIÓN GRÁFICA ───────────────────────────────────────────────────────
+const chartGroup = { ini:'dia', lle:'dia' };
 
-function setGroup(chart, group){
+function setGroup(chart, group) {
   chartGroup[chart] = group;
-  // Update button styles
-  document.querySelectorAll(`#grp-${chart} .grp-btn`).forEach(b=>{
-    b.classList.toggle('active', b.textContent.toLowerCase().startsWith(group==='dia'?'d':group==='semana'?'s':group==='mes'?'m':'a'));
+  document.querySelectorAll(`#grp-${chart} .grp-btn`).forEach(b => {
+    b.classList.toggle('active',
+      b.textContent.toLowerCase().startsWith(
+        group==='dia'?'d':group==='semana'?'s':group==='mes'?'m':'a'
+      )
+    );
   });
-  // Rebuild only this chart
   const rows = filterRows();
-  if(chart==='ini'){
-    myChartIni = buildChart('chart-ini', rows, C.retardo, 'Inicios tarde', myChartIni, 'ini');
-  } else {
-    myChartLle = buildChart('chart-lle', rows, C.llegada, 'Llegadas tarde', myChartLle, 'lle');
-  }
+  if (chart==='ini') myChartIni = buildChart('chart-ini', rows, C.retardo, 'Inicios tarde',  myChartIni, 'ini');
+  else               myChartLle = buildChart('chart-lle', rows, C.llegada, 'Llegadas tarde', myChartLle, 'lle');
 }
 
-function getGroupKey(r, group){
-  const f = getFecha(r);
-  if(!f) return '?';
-  if(group==='dia')    return f;                        // YYYY-MM-DD
-  if(group==='semana') return r[C.semana]||f.slice(0,7); // Semana col
-  if(group==='mes')    return f.slice(0,7);             // YYYY-MM
-  if(group==='año')    return f.slice(0,4);             // YYYY
+function getGroupKey(r, group) {
+  const f = getFecha(r); if (!f) return '?';
+  if (group==='dia')    return f;
+  if (group==='semana') return r[C.semana]||f.slice(0,7);
+  if (group==='mes')    return f.slice(0,7);
+  if (group==='año')    return f.slice(0,4);
   return f;
 }
 
-function formatGroupLabel(key, group){
-  if(group==='dia'){
+function formatGroupLabel(key, group) {
+  if (group==='dia') {
     const dt = new Date(key+'T12:00:00');
-    if(isNaN(dt.getTime())) return key;
-    return dt.toLocaleDateString('es-MX',{day:'2-digit',month:'short'});
+    if (isNaN(dt.getTime())) return key;
+    return dt.toLocaleDateString('es-MX', {day:'2-digit', month:'short'});
   }
-  if(group==='mes'){
+  if (group==='mes') {
     const [y,m] = key.split('-');
     return (MESES[parseInt(m,10)-1]||m)+' '+y;
   }
-  return key; // semana o año: mostrar tal cual
+  return key;
 }
 
-// ─── GRÁFICA ─────────────────────────────────────────────────
-function buildChart(canvasId, rows, lateField, lateLbl, existing, chartId){
+// ─── GRÁFICA ──────────────────────────────────────────────────────────────────
+function buildChart(canvasId, rows, lateField, lateLbl, existing, chartId) {
   const group = chartGroup[chartId||'ini'];
-  const by={};
-  rows.forEach(r=>{
+  const by    = {};
+  rows.forEach(r => {
     const key = getGroupKey(r, group);
-    if(!key||key==='?') return;
-    if(!by[key]) by[key]={t:0,l:0};
+    if (!key||key==='?') return;
+    if (!by[key]) by[key] = {t:0, l:0};
     by[key].t += parseInt(r[C.viajes])||1;
     by[key].l += countLate(r[lateField]);
   });
-  const keys = Object.keys(by).sort((a,b)=>{
-    // Si es semana, ordenar numéricamente
-    if(group==='semana'){
-      const na=parseInt(a)||0, nb=parseInt(b)||0;
-      return na-nb;
-    }
-    // Para dia, mes, año: orden lexicográfico es correcto (YYYY-MM-DD / YYYY-MM / YYYY)
+  const keys  = Object.keys(by).sort((a,b) => {
+    if (group==='semana') return (parseInt(a)||0)-(parseInt(b)||0);
     return a.localeCompare(b);
   });
-  const tots  = keys.map(k=>by[k].t);
-  const lates = keys.map(k=>by[k].l);
-  const pcts  = keys.map(k=>by[k].t>0?+((by[k].t-by[k].l)/by[k].t*100).toFixed(1):0);
-  const labels = keys.map(k=>formatGroupLabel(k, group));
-  if(existing) existing.destroy();
-  const ctx=document.getElementById(canvasId).getContext('2d');
-  return new Chart(ctx,{type:'bar',data:{labels,datasets:[
-    {label:'En tiempo',data:tots.map((t,i)=>t-lates[i]),backgroundColor:'#4a4a4a',stack:'s',order:2,borderRadius:{topLeft:0,topRight:0,bottomLeft:4,bottomRight:4},barPercentage:.6},
-    {label:lateLbl,data:lates,backgroundColor:'#e8a055',stack:'s',order:2,borderRadius:{topLeft:4,topRight:4,bottomLeft:0,bottomRight:0},barPercentage:.6},
-    {label:'% Cumplimiento',data:pcts,type:'line',yAxisID:'yP',order:1,borderColor:'#2a2a2a',backgroundColor:'rgba(42,42,42,.07)',borderWidth:2.5,pointBackgroundColor:'#2a2a2a',pointBorderColor:'#fff',pointBorderWidth:2,pointRadius:5,pointHoverRadius:7,tension:.3,fill:true},
-  ]},options:{
-    responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
-    plugins:{legend:{display:false},tooltip:{backgroundColor:'#1a2236',borderColor:'#7ed321',borderWidth:1,titleColor:'#fff',bodyColor:'rgba(255,255,255,.65)',padding:12,
-      callbacks:{label(c){return c.dataset.label==='% Cumplimiento'?'  % Cumpl.: '+c.raw+'%':'  '+c.dataset.label+': '+c.raw.toLocaleString('es-MX');}}}},
-    scales:{
-      x:{stacked:true,ticks:{color:'#6b7a99',font:{size:10,family:'Inter'}},grid:{color:'rgba(0,0,0,.05)'}},
-      y:{stacked:true,ticks:{color:'#6b7a99',font:{size:10}},grid:{color:'rgba(0,0,0,.05)'}},
-      yP:{position:'right',ticks:{color:'#2a2a2a',font:{size:10},callback:v=>v+'%'},grid:{display:false}},
-    }
-  },plugins:[{id:'lbl',afterDatasetsDraw(chart){
-    const c2=chart.ctx;
-    const li=chart.data.datasets.findIndex(d=>d.label==='% Cumplimiento');
-    chart.getDatasetMeta(li).data.forEach((pt,i)=>{
-      const v=chart.data.datasets[li].data[i]; if(v==null) return;
-      c2.save();c2.fillStyle='#2a2a2a';c2.font='bold 10px Inter';c2.textAlign='center';c2.fillText(v+'%',pt.x,pt.y-10);c2.restore();
-    });
-    [lateLbl,'En tiempo'].forEach((lbl,idx)=>{
-      const bi=chart.data.datasets.findIndex(d=>d.label===lbl);
-      chart.getDatasetMeta(bi).data.forEach((bar,i)=>{
-        const v=chart.data.datasets[bi].data[i]; if(!v||bar.height<14) return;
-        c2.save();c2.fillStyle=idx===0?'#1a1a1a':'#ffffff';c2.font='bold 10px Inter';
-        c2.textAlign='center';c2.textBaseline='middle';c2.fillText(v.toLocaleString('es-MX'),bar.x,bar.y+bar.height/2);c2.restore();
+  const tots   = keys.map(k => by[k].t);
+  const lates  = keys.map(k => by[k].l);
+  const pcts   = keys.map(k => by[k].t>0 ? +((by[k].t-by[k].l)/by[k].t*100).toFixed(1) : 0);
+  const labels = keys.map(k => formatGroupLabel(k, group));
+
+  if (existing) existing.destroy();
+  const ctx = document.getElementById(canvasId).getContext('2d');
+  return new Chart(ctx, {
+    type:'bar',
+    data:{ labels, datasets:[
+      { label:'En tiempo', data:tots.map((t,i)=>t-lates[i]),
+        backgroundColor:'#4a4a4a', stack:'s', order:2,
+        borderRadius:{topLeft:0,topRight:0,bottomLeft:4,bottomRight:4}, barPercentage:.6 },
+      { label:lateLbl, data:lates,
+        backgroundColor:'#e8a055', stack:'s', order:2,
+        borderRadius:{topLeft:4,topRight:4,bottomLeft:0,bottomRight:0}, barPercentage:.6 },
+      { label:'% Cumplimiento', data:pcts, type:'line', yAxisID:'yP', order:1,
+        borderColor:'#2a2a2a', backgroundColor:'rgba(42,42,42,.07)',
+        borderWidth:2.5, pointBackgroundColor:'#2a2a2a', pointBorderColor:'#fff',
+        pointBorderWidth:2, pointRadius:5, pointHoverRadius:7, tension:.3, fill:true },
+    ]},
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      interaction:{mode:'index', intersect:false},
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          backgroundColor:'#1a2236', borderColor:'#7ed321', borderWidth:1,
+          titleColor:'#fff', bodyColor:'rgba(255,255,255,.65)', padding:12,
+          callbacks:{label(c){
+            return c.dataset.label==='% Cumplimiento'
+              ? '  % Cumpl.: '+c.raw+'%'
+              : '  '+c.dataset.label+': '+c.raw.toLocaleString('es-MX');
+          }}
+        }
+      },
+      scales:{
+        x:  { stacked:true, ticks:{color:'#6b7a99',font:{size:10,family:'Inter'}}, grid:{color:'rgba(0,0,0,.05)'} },
+        y:  { stacked:true, ticks:{color:'#6b7a99',font:{size:10}}, grid:{color:'rgba(0,0,0,.05)'} },
+        yP: { position:'right', ticks:{color:'#2a2a2a',font:{size:10},callback:v=>v+'%'}, grid:{display:false} },
+      }
+    },
+    plugins:[{id:'lbl', afterDatasetsDraw(chart){
+      const c2 = chart.ctx;
+      const li = chart.data.datasets.findIndex(d=>d.label==='% Cumplimiento');
+      chart.getDatasetMeta(li).data.forEach((pt,i)=>{
+        const v=chart.data.datasets[li].data[i]; if(v==null) return;
+        c2.save(); c2.fillStyle='#2a2a2a'; c2.font='bold 10px Inter';
+        c2.textAlign='center'; c2.fillText(v+'%',pt.x,pt.y-10); c2.restore();
       });
-    });
-  }}]});
+      [lateLbl,'En tiempo'].forEach((lbl,idx)=>{
+        const bi=chart.data.datasets.findIndex(d=>d.label===lbl);
+        chart.getDatasetMeta(bi).data.forEach((bar,i)=>{
+          const v=chart.data.datasets[bi].data[i]; if(!v||bar.height<14) return;
+          c2.save(); c2.fillStyle=idx===0?'#1a1a1a':'#ffffff'; c2.font='bold 10px Inter';
+          c2.textAlign='center'; c2.textBaseline='middle';
+          c2.fillText(v.toLocaleString('es-MX'),bar.x,bar.y+bar.height/2); c2.restore();
+        });
+      });
+    }}]
+  });
 }
 
-// ─── DRAW ────────────────────────────────────────────────────
-function draw(){
-  if(!DATA.length) return;
-  const rows=filterRows(), f=getF();
-  const parts=[];
-  if(f.mes) parts.push(mesLabel(f.mes));
-  if(f.sem) parts.push('Sem '+f.sem);
-  if(f.udn) parts.push(f.udn);
-  if(f.cli) parts.push(f.cli);
-  if(f.ger) parts.push('Ger: '+f.ger);
-  if(f.jef) parts.push('Jefe: '+f.jef);
-  const sfx=parts.length?' – '+parts.join(' · '):'';
+// ─── DRAW ─────────────────────────────────────────────────────────────────────
+function draw() {
+  if (!DATA.length) return;
+  const rows = filterRows(), f = getF();
+  const parts = [];
+  if (f.mes) parts.push(mesLabel(f.mes));
+  if (f.sem) parts.push('Sem '+f.sem);
+  if (f.udn) parts.push(f.udn);
+  if (f.cli) parts.push(f.cli);
+  if (f.ger) parts.push('Ger: '+f.ger);
+  if (f.jef) parts.push('Jefe: '+f.jef);
+  const sfx = parts.length ? ' – '+parts.join(' · ') : '';
 
-  const totT=rows.reduce((s,r)=>s+(parseInt(r[C.viajes])||1),0);
-  const totI=rows.reduce((s,r)=>s+countLate(r[C.retardo]),0);
-  const totLL=rows.reduce((s,r)=>s+countLate(r[C.llegada]),0);
+  const totT  = rows.reduce((s,r) => s+(parseInt(r[C.viajes])||1), 0);
+  const totI  = rows.reduce((s,r) => s+countLate(r[C.retardo]), 0);
+  const totLL = rows.reduce((s,r) => s+countLate(r[C.llegada]), 0);
 
-  document.getElementById('kTotal').textContent=N(totT);
-  document.getElementById('kTarde').textContent=N(totI);
-  const pI=totT>0?(totT-totI)/totT*100:0;
-  const kp=document.getElementById('kPct'); kp.textContent=totT>0?pI.toFixed(1)+'%':'–'; kp.style.color=pctColor(pI);
+  document.getElementById('kTotal').textContent  = N(totT);
+  document.getElementById('kTarde').textContent  = N(totI);
+  document.getElementById('lkTotal').textContent = N(totT);
+  document.getElementById('lkTarde').textContent = N(totLL);
 
-  document.getElementById('lkTotal').textContent=N(totT);
-  document.getElementById('lkTarde').textContent=N(totLL);
-  const pL=totT>0?(totT-totLL)/totT*100:0;
-  const lp=document.getElementById('lkPct'); lp.textContent=totT>0?pL.toFixed(1)+'%':'–'; lp.style.color=pctColorLlegadas(pL);
+  const pI = totT>0 ? (totT-totI)/totT*100  : 0;
+  const pL = totT>0 ? (totT-totLL)/totT*100 : 0;
+  const kp = document.getElementById('kPct');
+  kp.textContent = totT>0 ? pI.toFixed(1)+'%' : '–'; kp.style.color = pctColor(pI);
+  const lp = document.getElementById('lkPct');
+  lp.textContent = totT>0 ? pL.toFixed(1)+'%' : '–'; lp.style.color = pctColorLlegadas(pL);
 
-  ['chartTitle','tCliTitle','tGerTitle','tJefTitle'].forEach((id,i)=>
-    document.getElementById(id).textContent=['Inicios Tarde por Día','Resumen por Cliente','Resumen por Gerente','Resumen por Jefe'][i]+sfx);
-  ['lChartTitle','ltCliTitle','ltGerTitle','ltJefTitle'].forEach((id,i)=>
-    document.getElementById(id).textContent=['Llegadas Tarde por Día','Resumen por Cliente','Resumen por Gerente','Resumen por Jefe'][i]+sfx);
+  ['chartTitle','tCliTitle','tGerTitle','tJefTitle'].forEach((id,i) =>
+    document.getElementById(id).textContent =
+      ['Inicios Tarde por Día','Resumen por Cliente','Resumen por Gerente','Resumen por Jefe'][i]+sfx);
+  ['lChartTitle','ltCliTitle','ltGerTitle','ltJefTitle'].forEach((id,i) =>
+    document.getElementById(id).textContent =
+      ['Llegadas Tarde por Día','Resumen por Cliente','Resumen por Gerente','Resumen por Jefe'][i]+sfx);
 
-  myChartIni=buildChart('chart-ini',rows,C.retardo,'Inicios tarde',myChartIni,'ini');
-  myChartLle=buildChart('chart-lle',rows,C.llegada,'Llegadas tarde',myChartLle,'lle');
-  buildTable(rows,C.cliente,'cli',C.retardo);
-  buildTable(rows,C.gerente,'ger',C.retardo);
-  buildTable(rows,C.jefe,   'jef',C.retardo);
-  buildTable(rows,C.cliente,'lcli',C.llegada);
-  buildTable(rows,C.gerente,'lger',C.llegada);
-  buildTable(rows,C.jefe,   'ljef',C.llegada);
+  myChartIni = buildChart('chart-ini', rows, C.retardo, 'Inicios tarde',  myChartIni, 'ini');
+  myChartLle = buildChart('chart-lle', rows, C.llegada, 'Llegadas tarde', myChartLle, 'lle');
+  buildTable(rows, C.cliente, 'cli',  C.retardo);
+  buildTable(rows, C.gerente, 'ger',  C.retardo);
+  buildTable(rows, C.jefe,    'jef',  C.retardo);
+  buildTable(rows, C.cliente, 'lcli', C.llegada);
+  buildTable(rows, C.gerente, 'lger', C.llegada);
+  buildTable(rows, C.jefe,    'ljef', C.llegada);
 }
 
-async function captureTable(cardId,label){
-  const card=document.getElementById(cardId); if(!card) return;
-  try{
-    const canvas=await html2canvas(card,{scale:2,backgroundColor:'#ffffff',useCORS:true,logging:false});
-    const link=document.createElement('a');
-    link.download=`Traxion_${label}_${new Date().toISOString().slice(0,10)}.png`;
-    link.href=canvas.toDataURL('image/png'); link.click();
-  }catch(err){alert('Error al capturar: '+err.message);}
+// ─── CAPTURA ──────────────────────────────────────────────────────────────────
+async function captureTable(cardId, label) {
+  const card = document.getElementById(cardId); if (!card) return;
+  try {
+    const canvas = await html2canvas(card, {scale:2, backgroundColor:'#ffffff', useCORS:true, logging:false});
+    const link   = document.createElement('a');
+    link.download = `Traxion_${label}_${new Date().toISOString().slice(0,10)}.png`;
+    link.href = canvas.toDataURL('image/png'); link.click();
+  } catch(err) { alert('Error al capturar: '+err.message); }
 }
 
-// ─── DRILL-DOWN POR CLIENTE ──────────────────────────────────
-let drillSortDir = 1; // 1 = menor a mayor, -1 = mayor a menor
+// ─── DRILL-DOWN ───────────────────────────────────────────────────────────────
+let drillSortDir  = 1;
 let lastDrillArgs = null;
 
-function openDrill(clienteK, tbl){
-  drillSortDir = 1; // reset a menor→mayor cada vez que abres
+function openDrill(clienteK, tbl) {
+  drillSortDir  = 1;
   lastDrillArgs = [clienteK, tbl];
   renderDrill(clienteK, tbl);
   document.getElementById('drillModal').classList.add('open');
 }
-
-function toggleDrillSort(){
+function toggleDrillSort() {
   drillSortDir *= -1;
   const btn = document.getElementById('drillSortBtn');
   btn.textContent = drillSortDir===1 ? '↑ Menor → Mayor' : '↓ Mayor → Menor';
-  if(lastDrillArgs) renderDrill(...lastDrillArgs);
+  if (lastDrillArgs) renderDrill(...lastDrillArgs);
 }
-
-function renderDrill(clienteK, tbl){
+function renderDrill(clienteK, tbl) {
   const isLlegadas = tbl==='lcli';
-  const lateField  = isLlegadas ? C.llegada : C.retardo;
+  const lateField  = isLlegadas ? C.llegada  : C.retardo;
   const lateLbl    = isLlegadas ? 'Llegadas Tarde' : 'Inicios Tarde';
   const colorFn    = isLlegadas ? pctColorLlegadas : pctColor;
-
-  // Filtrar solo filas de este cliente
-  const rows = filterRows().filter(r=>(r[C.cliente]||'').trim()===clienteK);
-
-  // Agrupar por ruta
-  const byRuta={};
-  rows.forEach(r=>{
-    const ruta=(r['des']||'Sin ruta').trim()||'Sin ruta';
-    if(!byRuta[ruta]) byRuta[ruta]={t:0,l:0};
+  const rows = filterRows().filter(r => (r[C.cliente]||'').trim()===clienteK);
+  const byRuta = {};
+  rows.forEach(r => {
+    const ruta = (r['des']||'Sin ruta').trim()||'Sin ruta';
+    if (!byRuta[ruta]) byRuta[ruta] = {t:0, l:0};
     byRuta[ruta].t += parseInt(r[C.viajes])||1;
     byRuta[ruta].l += countLate(r[lateField]);
   });
-
-  // Ordenar por % cumplimiento según dirección actual
   const sorted = Object.entries(byRuta)
-    .map(([k,d])=>({k, t:d.t, l:d.l, pct:d.t>0?(d.t-d.l)/d.t*100:0}))
-    .sort((a,b)=> (a.pct - b.pct) * drillSortDir);
-
-  const totT=sorted.reduce((s,r)=>s+r.t,0);
-  const totL=sorted.reduce((s,r)=>s+r.l,0);
-  const pctG=totT>0?(totT-totL)/totT*100:0;
-
-  document.getElementById('drillTitle').textContent=clienteK;
-  document.getElementById('drillSub').textContent=
+    .map(([k,d]) => ({k, t:d.t, l:d.l, pct:d.t>0?(d.t-d.l)/d.t*100:0}))
+    .sort((a,b) => (a.pct-b.pct)*drillSortDir);
+  const totT = sorted.reduce((s,r)=>s+r.t, 0);
+  const totL = sorted.reduce((s,r)=>s+r.l, 0);
+  const pctG = totT>0 ? (totT-totL)/totT*100 : 0;
+  document.getElementById('drillTitle').textContent = clienteK;
+  document.getElementById('drillSub').textContent   =
     `${lateLbl} · ${sorted.length} rutas · ${N(totT)} viajes · ${pctG.toFixed(1)}% cumplimiento`;
   document.getElementById('drillSortBtn').textContent =
     drillSortDir===1 ? '↑ Menor → Mayor' : '↓ Mayor → Menor';
-
-  document.getElementById('drillBody').innerHTML = sorted.map((r,i)=>{
-    const pctFmt=r.pct.toFixed(1)+'%';
-    const color=colorFn(r.pct);
-    const barW=Math.min(100,r.pct).toFixed(1);
-    const bg = i%2===0?'#ffffff':'#f7f9ff';
+  document.getElementById('drillBody').innerHTML = sorted.map((r,i) => {
+    const color = colorFn(r.pct);
+    const barW  = Math.min(100,r.pct).toFixed(1);
+    const bg    = i%2===0 ? '#ffffff' : '#f7f9ff';
     return `<tr style="background:${bg}">
       <td class="td-ruta">${r.k}</td>
       <td>${N(r.t)}</td>
       <td style="color:${r.l>0?'#d97706':'#16a34a'};font-weight:600">${N(r.l)}</td>
-      <td><div class="pct-cell"><div class="pct-bar-wrap"><div class="pct-bar" style="width:${barW}%;background:${color}"></div></div><span class="pct-val" style="color:${color}">${pctFmt}</span></div></td>
+      <td><div class="pct-cell">
+        <div class="pct-bar-wrap"><div class="pct-bar" style="width:${barW}%;background:${color}"></div></div>
+        <span class="pct-val" style="color:${color}">${r.pct.toFixed(1)}%</span>
+      </div></td>
     </tr>`;
   }).join('');
-
   document.getElementById('drillFoot').textContent =
     `Total: ${N(totT)} viajes · ${N(totL)} ${lateLbl.toLowerCase()} · ${pctG.toFixed(1)}% cumplimiento`;
 }
-
-function closeDrill(e){
-  if(e.target===document.getElementById('drillModal'))
+function closeDrill(e) {
+  if (e.target===document.getElementById('drillModal'))
     document.getElementById('drillModal').classList.remove('open');
 }
-document.addEventListener('keydown',e=>{
-  if(e.key==='Escape') document.getElementById('drillModal').classList.remove('open');
+document.addEventListener('keydown', e => {
+  if (e.key==='Escape') document.getElementById('drillModal').classList.remove('open');
 });
 </script>
 
 <script>
-function toggleDropdown(id){
-  const d=document.getElementById(id);
-  document.querySelectorAll('.dropdown').forEach(x=>{if(x.id!==id)x.classList.remove('open');});
+function toggleDropdown(id) {
+  const d = document.getElementById(id);
+  document.querySelectorAll('.dropdown').forEach(x => { if(x.id!==id) x.classList.remove('open'); });
   d.classList.toggle('open');
 }
-document.addEventListener('click',function(e){
-  if(!e.target.closest('.dropdown'))
-    document.querySelectorAll('.dropdown').forEach(d=>d.classList.remove('open'));
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.dropdown'))
+    document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('open'));
 });
 
-function toggleSidebar(){
-  const sb=document.getElementById('sidebar');
-  const isCollapsed=sb.classList.toggle('collapsed');
-  const btn=sb.querySelector('.filter-toggle-btn');
-  btn.innerHTML=(isCollapsed?'▶':'🔽')+' Filtros <span>'+( isCollapsed?'Mostrar':'Ocultar')+'</span>';
+function toggleSidebar() {
+  const sb = document.getElementById('sidebar');
+  const isCollapsed = sb.classList.toggle('collapsed');
+  const btn = sb.querySelector('.filter-toggle-btn');
+  btn.innerHTML = (isCollapsed?'▶':'🔽')+' Filtros <span>'+(isCollapsed?'Mostrar':'Ocultar')+'</span>';
 }
 
-// Auto-colapsar en móvil al cargar
-if(window.innerWidth<=768){
-  document.addEventListener('DOMContentLoaded',()=>{
-    const sb=document.getElementById('sidebar');
-    if(sb){ sb.classList.add('collapsed'); }
+if (window.innerWidth <= 768) {
+  document.addEventListener('DOMContentLoaded', () => {
+    const sb = document.getElementById('sidebar');
+    if (sb) sb.classList.add('collapsed');
   });
 }
 </script>
