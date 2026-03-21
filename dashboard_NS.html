@@ -619,20 +619,16 @@ function parseCSV(text) {
 // 144k filas totales → ~12k filas del mes actual en la primera carga.
 const DATE_COL = 'L'; // columna start_date (DD/MM/YYYY en Sheets)
 
-// Sheets gviz acepta: date 'YYYY-MM-DD' con comillas simples
-// Las fechas en el sheet son DD/MM/YYYY pero la query usa ISO
-function csvUrlMes(yyyymm) {
-  const [y, m] = yyyymm.split('-');
-  const mm   = m.padStart(2,'0');
-  const desde = `${y}-${mm}-01`;
-  const hasta = `${y}-${mm}-31`;
-  const tq = encodeURIComponent(
-    `SELECT * WHERE ${DATE_COL} >= date '${desde}' AND ${DATE_COL} <= date '${hasta}'`
-  );
+// Descarga todo el sheet de una vez pero en paralelo con chunks de filas
+// Usamos LIMIT+OFFSET para bajar el sheet en trozos simultáneos
+const CHUNK = 35000; // filas por chunk — ajusta si tu sheet crece mucho
+
+function csvUrlChunk(offset) {
+  const tq = encodeURIComponent(`SELECT * LIMIT ${CHUNK} OFFSET ${offset}`);
   return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${GID}&tq=${tq}`;
 }
 
-// Descubrir meses: solo col L, parsea DD/MM/YYYY
+// Descubrir cuántas filas hay: pide solo col L para contar
 function csvUrlDescubrirMeses() {
   const tq = encodeURIComponent(`SELECT ${DATE_COL}`);
   return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${GID}&tq=${tq}`;
@@ -647,42 +643,64 @@ async function loadSheet() {
   const errMsg  = document.getElementById('errMsg');
 
   try {
-    // PASO 1: Descubrir meses disponibles (solo col L — muy rápido)
+    // PASO 1: Descubrir meses y total de filas (solo col L — muy rápido)
     loadMsg.innerHTML = 'Detectando períodos disponibles...';
     const resMeses = await fetch(csvUrlDescubrirMeses());
     if (!resMeses.ok) throw new Error('HTTP ' + resMeses.status + '. Verifica que el Sheet sea público.');
-    const textMeses = await resMeses.text();
-    const mesesSet  = new Set();
-    textMeses.trim().split(/\r?\n/).slice(1).forEach(line => {
+    const textMeses  = await resMeses.text();
+    const lineas     = textMeses.trim().split(/\r?\n/).slice(1).filter(l => l.trim());
+    const totalFilas = lineas.length;
+
+    const mesesSet = new Set();
+    lineas.forEach(line => {
       const val = line.replace(/"/g,'').trim();
-      // Formato DD/MM/YYYY (como viene de este sheet)
       if (/^\d{2}\/\d{2}\/\d{4}/.test(val)) {
         const [d,m,y] = val.split('/');
         mesesSet.add(`${y}-${m.padStart(2,'0')}`);
-      }
-      // También soporta YYYY-MM-DD por si acaso
-      else if (/^\d{4}-\d{2}/.test(val)) {
+      } else if (/^\d{4}-\d{2}/.test(val)) {
         mesesSet.add(val.slice(0,7));
       }
     });
+
     const mesesDisp = [...mesesSet].sort((a,b) => b.localeCompare(a));
     if (!mesesDisp.length) throw new Error('No se encontraron fechas válidas en columna ' + DATE_COL);
     console.log('Meses disponibles:', mesesDisp);
+    console.log('Total filas estimadas:', totalFilas);
 
-    // PASO 2: Descargar SOLO el mes actual desde el servidor
+    // PASO 2: Calcular chunks necesarios y descargarlos TODOS EN PARALELO
+    const numChunks = Math.ceil(totalFilas / CHUNK);
+    const offsets   = Array.from({length: numChunks}, (_, i) => i * CHUNK);
+    loadMsg.innerHTML = `Cargando datos en ${numChunks} bloques paralelos...<br>Por favor espera`;
+
+    // Fetch simultáneo de todos los chunks
+    const promises = offsets.map(offset => 
+      fetch(csvUrlChunk(offset))
+        .then(r => r.ok ? r.text() : Promise.reject('HTTP ' + r.status))
+        .then(text => parseCSV(text))
+        .catch(e => { console.warn('Chunk falló offset=' + offset, e); return []; })
+    );
+
+    const chunks = await Promise.all(promises);
+    const allRows = chunks.flat();
+
+    if (!allRows.length) throw new Error('Sin filas válidas. Revisa la consola (F12).');
+    console.log(`✅ Total descargado: ${allRows.length} filas en ${numChunks} chunks paralelos`);
+
+    // PASO 3: Separar por mes en memoria
     const mesActual = getCurrentMonth();
-    const mesCarga  = mesesDisp.includes(mesActual) ? mesActual : mesesDisp[0];
-    loadMsg.innerHTML = `Cargando ${mesLabel(mesCarga)}...<br>Solo este mes por ahora`;
+    const byMonth   = {};
+    allRows.forEach(r => {
+      const mes = normMonth(getFecha(r));
+      if (!mes) return;
+      if (!byMonth[mes]) byMonth[mes] = [];
+      byMonth[mes].push(r);
+    });
 
-    const resMes = await fetch(csvUrlMes(mesCarga));
-    if (!resMes.ok) throw new Error('HTTP ' + resMes.status + ' al cargar mes.');
-    const rows = parseCSV(await resMes.text());
-    if (!rows.length) throw new Error('Sin filas para ' + mesLabel(mesCarga) + '. Revisa la consola.');
-
-    DATA = rows;
-    monthCache[mesCarga] = rows;
+    // Cargar mes actual primero, resto en background inmediato
+    const mesCarga = byMonth[mesActual] ? mesActual : mesesDisp[0];
+    DATA = [...(byMonth[mesCarga] || [])];
+    monthCache[mesCarga] = byMonth[mesCarga] || [];
     loadedMonths.add(mesCarga);
-    console.log(`✅ Mes actual ${mesCarga}: ${rows.length} filas`);
 
     if (banner) banner.classList.add('hidden');
     if (overlay) { overlay.classList.add('hidden'); setTimeout(() => overlay.style.display='none', 450); }
@@ -690,8 +708,16 @@ async function loadSheet() {
     fillSelects();
     draw();
 
-    // PASO 3: Cargar el resto de meses en background uno a uno
-    loadRemainingBackground(mesesDisp, mesCarga);
+    // Agregar el resto de meses al DATA inmediatamente (ya están en memoria)
+    mesesDisp.filter(m => m !== mesCarga).forEach(mes => {
+      const rows = byMonth[mes] || [];
+      DATA.push(...rows);
+      monthCache[mes] = rows;
+      loadedMonths.add(mes);
+    });
+    updateMesSelect();
+    bgLoadDone = true;
+    console.log('✅ Todos los meses disponibles. Total:', DATA.length);
 
   } catch(e) {
     console.error(e);
@@ -700,28 +726,8 @@ async function loadSheet() {
   }
 }
 
-// Descarga cada mes restante en background, silenciosamente
-async function loadRemainingBackground(mesesDisp, mesCargado) {
-  const pending = mesesDisp.filter(m => m !== mesCargado);
-  for (const mes of pending) {
-    if (loadedMonths.has(mes)) continue;
-    await new Promise(r => setTimeout(r, 500)); // pausa entre requests para no saturar
-    try {
-      const res  = await fetch(csvUrlMes(mes));
-      if (!res.ok) { console.warn(`⚠️ No se pudo cargar ${mes}`); continue; }
-      const rows = parseCSV(await res.text());
-      DATA.push(...rows);
-      monthCache[mes] = rows;
-      loadedMonths.add(mes);
-      updateMesSelect();
-      console.log(`⬇️ BG: ${mes} — ${rows.length} filas (total acumulado: ${DATA.length})`);
-    } catch(e) {
-      console.warn(`⚠️ Error en BG al cargar ${mes}:`, e.message);
-    }
-  }
-  bgLoadDone = true;
-  console.log('✅ Todos los meses cargados. Total filas:', DATA.length);
-}
+// Ya no se necesita loadRemainingBackground — todo carga en paralelo arriba
+async function loadRemainingBackground() {}
 
 // Actualiza el select de mes silenciosamente
 function updateMesSelect() {
