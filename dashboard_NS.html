@@ -140,9 +140,7 @@ html,body{background:var(--bg);color:var(--text);font-family:"Inter",sans-serif;
 /* ── MODALES ─────────────────────────────────────────────────── */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(3px);align-items:center;justify-content:center;padding:1rem;}
 .modal-overlay.open{display:flex;}
-/* Nivel 1 – rutas */
 #drillModal{z-index:810;}
-/* Nivel 2 – detalle viajes: ENCIMA del modal de rutas */
 #drillDetailModal{z-index:820;}
 
 .modal-box{background:var(--white);border-radius:14px;box-shadow:0 16px 48px rgba(0,0,0,.25);width:100%;max-width:720px;max-height:85vh;display:flex;flex-direction:column;overflow:hidden;}
@@ -167,8 +165,6 @@ html,body{background:var(--bg);color:var(--text);font-family:"Inter",sans-serif;
 .row-ruta-clickable{cursor:pointer;}
 .row-ruta-clickable:hover{background:#f0f4ff !important;}
 .row-ruta-clickable .td-ruta{color:var(--navy);text-decoration:underline dotted;}
-.badge-tarde{display:inline-flex;align-items:center;gap:.3rem;background:#fff5f5;color:#c53030;border-radius:20px;padding:.18rem .6rem;font-size:.72rem;font-weight:700;}
-.badge-tiempo{display:inline-flex;align-items:center;gap:.3rem;background:#f0fff4;color:#276749;border-radius:20px;padding:.18rem .6rem;font-size:.72rem;font-weight:700;}
 .min-pos{color:#c53030;font-weight:700;}
 .min-neg{color:#16a34a;font-weight:700;}
 .min-cero{color:#6b7a99;font-weight:600;}
@@ -425,8 +421,8 @@ html,body{background:var(--bg);color:var(--text);font-family:"Inter",sans-serif;
           <th>Fecha</th>
           <th style="text-align:left">Unidad</th>
           <th style="text-align:left">Operador</th>
-          <th>Minutos</th>
-          <th>Estado</th>
+          <th>Min Inicio</th>
+          <th>Min Llegada</th>
         </tr></thead>
         <tbody id="drillDetailBody"></tbody>
       </table>
@@ -466,9 +462,9 @@ html,body{background:var(--bg);color:var(--text);font-family:"Inter",sans-serif;
 
 <script>
 // ── CONFIGURACIÓN ────────────────────────────────────────────────────────────
-const SHEET_ID = '1l3QYg7N050BScrtNhKkHQ-hHNDgaK9Prw95Dzb2-DRE';
-const GID      = '1297993336';
-const CHUNK    = 35000;
+const SHEET_ID   = '1l3QYg7N050BScrtNhKkHQ-hHNDgaK9Prw95Dzb2-DRE';
+const GID        = '1297993336';
+const CHUNK      = 35000;
 
 const C = {
   fecha:   'start_date',
@@ -477,11 +473,11 @@ const C = {
   cliente: 'group',
   gerente: 'Gerente',
   jefe:    'Jefe',
-  retardo: 'Retardos',            // inicios tarde
+  retardo: 'Inicios_Tarde',       // ← actualizado
   viajes:  'Cantidad de viajes',
-  llegada: 'Llegadas',            // llegadas tarde
-  minIni:  'Minutos de Retraso',  // col AR
-  minLle:  'Min llegadas',        // col BA
+  llegada: 'Llegadas_Tarde',      // ← actualizado
+  minIni:  'Minutos de Retraso',
+  minLle:  'Minutos llegadas',    // ← actualizado
 };
 
 let DATA         = [];
@@ -676,7 +672,9 @@ const uniq=arr=>[...new Set(arr.filter(v=>v&&v.trim()))].sort();
 const N=n=>n.toLocaleString('es-MX');
 function pctColor(p){ return p>=90?'#16a34a':'#e53e3e'; }
 function pctColorLlegadas(p){ return p>=98?'#16a34a':'#e53e3e'; }
-function countLate(v){ const n=parseInt(v)||0; return n<0?1:n; }
+
+// ── countLate: lee 1/0 como flag (no suma enteros) ──────────────────────────
+function countLate(v){ return String(v||'').trim()==='1'?1:0; }
 function countViajes(v){ const n=parseInt(v)||0; return n>0?n:1; }
 
 function fill(id,vals){
@@ -1006,11 +1004,10 @@ function renderDrill(clienteK,tbl){
 }
 function closeDrill(e){ if(e.target===document.getElementById('drillModal')) document.getElementById('drillModal').classList.remove('open'); }
 
-// ── MODAL NIVEL 2: detalle por viaje ─────────────────────────────────────────
+// ── MODAL NIVEL 2: Min Inicio + Min Llegada ───────────────────────────────────
 function openDrillDetail(rutaK, clienteK, tbl){
   const isLlegadas = tbl==='lcli';
   const lateField  = isLlegadas ? C.llegada : C.retardo;
-  const minField   = isLlegadas ? C.minLle  : C.minIni;
   const lateLbl    = isLlegadas ? 'Llegada tarde' : 'Inicio tarde';
 
   const rows = filterRows().filter(r=>
@@ -1034,16 +1031,14 @@ function openDrillDetail(rutaK, clienteK, tbl){
     const unidad   = (r['car']||'–').trim();
     const driver   = (r['driver']||'–').trim();
     const bg       = i%2===0?'#ffffff':'#f7f9ff';
-    const badge    = tarde
-      ? '<span class="badge-tarde">❌ '+lateLbl+'</span>'
-      : '<span class="badge-tiempo">✅ A tiempo</span>';
-    const minVal   = parseMin(r[minField]);
+    const minIni   = parseMin(r[C.minIni]);
+    const minLle   = parseMin(r[C.minLle]);
     return `<tr style="background:${bg}${tarde?';border-left:3px solid #e53e3e':''}">
       <td style="font-variant-numeric:tabular-nums;white-space:nowrap">${fechaFmt}</td>
       <td style="text-align:left;font-weight:600">${unidad}</td>
       <td style="text-align:left">${driver}</td>
-      <td style="text-align:right">${minCell(minVal,0)}</td>
-      <td style="text-align:right">${badge}</td>
+      <td style="text-align:right">${minCell(minIni,0)}</td>
+      <td style="text-align:right">${minCell(minLle,0)}</td>
     </tr>`;
   }).join('')||'<tr><td colspan="5" class="table-empty">Sin viajes registrados</td></tr>';
 
