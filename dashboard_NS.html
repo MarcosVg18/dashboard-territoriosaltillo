@@ -849,7 +849,7 @@ th.sort-asc,th.sort-desc{background:#2c3a55 !important;}
 const SHEET_ID    = '1l3QYg7N050BScrtNhKkHQ-hHNDgaK9Prw95Dzb2-DRE';
 const GID         = '1297993336';
 const INPUTS_NAME = 'Inputs';
-const CHUNK       = 35000;
+const CHUNK       = 100000;
 
 const C = {
   fecha:'start_date', semana:'Semana', udn:'business_unit', cliente:'group',
@@ -2065,7 +2065,8 @@ function rerenderDetailModal(){
     const sEta =(r[C.startEta] ||'–').trim();
     const eTime=(r[C.endTime]  ||'–').trim();
     const eEta =(r[C.endEta]   ||'–').trim();
-    const tripId=(r[C.id]||'').trim();
+    const _rawId=(r[C.id]||'').trim();
+    const tripId=_rawId&&!isNaN(_rawId)?String(Math.round(parseFloat(_rawId))):_rawId;
     const driverEsc=driver.replace(/'/g,"\\'");
     const auditBtn=tripId?`<button onclick="openAuditModal('${tripId}')" style="background:#1a2236;color:#7ed321;border:1px solid #7ed321;border-radius:5px;padding:.15rem .35rem;font-size:.62rem;font-weight:700;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;line-height:1.4" title="Auditoría del viaje">📍</button>`:'';
     return`<tr style="background:${bg}${tarde?';border-left:3px solid #e53e3e':''}">
@@ -2425,7 +2426,8 @@ function openDrillDetail(rutaK,clienteK,tbl){
     const sEta =(r[C.startEta] ||'–').trim();
     const eTime=(r[C.endTime]  ||'–').trim();
     const eEta =(r[C.endEta]   ||'–').trim();
-    const tripId=(r[C.id]||'').trim();
+    const _rawId=(r[C.id]||'').trim();
+    const tripId=_rawId&&!isNaN(_rawId)?String(Math.round(parseFloat(_rawId))):_rawId;
     const auditBtn=tripId
       ? `<button onclick="openAuditModal('${tripId}')"
            style="background:#1a2236;color:#7ed321;border:1px solid #7ed321;border-radius:5px;
