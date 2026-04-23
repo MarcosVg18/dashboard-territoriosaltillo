@@ -299,6 +299,12 @@ th.sort-asc,th.sort-desc{background:#2c3a55 !important;}
   </div>
 </div>
 
+<div id="refreshIndicator" style="display:none;position:fixed;top:14px;right:14px;background:#1f2937;color:#84cc16;padding:8px 14px;border-radius:20px;font-size:12px;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,.2);z-index:9999;display:none;">
+  <span style="display:inline-block;width:10px;height:10px;border:2px solid #84cc16;border-top-color:transparent;border-radius:50%;animation:spin 0.8s linear infinite;margin-right:6px;vertical-align:middle;"></span>
+  Actualizando datos...
+</div>
+<style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+
 <div class="mini-modal" id="miniModal">
   <div class="mini-modal-box">
     <div class="mini-spinner"></div>
@@ -1142,28 +1148,99 @@ async function loadOneSheet(sheetName, offset){
   return parseCSV(await res.text());
 }
 
+// ── IndexedDB cache (stale-while-revalidate) ──────────────────────
+const IDB_NAME='ns-dashboard-cache';
+const IDB_STORE='data';
+function idbOpen(){
+  return new Promise((res,rej)=>{
+    const req=indexedDB.open(IDB_NAME,1);
+    req.onupgradeneeded=()=>{
+      const db=req.result;
+      if(!db.objectStoreNames.contains(IDB_STORE)) db.createObjectStore(IDB_STORE);
+    };
+    req.onsuccess=()=>res(req.result);
+    req.onerror=()=>rej(req.error);
+  });
+}
+async function idbGet(key){
+  try{
+    const db=await idbOpen();
+    return await new Promise((res)=>{
+      const tx=db.transaction(IDB_STORE,'readonly');
+      const req=tx.objectStore(IDB_STORE).get(key);
+      req.onsuccess=()=>res(req.result||null);
+      req.onerror=()=>res(null);
+    });
+  }catch(e){ return null; }
+}
+async function idbSet(key,val){
+  try{
+    const db=await idbOpen();
+    await new Promise((res)=>{
+      const tx=db.transaction(IDB_STORE,'readwrite');
+      tx.objectStore(IDB_STORE).put(val,key);
+      tx.oncomplete=()=>res();
+      tx.onerror=()=>res();
+    });
+  }catch(e){ /* silencioso */ }
+}
+
 async function loadSheet(){
   const overlay=document.getElementById('loadingOverlay');
   const loadMsg=document.getElementById('loadingMsg');
   const banner =document.getElementById('errBanner');
   const errMsg =document.getElementById('errMsg');
+
+  // ── Fase 0: intentar cache local (carga instantánea) ──
+  let cacheShown=false;
+  try{
+    const cached=await idbGet('rows');
+    if(cached&&cached.rows&&cached.rows.length){
+      DATA=[...cached.rows];
+      cached.rows.forEach(r=>{ const mes=normMonth(getFecha(r)); if(mes) loadedMonths.add(mes); });
+      if(banner) banner.classList.add('hidden');
+      if(overlay){ overlay.classList.add('hidden'); setTimeout(()=>overlay.style.display='none',450); }
+      fillAllSelects();
+      const mesActual=getCurrentMonth();
+      if(loadedMonths.has(mesActual)){
+        scSetVal('mes',mesActual,mesLabel(mesActual));
+        cascadeSelects();
+      }
+      draw();
+      cacheShown=true;
+      // Indicador sutil de que se está actualizando
+      const ind=document.getElementById('refreshIndicator');
+      if(ind) ind.style.display='block';
+    }
+  }catch(e){/* cache falló, sigue con fetch */}
+
   try{
     // ── Fase 1: primer chunk de ambas hojas en paralelo (carga rápida) ──
-    loadMsg.innerHTML='Cargando NS Settepi y NS Lipu...<br>Por favor espera';
+    if(!cacheShown) loadMsg.innerHTML='Cargando NS Settepi y NS Lipu...<br>Por favor espera';
     const [rowsA, rowsB] = await Promise.all(
       SHEETS.map(s => loadOneSheet(s, 0))
     );
     const firstRows=[...rowsA,...rowsB];
-    if(!firstRows.length) throw new Error('Sin filas válidas en ninguna de las dos hojas.');
+    if(!firstRows.length){
+      if(!cacheShown) throw new Error('Sin filas válidas en ninguna de las dos hojas.');
+      return;
+    }
+    // Reemplazar DATA con los datos frescos
     DATA=[...firstRows];
+    loadedMonths.clear();
     firstRows.forEach(r=>{ const mes=normMonth(getFecha(r)); if(mes) loadedMonths.add(mes); });
-    if(banner) banner.classList.add('hidden');
-    if(overlay){ overlay.classList.add('hidden'); setTimeout(()=>overlay.style.display='none',450); }
-    fillAllSelects();
-    const mesActual=getCurrentMonth();
-    if(loadedMonths.has(mesActual)){
-      scSetVal('mes',mesActual,mesLabel(mesActual));
-      cascadeSelects();
+
+    if(!cacheShown){
+      if(banner) banner.classList.add('hidden');
+      if(overlay){ overlay.classList.add('hidden'); setTimeout(()=>overlay.style.display='none',450); }
+      fillAllSelects();
+      const mesActual=getCurrentMonth();
+      if(loadedMonths.has(mesActual)){
+        scSetVal('mes',mesActual,mesLabel(mesActual));
+        cascadeSelects();
+      }
+    }else{
+      fillAllSelects();
     }
     draw();
 
@@ -1184,10 +1261,19 @@ async function loadSheet(){
       }
       draw();
     }
+
+    // ── Fase 3: guardar cache para próximas cargas ──
+    idbSet('rows',{rows:DATA, ts:Date.now()});
+    const ind=document.getElementById('refreshIndicator');
+    if(ind) ind.style.display='none';
   }catch(e){
     console.error(e);
-    if(overlay) overlay.style.display='none';
-    if(banner&&errMsg){ errMsg.textContent=e.message; banner.classList.remove('hidden'); }
+    if(!cacheShown){
+      if(overlay) overlay.style.display='none';
+      if(banner&&errMsg){ errMsg.textContent=e.message; banner.classList.remove('hidden'); }
+    }
+    const ind=document.getElementById('refreshIndicator');
+    if(ind) ind.style.display='none';
   }
 }
 
