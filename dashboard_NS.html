@@ -849,7 +849,8 @@ th.sort-asc,th.sort-desc{background:#2c3a55 !important;}
 const SHEET_ID    = '1l3QYg7N050BScrtNhKkHQ-hHNDgaK9Prw95Dzb2-DRE';
 const GID         = '1297993336';
 const INPUTS_NAME = 'Inputs';
-const CHUNK       = 100000;
+const CHUNK_LATEST = 15000;   // fase 1: últimas filas (mes actual)
+const CHUNK_HIST   = 30000;   // fase 2: histórico hacia atrás
 
 const C = {
   fecha:'start_date', semana:'Semana', udn:'business_unit', cliente:'group',
@@ -970,9 +971,23 @@ function parseCSV(text){
 }
 const SHEETS = ['NS Settepi', 'NS Lipu'];
 
-function csvUrl(offset, sheetName){
-  const tq=encodeURIComponent(`SELECT * LIMIT ${CHUNK} OFFSET ${offset}`);
+function csvUrlRange(offset, limit, sheetName){
+  const tq=encodeURIComponent(`SELECT * LIMIT ${limit} OFFSET ${offset}`);
   return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}&tq=${tq}`;
+}
+
+async function getRowCount(sheetName){
+  // gviz devuelve algo como:  "count-A"\n144532
+  const tq=encodeURIComponent('SELECT COUNT(A)');
+  const url=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}&tq=${tq}`;
+  try{
+    const res=await fetch(url);
+    if(!res.ok) return 0;
+    const txt=await res.text();
+    const lines=txt.trim().split(/\r?\n/);
+    const n=parseInt((lines[1]||'').replace(/"/g,'').trim(),10);
+    return isNaN(n)?0:n;
+  }catch(e){ return 0; }
 }
 function inputsUrl(){
   return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(INPUTS_NAME)}`;
@@ -1136,8 +1151,8 @@ window.addEventListener('DOMContentLoaded', async ()=>{
   draw();
 });
 
-async function loadOneSheet(sheetName, offset){
-  const res=await fetch(csvUrl(offset, sheetName));
+async function loadOneSheet(sheetName, offset, limit){
+  const res=await fetch(csvUrlRange(offset, limit, sheetName));
   if(!res.ok) throw new Error(`HTTP ${res.status} en hoja "${sheetName}"`);
   return parseCSV(await res.text());
 }
@@ -1148,17 +1163,25 @@ async function loadSheet(){
   const banner =document.getElementById('errBanner');
   const errMsg =document.getElementById('errMsg');
   try{
-    // ── Fase 1: primer chunk de ambas hojas en paralelo (carga rápida) ──
-    loadMsg.innerHTML='Cargando NS Settepi y NS Lipu...<br>Por favor espera';
-    const [rowsA, rowsB] = await Promise.all(
-      SHEETS.map(s => loadOneSheet(s, 0))
+    // ── Fase 0: tamaño de cada hoja ──
+    loadMsg.innerHTML='Consultando tamaño de hojas...<br>Casi listo';
+    const counts = await Promise.all(SHEETS.map(s => getRowCount(s)));
+
+    // ── Fase 1: últimas filas (mes actual primero) en paralelo ──
+    loadMsg.innerHTML='Cargando mes actual...<br>Un momento';
+    const firstOffsets = counts.map(c => Math.max(0, c - CHUNK_LATEST));
+    const firstChunks = await Promise.all(
+      SHEETS.map((s,i) => loadOneSheet(s, firstOffsets[i], CHUNK_LATEST).catch(()=>[]))
     );
-    const firstRows=[...rowsA,...rowsB];
+    const firstRows=[...firstChunks[0],...firstChunks[1]];
     if(!firstRows.length) throw new Error('Sin filas válidas en ninguna de las dos hojas.');
+
     DATA=[...firstRows];
     firstRows.forEach(r=>{ const mes=normMonth(getFecha(r)); if(mes) loadedMonths.add(mes); });
+
     if(banner) banner.classList.add('hidden');
     if(overlay){ overlay.classList.add('hidden'); setTimeout(()=>overlay.style.display='none',450); }
+
     fillAllSelects();
     const mesActual=getCurrentMonth();
     if(loadedMonths.has(mesActual)){
@@ -1167,23 +1190,22 @@ async function loadSheet(){
     }
     draw();
 
-    // ── Fase 2: resto de datos tras bambalinas ──
-    const needsMore = SHEETS.filter((s,i)=>(i===0?rowsA:rowsB).length>=CHUNK);
-    if(needsMore.length){
-      for(const sheetName of needsMore){
-        let offset=CHUNK;
-        while(true){
-          const more=await loadOneSheet(sheetName, offset).catch(()=>[]);
-          if(!more.length) break;
-          more.forEach(r=>{ const mes=normMonth(getFecha(r)); if(mes) loadedMonths.add(mes); });
-          DATA.push(...more);
+    // ── Fase 2: histórico hacia atrás, hoja por hoja, chunk por chunk ──
+    for(let i=0;i<SHEETS.length;i++){
+      let end = firstOffsets[i];           // lo que ya bajamos empieza aquí
+      while(end > 0){
+        const start = Math.max(0, end - CHUNK_HIST);
+        const size  = end - start;
+        const chunk = await loadOneSheet(SHEETS[i], start, size).catch(()=>[]);
+        if(chunk.length){
+          chunk.forEach(r=>{ const mes=normMonth(getFecha(r)); if(mes) loadedMonths.add(mes); });
+          DATA.push(...chunk);
           fillAllSelects();
-          if(more.length<CHUNK) break;
-          offset+=CHUNK;
         }
+        end = start;
       }
-      draw();
     }
+    draw();
   }catch(e){
     console.error(e);
     if(overlay) overlay.style.display='none';
