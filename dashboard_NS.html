@@ -299,16 +299,16 @@ th.sort-asc,th.sort-desc{background:#2c3a55 !important;}
   </div>
 </div>
 
-<div id="refreshIndicator" style="display:none;position:fixed;top:14px;right:14px;background:#1f2937;color:#84cc16;padding:8px 14px;border-radius:20px;font-size:12px;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,.2);z-index:9999;display:none;">
-  <span style="display:inline-block;width:10px;height:10px;border:2px solid #84cc16;border-top-color:transparent;border-radius:50%;animation:spin 0.8s linear infinite;margin-right:6px;vertical-align:middle;"></span>
+<div id="refreshIndicator" style="display:none;position:fixed;top:14px;right:14px;background:#1f2937;color:#84cc16;padding:8px 14px;border-radius:20px;font-size:12px;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,.2);z-index:9999;">
+  <span style="display:inline-block;width:10px;height:10px;border:2px solid #84cc16;border-top-color:transparent;border-radius:50%;animation:spinRefresh 0.8s linear infinite;margin-right:6px;vertical-align:middle;"></span>
   Actualizando datos...
 </div>
-<style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+<style>@keyframes spinRefresh{to{transform:rotate(360deg)}}</style>
 
 <div class="mini-modal" id="miniModal">
   <div class="mini-modal-box">
     <div class="mini-spinner"></div>
-    <div class="mini-msg" id="miniModalMsg">Cargando.</div>
+    <div class="mini-msg" id="miniModalMsg">Cargando...</div>
   </div>
 </div>
 
@@ -980,6 +980,14 @@ function csvUrl(offset, sheetName){
   const tq=encodeURIComponent(`SELECT * LIMIT ${CHUNK} OFFSET ${offset}`);
   return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}&tq=${tq}`;
 }
+function csvUrlRange(offset, limit, sheetName){
+  const tq=encodeURIComponent(`SELECT * LIMIT ${limit} OFFSET ${offset}`);
+  return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}&tq=${tq}`;
+}
+function countUrl(sheetName){
+  const tq=encodeURIComponent('SELECT COUNT(A)');
+  return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}&tq=${tq}`;
+}
 function inputsUrl(){
   return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(INPUTS_NAME)}`;
 }
@@ -1151,6 +1159,8 @@ async function loadOneSheet(sheetName, offset){
 // ── IndexedDB cache (stale-while-revalidate) ──────────────────────
 const IDB_NAME='ns-dashboard-cache';
 const IDB_STORE='data';
+const DB_KEY='full_data_v2';
+const CACHE_MAX_AGE_MS = 7*24*60*60*1000; // 7 días → refresh total
 function idbOpen(){
   return new Promise((res,rej)=>{
     const req=indexedDB.open(IDB_NAME,1);
@@ -1184,73 +1194,129 @@ async function idbSet(key,val){
     });
   }catch(e){ /* silencioso */ }
 }
+// Llave única por fila: incluye __sheet para no chocar entre Settepi y Lipu
+function rowKey(r){
+  const id = r[C.id] || `${r[C.fecha]||''}|${r[C.ruta]||''}|${r[C.driver]||''}|${r[C.startTime]||''}`;
+  return `${r.__sheet||''}::${id}`;
+}
+// Marca cada fila con la hoja de origen (Settepi/Lipu)
+function tagSheet(rows, sheetName){
+  rows.forEach(r => r.__sheet = sheetName);
+  return rows;
+}
+async function getRowCount(sheetName){
+  try{
+    const r = await fetch(countUrl(sheetName));
+    if(!r.ok) return 0;
+    const t = await r.text();
+    const nums = t.match(/[\d.]+/g);
+    return nums && nums.length ? Math.floor(parseFloat(nums[nums.length-1])) || 0 : 0;
+  }catch(e){ console.warn('COUNT falló para',sheetName,e); return 0; }
+}
 
 async function loadSheet(){
   const overlay=document.getElementById('loadingOverlay');
   const loadMsg=document.getElementById('loadingMsg');
   const banner =document.getElementById('errBanner');
   const errMsg =document.getElementById('errMsg');
+  const refInd =document.getElementById('refreshIndicator');
 
-  // ── Fase 0: intentar cache local (carga instantánea) ──
-  let cacheShown=false;
   try{
-    const cached=await idbGet('rows');
-    if(cached&&cached.rows&&cached.rows.length){
-      DATA=[...cached.rows];
-      cached.rows.forEach(r=>{ const mes=normMonth(getFecha(r)); if(mes) loadedMonths.add(mes); });
+    // ═══════════════════════════════════════════════════════════════
+    // FASE 1: Intentar cargar desde caché IndexedDB (casi instantáneo)
+    // ═══════════════════════════════════════════════════════════════
+    let hasCache=false;
+    const cached = await idbGet(DB_KEY);
+    if(cached && cached.rows && cached.rows.length && (Date.now()-cached.cachedAt < CACHE_MAX_AGE_MS)){
+      DATA = cached.rows;
+      (cached.months||[]).forEach(m=>loadedMonths.add(m));
+      hasCache=true;
       if(banner) banner.classList.add('hidden');
       if(overlay){ overlay.classList.add('hidden'); setTimeout(()=>overlay.style.display='none',450); }
       fillAllSelects();
-      const mesActual=getCurrentMonth();
-      if(loadedMonths.has(mesActual)){
-        scSetVal('mes',mesActual,mesLabel(mesActual));
+      const mesActualCache=getCurrentMonth();
+      if(loadedMonths.has(mesActualCache)){
+        scSetVal('mes',mesActualCache,mesLabel(mesActualCache));
         cascadeSelects();
       }
       draw();
-      cacheShown=true;
-      // Indicador sutil de que se está actualizando
-      const ind=document.getElementById('refreshIndicator');
-      if(ind) ind.style.display='block';
+      // Mostrar indicador "Actualizando datos..." mientras se refresca en background
+      if(refInd) refInd.style.display='block';
     }
-  }catch(e){/* cache falló, sigue con fetch */}
 
-  try{
-    // ── Fase 1: primer chunk de ambas hojas en paralelo (carga rápida) ──
-    if(!cacheShown) loadMsg.innerHTML='Cargando NS Settepi y NS Lipu...<br>Por favor espera';
-    const [rowsA, rowsB] = await Promise.all(
-      SHEETS.map(s => loadOneSheet(s, 0))
-    );
-    const firstRows=[...rowsA,...rowsB];
-    if(!firstRows.length){
-      if(!cacheShown) throw new Error('Sin filas válidas en ninguna de las dos hojas.');
-      return;
-    }
-    // Reemplazar DATA con los datos frescos
-    DATA=[...firstRows];
-    loadedMonths.clear();
-    firstRows.forEach(r=>{ const mes=normMonth(getFecha(r)); if(mes) loadedMonths.add(mes); });
+    // ═══════════════════════════════════════════════════════════════
+    // FASE 2: Consultar COUNT actual de cada hoja
+    // ═══════════════════════════════════════════════════════════════
+    const countPromises = SHEETS.map(s => getRowCount(s));
 
-    if(!cacheShown){
-      if(banner) banner.classList.add('hidden');
-      if(overlay){ overlay.classList.add('hidden'); setTimeout(()=>overlay.style.display='none',450); }
+    // ═══════════════════════════════════════════════════════════════
+    // FASE 3A: MODO CACHÉ → refrescar solo últimas ~3000 filas por hoja
+    // ═══════════════════════════════════════════════════════════════
+    if(hasCache){
+      const counts = await Promise.all(countPromises);
+      const RECENT_CHUNK = 3000;
+      // Refrescar ambas hojas en paralelo
+      await Promise.all(SHEETS.map(async (sheetName, i) => {
+        const realCount = counts[i];
+        if(realCount <= 0) return;
+        const recentOffset = realCount > RECENT_CHUNK ? (realCount - RECENT_CHUNK) : 0;
+        const recentLimit  = Math.min(RECENT_CHUNK, realCount);
+        try{
+          const r = await fetch(csvUrlRange(recentOffset, recentLimit, sheetName));
+          if(!r.ok) return;
+          const fresh = tagSheet(parseCSV(await r.text()), sheetName);
+          if(!fresh.length) return;
+          // Dedupe: quitar del DATA las filas frescas que ya estaban
+          const freshKeys = new Set(fresh.map(rowKey));
+          DATA = DATA.filter(row => !freshKeys.has(rowKey(row)));
+          DATA.push(...fresh);
+          fresh.forEach(r=>{ const m=normMonth(getFecha(r)); if(m) loadedMonths.add(m); });
+        }catch(e){ console.warn('Error refrescando',sheetName,e); }
+      }));
       fillAllSelects();
-      const mesActual=getCurrentMonth();
-      if(loadedMonths.has(mesActual)){
-        scSetVal('mes',mesActual,mesLabel(mesActual));
+      const mesA=getCurrentMonth();
+      if(loadedMonths.has(mesA) && !SC_SEL.mes){
+        scSetVal('mes',mesA,mesLabel(mesA));
         cascadeSelects();
       }
-    }else{
-      fillAllSelects();
+      draw();
+      // Guardar caché actualizado (sin bloquear UI)
+      setTimeout(()=>idbSet(DB_KEY, { rows: DATA, months:[...loadedMonths], cachedAt: Date.now() }), 200);
+      if(refInd) refInd.style.display='none';
+      return;
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // FASE 3B: SIN CACHÉ → carga completa desde el inicio (primera vez)
+    // ═══════════════════════════════════════════════════════════════
+    loadMsg.innerHTML='Cargando NS Settepi y NS Lipu...<br>Por favor espera';
+    const [rowsA, rowsB] = await Promise.all([
+      loadOneSheet(SHEETS[0], 0).then(rs => tagSheet(rs, SHEETS[0])),
+      loadOneSheet(SHEETS[1], 0).then(rs => tagSheet(rs, SHEETS[1])),
+    ]);
+    const firstRows=[...rowsA,...rowsB];
+    if(!firstRows.length) throw new Error('Sin filas válidas en ninguna de las dos hojas.');
+    DATA=[...firstRows];
+    firstRows.forEach(r=>{ const mes=normMonth(getFecha(r)); if(mes) loadedMonths.add(mes); });
+    if(banner) banner.classList.add('hidden');
+    if(overlay){ overlay.classList.add('hidden'); setTimeout(()=>overlay.style.display='none',450); }
+    fillAllSelects();
+    const mesActual=getCurrentMonth();
+    if(loadedMonths.has(mesActual)){
+      scSetVal('mes',mesActual,mesLabel(mesActual));
+      cascadeSelects();
     }
     draw();
 
-    // ── Fase 2: resto de datos tras bambalinas ──
+    // Resto de datos en background (paginación si la hoja excede CHUNK)
     const needsMore = SHEETS.filter((s,i)=>(i===0?rowsA:rowsB).length>=CHUNK);
     if(needsMore.length){
       for(const sheetName of needsMore){
         let offset=CHUNK;
         while(true){
-          const more=await loadOneSheet(sheetName, offset).catch(()=>[]);
+          const more = await loadOneSheet(sheetName, offset)
+            .then(rs => tagSheet(rs, sheetName))
+            .catch(()=>[]);
           if(!more.length) break;
           more.forEach(r=>{ const mes=normMonth(getFecha(r)); if(mes) loadedMonths.add(mes); });
           DATA.push(...more);
@@ -1262,18 +1328,14 @@ async function loadSheet(){
       draw();
     }
 
-    // ── Fase 3: guardar cache para próximas cargas ──
-    idbSet('rows',{rows:DATA, ts:Date.now()});
-    const ind=document.getElementById('refreshIndicator');
-    if(ind) ind.style.display='none';
+    // Guardar TODO en caché para próximas visitas
+    setTimeout(()=>idbSet(DB_KEY, { rows: DATA, months:[...loadedMonths], cachedAt: Date.now() }), 500);
+    if(refInd) refInd.style.display='none';
   }catch(e){
     console.error(e);
-    if(!cacheShown){
-      if(overlay) overlay.style.display='none';
-      if(banner&&errMsg){ errMsg.textContent=e.message; banner.classList.remove('hidden'); }
-    }
-    const ind=document.getElementById('refreshIndicator');
-    if(ind) ind.style.display='none';
+    if(overlay) overlay.style.display='none';
+    if(refInd) refInd.style.display='none';
+    if(banner&&errMsg){ errMsg.textContent=e.message; banner.classList.remove('hidden'); }
   }
 }
 
