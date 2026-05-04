@@ -568,7 +568,7 @@ th.sort-asc,th.sort-desc{background:#2c3a55 !important;}
   <col style="width:76px">
   <col style="width:72px">
 </colgroup><table class="data-table tbl-std"><thead><tr>
-          <th style="width:34px">#</th><th>Operador</th><th style="text-align:right">Servicios</th><th style="text-align:right">En Tiempo</th><th style="text-align:right"><span style="font-weight:500">(ini tarde · lle ok)</span></th><th style="text-align:right"><span style="font-weight:500">(ini tarde · lle tarde)</span></th><th style="text-align:right">Prom. Ini (min)</th><th style="text-align:right">Prom. Lle (min)</th><th style="cursor:pointer" onclick="sortTable('coord')"><div class="th-inner"><span>% Cumpl.</span><button class="sort-btn" id="sort-coord" style="pointer-events:none">↓</button></div></th>
+          <th style="width:34px">#</th><th>Operador</th><th>Planta</th><th style="text-align:right">Servicios</th><th style="text-align:right">En Tiempo</th><th style="text-align:right"><span style="font-weight:500">(ini tarde · lle ok)</span></th><th style="text-align:right"><span style="font-weight:500">(ini tarde · lle tarde)</span></th><th style="text-align:right">Prom. Ini (min)</th><th style="text-align:right">Prom. Lle (min)</th><th style="cursor:pointer" onclick="sortTable('coord')"><div class="th-inner"><span>% Cumpl.</span><button class="sort-btn" id="sort-coord" style="pointer-events:none">↓</button></div></th>
         </tr></thead><tbody id="tCoordBody"></tbody></table></div>
       </div>
     </div><!-- /panel-inicios -->
@@ -705,7 +705,7 @@ th.sort-asc,th.sort-desc{background:#2c3a55 !important;}
   <col style="width:76px">
   <col style="width:72px">
 </colgroup><table class="data-table tbl-std"><thead><tr>
-          <th style="width:34px">#</th><th>Operador</th><th style="text-align:right">Servicios</th><th style="text-align:right">En Tiempo</th><th style="text-align:right"><span style="font-weight:500">(ini ok · lle tarde)</span></th><th style="text-align:right"><span style="font-weight:500">(ini tarde · lle tarde)</span></th><th style="text-align:right">Prom. Ini (min)</th><th style="text-align:right">Prom. Lle (min)</th><th style="cursor:pointer" onclick="sortTable('lcoord')"><div class="th-inner"><span>% Cumpl.</span><button class="sort-btn" id="sort-lcoord" style="pointer-events:none">↓</button></div></th>
+          <th style="width:34px">#</th><th>Operador</th><th>Planta</th><th style="text-align:right">Servicios</th><th style="text-align:right">En Tiempo</th><th style="text-align:right"><span style="font-weight:500">(ini ok · lle tarde)</span></th><th style="text-align:right"><span style="font-weight:500">(ini tarde · lle tarde)</span></th><th style="text-align:right">Prom. Ini (min)</th><th style="text-align:right">Prom. Lle (min)</th><th style="cursor:pointer" onclick="sortTable('lcoord')"><div class="th-inner"><span>% Cumpl.</span><button class="sort-btn" id="sort-lcoord" style="pointer-events:none">↓</button></div></th>
         </tr></thead><tbody id="ltCoordBody"></tbody></table></div>
       </div>
     </div><!-- /panel-llegadas -->
@@ -1443,11 +1443,12 @@ function renderTable(tbl){
   const isL=tbl.startsWith('l');
   const colorFn=isL?pctColorLlegadas:pctColor;
   const isCliTable=(tbl==='cli'||tbl==='lcli');
+  const isOpeTable=(tbl==='coord'||tbl==='lcoord');
   const rows=[...tableData[tbl]].sort((a,b)=>(a.pct-b.pct)*sortState[tbl].dir);
   const bodyId=TABLE_BODY[tbl],countId=TABLE_CNT[tbl],word=TABLE_WORD[tbl];
   const badges=['#f59e0b','#9ca3af','#b45309'];
   document.getElementById(countId).textContent=rows.length+(rows.length===1?' '+word:' '+word+'s');
-  if(!rows.length){ document.getElementById(bodyId).innerHTML=`<tr><td colspan="${isCliTable?10:9}" class="table-empty">Sin resultados</td></tr>`; return; }
+  if(!rows.length){ document.getElementById(bodyId).innerHTML=`<tr><td colspan="${isCliTable?10:isOpeTable?10:9}" class="table-empty">Sin resultados</td></tr>`; return; }
 
   const fmtMin=v=>{
     if(v===null) return '<span style="color:#aaa;font-size:.7rem">–</span>';
@@ -1465,10 +1466,14 @@ function renderTable(tbl){
     const carrosCell=isCliTable
       ? `<td style="text-align:right;color:var(--navy);font-weight:600">${CARROS_MAP[row.k]!=null?N(CARROS_MAP[row.k]):'–'}</td>`
       : '';
+    // Planta: solo para tabla operador
+    const plantaCell=isOpeTable
+      ? `<td style="font-size:.72rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px" title="${row.udn||''}">${row.udn||'–'}</td>`
+      : '';
     return `<tr ${clickAttr}>
       <td style="width:34px"><span class="rank-badge" style="background:${bg};color:${fg}">${i+1}</span></td>
       <td class="td-cli" title="${row.k}">${row.k}${isCliTable?' <span style="font-size:.6rem;color:var(--muted)">▶</span>':''}</td>
-      ${carrosCell}
+      ${carrosCell}${plantaCell}
       <td style="text-align:right;color:var(--navy);font-variant-numeric:tabular-nums">${N(row.t)}</td>
       <td style="text-align:right;color:#16a34a;font-weight:600;font-variant-numeric:tabular-nums">${N(row.enT)}</td>
       <td style="text-align:right;color:#d97706;font-weight:600;font-variant-numeric:tabular-nums">${N(row.lSolo)}</td>
@@ -1484,9 +1489,10 @@ function buildTable(rows,field,tbl,isIniPanel){
   const byKey={};
   rows.forEach(r=>{
     const k=(r[field]||'').trim()||'(Sin asignar)';
-    if(!byKey[k]) byKey[k]={t:0,enT:0,lSolo:0,lAmbos:0,sumMI:0,cMI:0,sumML:0,cML:0,cars:new Set()};
+    if(!byKey[k]) byKey[k]={t:0,enT:0,lSolo:0,lAmbos:0,sumMI:0,cMI:0,sumML:0,cML:0,cars:new Set(),udns:new Set()};
     byKey[k].t+=countViajes(r[C.viajes]);
     const car=(r[C.car]||'').trim(); if(car) byKey[k].cars.add(car);
+    const udn=(r[C.udn]||'').trim(); if(udn) byKey[k].udns.add(udn);
     const iniT=countLate(r[C.retardo])===1;
     const lleT=countLate(r[C.llegada])===1;
     if(isIniPanel){ if(!iniT) byKey[k].enT++; else if(!lleT) byKey[k].lSolo++; else byKey[k].lAmbos++; }
@@ -1498,6 +1504,7 @@ function buildTable(rows,field,tbl,isIniPanel){
   tableData[tbl]=Object.entries(byKey).map(([k,d])=>({
     k,t:d.t,enT:d.enT,lSolo:d.lSolo,lAmbos:d.lAmbos,
     cars:d.cars.size,
+    udn:[...d.udns].join(', '),
     avgMI:d.cMI>0?d.sumMI/d.cMI:null,
     avgML:d.cML>0?d.sumML/d.cML:null,
     pct:d.t>0?d.enT/d.t*100:0,
