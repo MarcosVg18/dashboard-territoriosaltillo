@@ -1254,23 +1254,51 @@ async function loadSheet(){
     // ═══════════════════════════════════════════════════════════════
     if(hasCache){
       const counts = await Promise.all(countPromises);
-      const RECENT_CHUNK = 3000;
-      // Refrescar ambas hojas en paralelo
+      const cachedCounts = (cached && cached.counts) || {};
+      const OVERLAP = 200; // filas de solape para captar ediciones recientes
+      // Refrescar ambas hojas en paralelo, llenando TODO el hueco entre caché y realidad
       await Promise.all(SHEETS.map(async (sheetName, i) => {
         const realCount = counts[i];
         if(realCount <= 0) return;
-        const recentOffset = realCount > RECENT_CHUNK ? (realCount - RECENT_CHUNK) : 0;
-        const recentLimit  = Math.min(RECENT_CHUNK, realCount);
+        // Conteo cacheado: prioriza el guardado; si no, cuenta filas en DATA
+        let cachedSheetCount = cachedCounts[sheetName];
+        if(cachedSheetCount == null){
+          cachedSheetCount = DATA.reduce((n,r)=>n+(r.__sheet===sheetName?1:0),0);
+        }
+        // Calcular ventana a descargar
+        let offset, limit;
+        if(cachedSheetCount === 0){
+          // Hoja no estaba en caché → recarga completa de esta hoja
+          offset = 0;
+          limit  = realCount;
+        } else if(realCount > cachedSheetCount){
+          // Hueco real: desde donde quedó el caché (con solape) hasta el final
+          offset = Math.max(0, cachedSheetCount - OVERLAP);
+          limit  = realCount - offset;
+        } else {
+          // Sin nuevas filas → solo refrescar últimas para captar ediciones
+          const W = Math.min(realCount, OVERLAP*5);
+          offset = Math.max(0, realCount - W);
+          limit  = W;
+        }
         try{
-          const r = await fetch(csvUrlRange(recentOffset, recentLimit, sheetName));
-          if(!r.ok) return;
-          const fresh = tagSheet(parseCSV(await r.text()), sheetName);
-          if(!fresh.length) return;
-          // Dedupe: quitar del DATA las filas frescas que ya estaban
-          const freshKeys = new Set(fresh.map(rowKey));
-          DATA = DATA.filter(row => !freshKeys.has(rowKey(row)));
-          DATA.push(...fresh);
-          fresh.forEach(r=>{ const m=normMonth(getFecha(r)); if(m) loadedMonths.add(m); });
+          // Paginar por si el hueco es muy grande (>CHUNK)
+          let off = offset;
+          const end = offset + limit;
+          while(off < end){
+            const lim = Math.min(CHUNK, end - off);
+            const r = await fetch(csvUrlRange(off, lim, sheetName));
+            if(!r.ok) break;
+            const fresh = tagSheet(parseCSV(await r.text()), sheetName);
+            if(!fresh.length) break;
+            // Dedupe: quitar del DATA las filas frescas que ya estaban
+            const freshKeys = new Set(fresh.map(rowKey));
+            DATA = DATA.filter(row => !freshKeys.has(rowKey(row)));
+            DATA.push(...fresh);
+            fresh.forEach(rr=>{ const m=normMonth(getFecha(rr)); if(m) loadedMonths.add(m); });
+            off += fresh.length;
+            if(fresh.length < lim) break;
+          }
         }catch(e){ console.warn('Error refrescando',sheetName,e); }
       }));
       fillAllSelects();
@@ -1280,8 +1308,10 @@ async function loadSheet(){
         cascadeSelects();
       }
       draw();
-      // Guardar caché actualizado (sin bloquear UI)
-      setTimeout(()=>idbSet(DB_KEY, { rows: DATA, months:[...loadedMonths], cachedAt: Date.now() }), 200);
+      // Guardar caché actualizado (sin bloquear UI), incluyendo count por hoja
+      const newCounts3A = {};
+      SHEETS.forEach((s,i)=>{ newCounts3A[s] = counts[i] || 0; });
+      setTimeout(()=>idbSet(DB_KEY, { rows: DATA, months:[...loadedMonths], cachedAt: Date.now(), counts: newCounts3A }), 200);
       if(refInd) refInd.style.display='none';
       return;
     }
@@ -1328,8 +1358,10 @@ async function loadSheet(){
       draw();
     }
 
-    // Guardar TODO en caché para próximas visitas
-    setTimeout(()=>idbSet(DB_KEY, { rows: DATA, months:[...loadedMonths], cachedAt: Date.now() }), 500);
+    // Guardar TODO en caché para próximas visitas, con count por hoja
+    const newCounts3B = {};
+    SHEETS.forEach(s=>{ newCounts3B[s] = DATA.reduce((n,r)=>n+(r.__sheet===s?1:0),0); });
+    setTimeout(()=>idbSet(DB_KEY, { rows: DATA, months:[...loadedMonths], cachedAt: Date.now(), counts: newCounts3B }), 500);
     if(refInd) refInd.style.display='none';
   }catch(e){
     console.error(e);
