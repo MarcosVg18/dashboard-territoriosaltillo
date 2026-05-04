@@ -856,6 +856,7 @@ const SHEET_ID    = '1l3QYg7N050BScrtNhKkHQ-hHNDgaK9Prw95Dzb2-DRE';
 const GID         = '1297993336';
 const INPUTS_NAME = 'Inputs';
 const CHUNK       = 100000;
+const FAST_CHUNK  = 12000;   // primeras filas (más recientes) para pintar rápido
 
 const C = {
   fecha:'start_date', semana:'Semana', udn:'business_unit', cliente:'group',
@@ -1157,8 +1158,6 @@ async function loadOneSheet(sheetName, offset){
 }
 
 // ── Cache desactivado: siempre carga fresco ───────────────────────
-async function idbGet(){ return null; }
-async function idbSet(){ /* sin caché */ }
 // Llave única por fila: incluye __sheet para no chocar entre Settepi y Lipu
 function rowKey(r){
   const id = r[C.id] || `${r[C.fecha]||''}|${r[C.ruta]||''}|${r[C.driver]||''}|${r[C.startTime]||''}`;
@@ -1188,47 +1187,73 @@ async function loadSheet(){
 
   try{
     // ═══════════════════════════════════════════════════════════════
-    // CARGA COMPLETA SIEMPRE (sin caché)
+    // FASE 1: COUNT de cada hoja (rápido) → sabemos dónde está la cola
     // ═══════════════════════════════════════════════════════════════
-    loadMsg.innerHTML='Cargando NS Settepi y NS Lipu...<br>Por favor espera';
-    const [rowsA, rowsB] = await Promise.all([
-      loadOneSheet(SHEETS[0], 0).then(rs => tagSheet(rs, SHEETS[0])),
-      loadOneSheet(SHEETS[1], 0).then(rs => tagSheet(rs, SHEETS[1])),
-    ]);
-    const firstRows=[...rowsA,...rowsB];
+    loadMsg.innerHTML='Consultando datos recientes...<br>Por favor espera';
+    const counts = await Promise.all(SHEETS.map(s => getRowCount(s)));
+
+    // ═══════════════════════════════════════════════════════════════
+    // FASE 2: Cargar las ÚLTIMAS FAST_CHUNK filas de cada hoja en paralelo
+    // (las filas se agregan al final, así que la cola = lo más reciente)
+    // ═══════════════════════════════════════════════════════════════
+    loadMsg.innerHTML='Cargando mes actual...<br>Por favor espera';
+    const initial = await Promise.all(SHEETS.map(async (s, i) => {
+      const total = counts[i];
+      if(total <= 0) return [];
+      const off = Math.max(0, total - FAST_CHUNK);
+      const lim = Math.min(FAST_CHUNK, total);
+      try{
+        const r = await fetch(csvUrlRange(off, lim, s));
+        if(!r.ok) return [];
+        return tagSheet(parseCSV(await r.text()), s);
+      }catch(e){ console.warn('Error cargando cola de',s,e); return []; }
+    }));
+    const firstRows=[...initial[0],...initial[1]];
     if(!firstRows.length) throw new Error('Sin filas válidas en ninguna de las dos hojas.');
     DATA=[...firstRows];
     firstRows.forEach(r=>{ const mes=normMonth(getFecha(r)); if(mes) loadedMonths.add(mes); });
+
+    // ═══════════════════════════════════════════════════════════════
+    // FASE 3: Primer pintado — mes actual si tiene datos, si no el más reciente
+    // ═══════════════════════════════════════════════════════════════
     if(banner) banner.classList.add('hidden');
     if(overlay){ overlay.classList.add('hidden'); setTimeout(()=>overlay.style.display='none',450); }
     fillAllSelects();
     const mesActual=getCurrentMonth();
-    if(loadedMonths.has(mesActual)){
-      scSetVal('mes',mesActual,mesLabel(mesActual));
+    const target = loadedMonths.has(mesActual)
+      ? mesActual
+      : [...loadedMonths].sort().pop(); // mes más reciente disponible
+    if(target){
+      scSetVal('mes',target,mesLabel(target));
       cascadeSelects();
     }
     draw();
 
-    // Resto de datos en background (paginación si la hoja excede CHUNK)
-    const needsMore = SHEETS.filter((s,i)=>(i===0?rowsA:rowsB).length>=CHUNK);
-    if(needsMore.length){
-      for(const sheetName of needsMore){
-        let offset=CHUNK;
-        while(true){
-          const more = await loadOneSheet(sheetName, offset)
-            .then(rs => tagSheet(rs, sheetName))
-            .catch(()=>[]);
-          if(!more.length) break;
-          more.forEach(r=>{ const mes=normMonth(getFecha(r)); if(mes) loadedMonths.add(mes); });
-          DATA.push(...more);
-          fillAllSelects();
-          if(more.length<CHUNK) break;
-          offset+=CHUNK;
-        }
+    // ═══════════════════════════════════════════════════════════════
+    // FASE 4: Paginar hacia atrás en BACKGROUND (filas más viejas)
+    // Las dos hojas en paralelo para terminar antes
+    // ═══════════════════════════════════════════════════════════════
+    if(refInd) refInd.style.display='block';
+    await Promise.all(SHEETS.map(async (s, i) => {
+      const total = counts[i];
+      let loaded = Math.min(FAST_CHUNK, total);
+      while(loaded < total){
+        const lim = Math.min(CHUNK, total - loaded);
+        const off = Math.max(0, total - loaded - lim);
+        let more = [];
+        try{
+          const r = await fetch(csvUrlRange(off, lim, s));
+          if(r.ok) more = tagSheet(parseCSV(await r.text()), s);
+        }catch(e){ console.warn('Error paginando',s,e); break; }
+        if(!more.length) break;
+        more.forEach(rr=>{ const m=normMonth(getFecha(rr)); if(m) loadedMonths.add(m); });
+        DATA.push(...more);
+        loaded += more.length;
+        fillAllSelects();
+        if(more.length < lim) break;
       }
-      draw();
-    }
-
+    }));
+    draw();
     if(refInd) refInd.style.display='none';
   }catch(e){
     console.error(e);
