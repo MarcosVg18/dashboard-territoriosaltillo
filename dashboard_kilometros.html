@@ -109,14 +109,14 @@ html,body{background:var(--bg);color:var(--text);font-family:"Inter",sans-serif;
 
 /* ── Data tables ── */
 .data-table{width:100%;border-collapse:collapse;min-width:500px;}
-.data-table thead th{background:var(--navy2);color:rgba(255,255,255,.85);font-size:.62rem;font-weight:600;letter-spacing:.03em;text-transform:uppercase;padding:.32rem .75rem;text-align:left;white-space:nowrap;}
+.data-table thead th{background:var(--navy2);color:rgba(255,255,255,.85);font-size:.6rem;font-weight:600;letter-spacing:.03em;text-transform:uppercase;padding:.28rem .6rem;text-align:left;white-space:nowrap;}
 .data-table thead th.r{text-align:right;}
 .data-table.sortable thead th{cursor:pointer;user-select:none;}
 .data-table.sortable thead th:hover{background:#2d3a52;}
 .data-table tbody tr{border-bottom:1px solid var(--border);transition:background .12s;}
 .data-table tbody tr:last-child{border-bottom:none;}
 .data-table tbody tr:hover td{background:#f7f9ff;}
-.data-table tbody td{padding:.28rem .75rem;font-size:.75rem;color:var(--text);vertical-align:middle;white-space:nowrap;}
+.data-table tbody td{padding:.22rem .6rem;font-size:.73rem;color:var(--text);vertical-align:middle;white-space:nowrap;}
 .data-table tbody td.r{text-align:right;font-variant-numeric:tabular-nums;}
 .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
 .val-pos{color:#3B6D11;font-weight:600;}
@@ -467,6 +467,9 @@ let DATA_CLIENTE = [];
 let DATA_DIA = [];
 let DATA_RANGOS = [];
 let KM_PERMITIDO = 0;
+let KM_GPS_TOTAL = 0;
+let KM_BUS_TOTAL = 0;
+let KM_INEF_TOTAL = 0;
 
 let SC_KEYS = ['ger','jef','cli','car'];
 let SC_SEL  = {ger:'', jef:'', cli:'', car:''};
@@ -692,6 +695,9 @@ function parseKmSheet(text){
   DATA_DIA=[];
   DATA_RANGOS=[];
   KM_PERMITIDO=0;
+  KM_GPS_TOTAL=0;
+  KM_BUS_TOTAL=0;
+  KM_INEF_TOTAL=0;
 
   for(let i=1;i<lines.length;i++){
     if(!lines[i].trim())continue;
@@ -752,11 +758,14 @@ function parseKmSheet(text){
       });
     }
 
-    const labelZ=g(iZ);
-    if(labelZ&&labelZ.toLowerCase().includes('km ppto')&&!labelZ.toLowerCase().includes('ing')){
-      const val=n(iAA);
-      if(val>0)KM_PERMITIDO=val;
-    }
+    // Leer valores fijos de columna AA (índice 26): fila 7=Permitido, 11=GPS, 12=Bustrax, 13=Ineficiente
+    // lines[i] es base-1 respecto a datos (lines[0]=header), así que línea de datos i corresponde a fila hoja i+1
+    const filaHoja = i + 1; // fila en la hoja (header=1, primer dato=2...)
+    const colAA = 26; // columna AA = índice 26 (base 0: A=0,B=1,...,Z=25,AA=26)
+    if(filaHoja===7){  const v=n(colAA); if(v>0)KM_PERMITIDO=v; }
+    if(filaHoja===11){ const v=n(colAA); if(v>0)KM_GPS_TOTAL=v; }
+    if(filaHoja===12){ const v=n(colAA); if(v>0)KM_BUS_TOTAL=v; }
+    if(filaHoja===13){ const v=n(colAA); if(v>0)KM_INEF_TOTAL=v; }
   }
 
   if(KM_PERMITIDO===0&&DATA_DIA.length>0){
@@ -790,9 +799,10 @@ function updateSidebar(rows){
 //  KPIs
 // ══════════════════════════════════════════
 function drawKPIs(rows, cliRows){
-  const kmGps  = rows.reduce((s,r)=>s+numVal(r[C.kmTotal_u]),0);
-  const kmBus  = rows.reduce((s,r)=>s+numVal(r[C.bustrax_u]),0);
-  const kmInef = rows.reduce((s,r)=>s+numVal(r[C.kmInef_u]),0);
+  // Usar totales de celdas AA11/AA12/AA13 si están disponibles; si no, sumar filas
+  const kmGps  = KM_GPS_TOTAL  || rows.reduce((s,r)=>s+numVal(r[C.kmTotal_u]),0);
+  const kmBus  = KM_BUS_TOTAL  || rows.reduce((s,r)=>s+numVal(r[C.bustrax_u]),0);
+  const kmInef = KM_INEF_TOTAL ? -KM_INEF_TOTAL : rows.reduce((s,r)=>s+numVal(r[C.kmInef_u]),0);
   const nUnid  = rows.filter(r=>r[C.vehicleId]&&r[C.vehicleId]!=='-').length;
 
   document.getElementById('kpiKmGps').textContent  = fmtN(kmGps);
@@ -861,10 +871,10 @@ function drawRangos(){
     data:{
       labels,
       datasets:[
-        {label:'< 5 km',   data:d0,backgroundColor:'#2dd4bf',borderColor:'#14b8a6',borderWidth:0,stack:'s'},
-        {label:'5-10 km',  data:d1,backgroundColor:'#fbbf24',borderColor:'#f59e0b',borderWidth:0,stack:'s'},
-        {label:'10-15 km', data:d2,backgroundColor:'#f97316',borderColor:'#ea580c',borderWidth:0,stack:'s'},
-        {label:'> 15 km',  data:d3,backgroundColor:'#E24B4A',borderColor:'#DC2626',borderWidth:0,stack:'s'},
+        {label:'< 5 km',   data:d0,backgroundColor:'#374151',borderColor:'#374151',borderWidth:0,stack:'s'},
+        {label:'5-10 km',  data:d1,backgroundColor:'#fbbf24',borderColor:'#fbbf24',borderWidth:0,stack:'s'},
+        {label:'10-15 km', data:d2,backgroundColor:'#f97316',borderColor:'#f97316',borderWidth:0,stack:'s'},
+        {label:'> 15 km',  data:d3,backgroundColor:'#E24B4A',borderColor:'#E24B4A',borderWidth:0,stack:'s'},
       ]
     },
     options:{
@@ -904,10 +914,10 @@ function drawDia(){
     {
       label:'Km Traffilog',
       data:totalData,
-      backgroundColor:'#84cc16',
-      borderColor:'#7ed321',
-      borderWidth:1,
-      borderRadius:4,
+      backgroundColor:'#374151',
+      borderColor:'#374151',
+      borderWidth:0,
+      borderRadius:3,
     }
   ];
   if(metaDia){
