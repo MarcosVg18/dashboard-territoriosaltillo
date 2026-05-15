@@ -294,6 +294,14 @@ html,body{background:var(--bg);color:var(--text);font-family:"Inter",sans-serif;
         <div class="kpi-chip-lbl">Km Ineficientes</div>
         <div class="kpi-chip-val" id="kpiKmInef" style="color:#f87171">–</div>
         <div class="kpi-chip-sub" id="kpiKmInefSub">GPS no cobrado</div>
+        <div style="margin-top:.5rem;">
+          <div style="display:flex;justify-content:space-between;font-size:.58rem;color:var(--muted);margin-bottom:.25rem;">
+            <span>% Ineficiencia</span><span id="kpiInefPctLbl">–</span>
+          </div>
+          <div style="height:7px;background:#f0f0f0;border-radius:4px;overflow:hidden;">
+            <div id="kpiInefBar" style="height:100%;border-radius:4px;width:0%;transition:width .6s ease;background:#f87171;"></div>
+          </div>
+        </div>
         <div class="kpi-chip-breakdown" id="kpiKmInefPct">–</div>
       </div>
       <!-- Km Marginal vs Permitido -->
@@ -768,7 +776,6 @@ function draw(){
 
   drawKPIs(fRows, fCli);
   drawRangos();
-  drawPpto(fRows);
   drawDia();
   drawClientes(fCli);
   drawCarros(fRows);
@@ -797,6 +804,12 @@ function drawKPIs(rows, cliRows){
   const pctInef=kmGps?Math.abs(kmInef)/kmGps*100:0;
   document.getElementById('kpiKmInefSub').textContent=pctInef.toFixed(1)+'% de GPS no cobrado';
   document.getElementById('kpiKmInefPct').textContent='GPS: '+fmtN(kmGps)+' · Bustrax: '+fmtN(kmBus);
+  const barPct=Math.min(pctInef,100);
+  const barColor=pctInef<=15?'#84cc16':pctInef<=35?'#f97316':'#f87171';
+  const barEl=document.getElementById('kpiInefBar');
+  const lblEl=document.getElementById('kpiInefPctLbl');
+  if(barEl){barEl.style.width=barPct+'%';barEl.style.background=barColor;}
+  if(lblEl){lblEl.textContent=pctInef.toFixed(1)+'%';lblEl.style.color=barColor;lblEl.style.fontWeight='700';}
 
   const dif = kmInef;
   const kmMargAbs = Math.abs(dif);
