@@ -81,13 +81,13 @@ html,body{background:var(--bg);color:var(--text);font-family:"Inter",sans-serif;
 .kpi-section{display:grid;grid-template-columns:repeat(4,1fr);gap:.7rem;align-items:stretch;}
 @media(max-width:1100px){.kpi-section{grid-template-columns:repeat(2,1fr);}}
 @media(max-width:600px){.kpi-section{grid-template-columns:1fr;}}
-.kpi-chip{background:var(--navy2);border-radius:10px;padding:1rem 1.1rem;display:flex;flex-direction:column;justify-content:space-between;min-width:0;border:1px solid rgba(255,255,255,.08);}
-.kpi-chip-lbl{font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,.55);margin-bottom:.4rem;}
+.kpi-chip{background:var(--white);border-radius:10px;padding:1rem 1.1rem;display:flex;flex-direction:column;justify-content:space-between;min-width:0;border:1px solid var(--border);}
+.kpi-chip-lbl{font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:.4rem;}
 .kpi-chip-val{font-size:1.85rem;font-weight:700;line-height:1;letter-spacing:-.02em;color:#84cc16;}
-.kpi-chip-sub{font-size:.65rem;margin-top:.3rem;color:rgba(255,255,255,.6);}
-.kpi-chip-breakdown{font-size:.58rem;margin-top:.35rem;color:rgba(255,255,255,.35);line-height:1.5;border-top:1px solid rgba(255,255,255,.1);padding-top:.3rem;}
+.kpi-chip-sub{font-size:.65rem;margin-top:.3rem;color:var(--muted);}
+.kpi-chip-breakdown{font-size:.58rem;margin-top:.35rem;color:var(--muted);line-height:1.5;border-top:1px solid var(--border);padding-top:.3rem;}
 /* override colores de los chips — todos usan el mismo fondo */
-.kpi-chip[style]{background:var(--navy2)!important;border-color:rgba(255,255,255,.08)!important;}
+.kpi-chip[style]{background:var(--white)!important;border-color:var(--border)!important;}
 
 /* Fecha badge */
 .fecha-badge{display:inline-flex;align-items:center;gap:.4rem;background:var(--white);border:1px solid var(--border);border-radius:20px;padding:.28rem .75rem;font-size:.7rem;font-weight:600;color:var(--muted);box-shadow:0 1px 4px rgba(26,34,54,.06);}
@@ -317,7 +317,7 @@ html,body{background:var(--bg);color:var(--text);font-family:"Inter",sans-serif;
       <div class="table-hdr">
         <div>
           <div class="table-hdr-title">Evolución por semana · rangos de distancia</div>
-          <div class="table-hdr-sub">Líneas por rango · eje X = semana · objetivo: reducir línea roja (&gt;15 km)</div>
+          <div class="table-hdr-sub">Barras agrupadas por rango · eje X = semana · objetivo: reducir barras rojas (&gt;15 km)</div>
         </div>
         <span class="table-count" id="rangosTotal">–</span>
       </div>
@@ -337,7 +337,7 @@ html,body{background:var(--bg);color:var(--text);font-family:"Inter",sans-serif;
       <div class="table-hdr">
         <div>
           <div class="table-hdr-title">Evolución diaria de kilómetros</div>
-          <div class="table-hdr-sub">Barras apiladas · línea = meta diaria</div>
+          <div class="table-hdr-sub">Barras de km total · línea = meta diaria</div>
         </div>
       </div>
       <div style="padding:.75rem 1rem;">
@@ -434,16 +434,7 @@ html,body{background:var(--bg);color:var(--text);font-family:"Inter",sans-serif;
 const SHEET_ID   = '1l3QYg7N050BScrtNhKkHQ-hHNDgaK9Prw95Dzb2-DRE';
 const SHEET_KM   = 'Kilometros';
 
-// Columnas conocidas (por letra → índice 0-based)
-// A=0 B=1 C=2 D=3 E=4 F=5 G=6 H=7 I=8
-// K=10 L=11 M=12 N=13 O=14 P=15 Q=16 R=17
-// T=19 U=20 V=21 W=22 X=23
-// Z=25 AA=26
-// AC=28 AD=29 AE=30 AF=31 AG=32 AH=33
-
-// Columnas de la hoja "Kilometros" detectadas por nombre
 const C = {
-  // Tabla A-I (por unidad)
   udn_u: 'UDN',
   gerente_u: 'Gerente',
   jefe_u: 'Jefe',
@@ -453,29 +444,21 @@ const C = {
   bustrax_u: 'Viajes Bustrax',
   kmInef_u: 'Km ineficiente',
   pct_u: '%',
-
-  // Tabla K-R (por cliente) — mismos nombres pero duplicados; los detectamos por posición
-  // Se infieren tras parsear los headers
-
-  // Tabla T-X (por día)
   dia: 'Dia',
   kmTotal_d: 'Km Total',
   kmServ_d: 'Km Servicio',
   kmInef_d: 'Km ineficiente',
   permitidos_d: 'Permitidos',
-
-  // Z-AA: presupuesto (fila 1 = etiqueta, fila valor)
-  // AC-AH: rangos operadores
 };
 
 // ══════════════════════════════════════════
 //  STATE
 // ══════════════════════════════════════════
-let DATA_UNIDAD = [];   // filas por unidad (cols A-I)
-let DATA_CLIENTE = [];  // filas por cliente (cols K-R)
-let DATA_DIA = [];      // filas por día (cols T-X)
-let DATA_RANGOS = [];   // filas rangos op. (cols AC-AH)
-let KM_PERMITIDO = 0;   // valor de AA7 aprox
+let DATA_UNIDAD = [];
+let DATA_CLIENTE = [];
+let DATA_DIA = [];
+let DATA_RANGOS = [];
+let KM_PERMITIDO = 0;
 
 let SC_KEYS = ['ger','jef','cli','car'];
 let SC_SEL  = {ger:'', jef:'', cli:'', car:''};
@@ -609,7 +592,6 @@ function filteredUnidades(){
   });
 }
 
-// filteredClientes: agrega por cliente desde unidades filtradas
 function filteredClientes(){
   const rows=filteredUnidades();
   const map={};
@@ -634,21 +616,15 @@ function resetFilters(){
 
 // ══════════════════════════════════════════
 //  PARSE DUAL-TABLE CSV
-//  La hoja tiene 2 tablas horizontales:
-//  cols A-I (por unidad) y K-R (por cliente)
-//  y T-X (por día) y AC-AH (rangos op.)
-//  Parseamos el CSV raw por índice de columna
 // ══════════════════════════════════════════
 function parseKmSheet(text){
   if(text.charCodeAt(0)===0xFEFF)text=text.slice(1);
   const lines=text.trim().split(/\r?\n/);
   if(lines.length<2)return;
 
-  // Row 0 = headers
   const hdrs=parseLine(lines[0]).map(h=>h.replace(/^\uFEFF/,'').trim());
   console.log('Headers Km sheet:', hdrs);
 
-  // Detectar índices por nombre de columna
   const idx=(name)=>{
     const n=name.toLowerCase();
     const i=hdrs.findIndex(h=>h.toLowerCase()===n);
@@ -660,16 +636,12 @@ function parseKmSheet(text){
     return i;
   };
 
-  // ── Tabla por UNIDAD (A-I): Vehicle ID, Km Total, Viajes Bustrax, Km ineficiente, %
-  // Buscamos los primeros headers conocidos
   const iVeh = idxInc('vehicle');
   const iUdn = idx('udn');
   const iGer = idx('gerente');
   const iJef = idx('jefe');
   const iCli = idx('cliente');
 
-  // Buscar km total, bustrax, km inef, % — puede haber duplicados en K-R
-  // Tomamos el primero (A-I range) y el segundo aparición (K-R range)
   const allKmTotal = hdrs.reduce((a,h,i)=>{if(h.toLowerCase()==='km total')a.push(i);return a;},[]);
   const allBustrax = hdrs.reduce((a,h,i)=>{if(h.toLowerCase().includes('viajes bustrax')||h.toLowerCase()==='viajes bustrax')a.push(i);return a;},[]);
   const allKmInef  = hdrs.reduce((a,h,i)=>{if(h.toLowerCase()==='km ineficiente')a.push(i);return a;},[]);
@@ -680,9 +652,6 @@ function parseKmSheet(text){
   const iKmInef_u  = allKmInef[0]??-1;
   const iPct_u     = allPct[0]??-1;
 
-  // Tabla K-R (segunda aparición = índices 1)
-  // K=10: UDN, L=11:Gerente, M=12:Jefe, N=13:Cliente, O=14:Km Total, P=15:Viajes Bustrax, Q=16:Km inef, R=17:%
-  // Buscamos segunda aparición
   const iUdn2  = hdrs.indexOf('UDN', iUdn+1);
   const iGer2  = hdrs.indexOf('Gerente', iGer+1);
   const iJef2  = hdrs.indexOf('Jefe', iJef+1);
@@ -692,14 +661,12 @@ function parseKmSheet(text){
   const iKmInef_c  = allKmInef[1]??-1;
   const iPct_c     = allPct[1]??-1;
 
-  // Tabla por DÍA (T-X): Dia, Km Total, Km Servicio, Km ineficiente, Permitidos
   const iDia     = idx('dia');
   const iKmServ  = idxInc('km servicio');
   const iPerms   = idx('permitidos');
-  const iKmTotal_d = allKmTotal[2]??-1; // 3ra aparición podría no existir, usar Km Servicio
+  const iKmTotal_d = allKmTotal[2]??-1;
   const iKmInef_d  = allKmInef[1]??allKmInef[0]??-1;
 
-  // Tabla rangos (AC-AH): Año, Sem, <5km, 5km a 10km, 10km a 15km, >15km
   const iAnio   = idxInc('año');
   const iSem    = idxInc('sem');
   const iR0     = hdrs.findIndex(h=>h.includes('<5'));
@@ -707,9 +674,7 @@ function parseKmSheet(text){
   const iR2     = hdrs.findIndex(h=>h.includes('10km a 15'));
   const iR3     = hdrs.findIndex(h=>h.includes('>15'));
 
-  // Km permitido (AA column): buscamos "km ppto" label en col Z, valor en col AA
-  // row con label "km ppto" → valor en siguiente columna
-  const iZ = idxInc('actualizar');   // col Z header
+  const iZ = idxInc('actualizar');
   const iAA= iZ+1;
 
   console.log('Índices detectados:', {iVeh,iUdn,iGer,iJef,iCli,iKmTotal_u,iBus_u,iKmInef_u,iPct_u,iDia,iKmServ,iPerms,iAnio,iSem,iR0,iR1,iR2,iR3});
@@ -726,7 +691,6 @@ function parseKmSheet(text){
     const g=(ii)=>(ii>=0&&ii<cols.length)?(cols[ii]||'').trim():'';
     const n=(ii)=>numVal(g(ii));
 
-    // Tabla unidad (requiere Vehicle ID)
     const veh=g(iVeh);
     if(veh&&veh!=='-'){
       DATA_UNIDAD.push({
@@ -742,7 +706,6 @@ function parseKmSheet(text){
       });
     }
 
-    // Tabla cliente (requiere Cliente en col N)
     if(iCli2>=0){
       const cli2=g(iCli2);
       if(cli2&&cli2!=='-'&&cli2!=='SIN ASIGNACION'){
@@ -759,7 +722,6 @@ function parseKmSheet(text){
       }
     }
 
-    // Tabla día (requiere Dia con número)
     const dia=g(iDia);
     if(dia&&!isNaN(parseInt(dia))&&parseInt(dia)>0){
       const kmServ=iKmServ>=0?n(iKmServ):0;
@@ -769,7 +731,6 @@ function parseKmSheet(text){
       DATA_DIA.push({dia:parseInt(dia), kmTotal:kmTotalD, kmServ, kmInef:kmInefD, permitidos:perm});
     }
 
-    // Rangos operadores (requiere Año y Sem)
     const anio=g(iAnio);
     const sem=g(iSem);
     if(anio&&sem&&!isNaN(parseInt(sem))&&parseInt(sem)>0){
@@ -783,7 +744,6 @@ function parseKmSheet(text){
       });
     }
 
-    // KM permitido (busco label "km ppto" en col Z)
     const labelZ=g(iZ);
     if(labelZ&&labelZ.toLowerCase().includes('km ppto')&&!labelZ.toLowerCase().includes('ing')){
       const val=n(iAA);
@@ -791,10 +751,9 @@ function parseKmSheet(text){
     }
   }
 
-  // Fallback: si no encontramos KM_PERMITIDO en col Z-AA, buscamos en DATA_DIA
   if(KM_PERMITIDO===0&&DATA_DIA.length>0){
     const p=DATA_DIA.find(d=>d.permitidos>0);
-    if(p)KM_PERMITIDO=p.permitidos*(31/p.dia||1); // estimado
+    if(p)KM_PERMITIDO=p.permitidos*(31/p.dia||1);
   }
 
   console.log('Parsed:', DATA_UNIDAD.length,'unidades,', DATA_CLIENTE.length,'clientes,', DATA_DIA.length,'días,', DATA_RANGOS.length,'semanas. KM_PERM=',KM_PERMITIDO);
@@ -817,7 +776,7 @@ function draw(){
 }
 
 function updateSidebar(rows){
-  // Sidebar card eliminado — no-op
+  // No-op
 }
 
 // ══════════════════════════════════════════
@@ -839,8 +798,7 @@ function drawKPIs(rows, cliRows){
   document.getElementById('kpiKmInefSub').textContent=pctInef.toFixed(1)+'% de GPS no cobrado';
   document.getElementById('kpiKmInefPct').textContent='GPS: '+fmtN(kmGps)+' · Bustrax: '+fmtN(kmBus);
 
-  // KM Marginal vs Permitido
-  const dif = kmInef; // negativo = km no cobrado (marginal real)
+  const dif = kmInef;
   const kmMargAbs = Math.abs(dif);
   const chip = document.getElementById('kpiPptoChip');
   const valEl= document.getElementById('kpiDifVal');
@@ -862,28 +820,21 @@ function drawKPIs(rows, cliRows){
 }
 
 // ══════════════════════════════════════════
-//  RANGOS DE OPERADORES — Gráfica de líneas
+//  RANGOS DE OPERADORES — Barras Agrupadas
 // ══════════════════════════════════════════
 function drawRangos(){
-  // Solo semanas con al menos un dato real
   const sems=[...new Map(DATA_RANGOS.map(r=>[r.anio+'_'+r.sem, r])).values()]
     .filter(r=>(r.r0+r.r1+r.r2+r.r3)>0)
     .sort((a,b)=>a.anio!==b.anio?a.anio-b.anio:a.sem-b.sem);
 
-  // Ocultar selector de semana (ya no se usa con la gráfica de líneas)
-  const sel=document.getElementById('semSelector');
-  if(sel)sel.style.display='none';
-
   if(!sems.length)return;
 
-  // Labels: solo "S8", "S9"... sin el año adelante
   const labels=sems.map(s=>`S${s.sem}`);
   const d0=sems.map(s=>s.r0||0);
   const d1=sems.map(s=>s.r1||0);
   const d2=sems.map(s=>s.r2||0);
   const d3=sems.map(s=>s.r3||0);
 
-  // Total de la última semana
   const last=sems[sems.length-1];
   const el=document.getElementById('rangosTotal');
   if(el)el.textContent=(last.r0+last.r1+last.r2+last.r3)+' operadores S'+last.sem;
@@ -893,41 +844,32 @@ function drawRangos(){
   if(rangosChart)rangosChart.destroy();
 
   rangosChart=new Chart(ctx,{
-    type:'line',
+    type:'bar',
     data:{
       labels,
       datasets:[
-        {label:'< 5 km',data:d0,borderColor:'#84cc16',backgroundColor:'rgba(132,204,22,.1)',tension:.3,pointRadius:4,pointHoverRadius:6,fill:false,borderWidth:2},
-        {label:'5–10 km',data:d1,borderColor:'#fbbf24',backgroundColor:'rgba(251,191,36,.1)',tension:.3,pointRadius:4,pointHoverRadius:6,fill:false,borderWidth:2},
-        {label:'10–15 km',data:d2,borderColor:'#f97316',backgroundColor:'rgba(249,115,22,.1)',tension:.3,pointRadius:4,pointHoverRadius:6,fill:false,borderWidth:2},
-        {label:'> 15 km ⚠️',data:d3,borderColor:'#E24B4A',backgroundColor:'rgba(226,75,74,.1)',tension:.3,pointRadius:5,pointHoverRadius:7,fill:false,borderWidth:2.5},
+        {label:'< 5 km',data:d0,backgroundColor:'#84cc16',borderColor:'#7ed321',borderWidth:1},
+        {label:'5–10 km',data:d1,backgroundColor:'#fbbf24',borderColor:#f59e0b',borderWidth:1},
+        {label:'10–15 km',data:d2,backgroundColor:'#f97316',borderColor:'#ea580c',borderWidth:1},
+        {label:'> 15 km ⚠️',data:d3,backgroundColor:'#E24B4A',borderColor:'#DC2626',borderWidth:1},
       ]
     },
     options:{
       responsive:true,maintainAspectRatio:false,
       plugins:{
-        legend:{labels:{font:{size:11},boxWidth:12,color:'#1a2236',usePointStyle:true}},
+        legend:{labels:{font:{size:11},boxWidth:12,color:'#1a2236',usePointStyle:false}},
         tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ${ctx.raw} operadores`}}
       },
       scales:{
-        x:{grid:{color:'#eee'},ticks:{font:{size:10}},title:{display:true,text:'Semana',font:{size:10},color:'#6b7a99'}},
-        y:{grid:{color:'#eee'},ticks:{font:{size:10},stepSize:1},title:{display:true,text:'Operadores',font:{size:10},color:'#6b7a99'},beginAtZero:true}
+        x:{stacked:false,grid:{color:'#eee',display:true},ticks:{font:{size:10}},title:{display:true,text:'Semana',font:{size:10},color:'#6b7a99'}},
+        y:{stacked:false,grid:{color:'#eee'},ticks:{font:{size:10},stepSize:1},title:{display:true,text:'Operadores',font:{size:10},color:'#6b7a99'},beginAtZero:true}
       }
     }
   });
 }
 
-function setSem(key){SEM_ACTIVE=key;drawRangos();}
-
 // ══════════════════════════════════════════
-//  AVANCE VS PRESUPUESTO — eliminado
-// ══════════════════════════════════════════
-function drawPpto(rows){
-  // Sección eliminada del dashboard
-}
-
-// ══════════════════════════════════════════
-//  KM POR DÍA — Chart.js (solo Km Total + meta)
+//  KM POR DÍA — Barras
 // ══════════════════════════════════════════
 function drawDia(){
   const dias=DATA_DIA.filter(d=>d.dia>0&&(d.kmServ>0||d.kmTotal>0));
@@ -949,19 +891,17 @@ function drawDia(){
     {
       label:'Km Traffilog',
       data:totalData,
-      borderColor:'#84cc16',
-      backgroundColor:'rgba(132,204,22,.12)',
-      borderWidth:2.5,
-      pointRadius:3,
-      pointHoverRadius:5,
-      tension:.35,
-      fill:true,
+      backgroundColor:'#84cc16',
+      borderColor:'#7ed321',
+      borderWidth:1,
+      borderRadius:4,
     }
   ];
   if(metaDia){
     datasets.push({
       label:'Km Permitido (meta)',
       data:dias.map(()=>metaDia),
+      type:'line',
       borderColor:'#E24B4A',
       borderDash:[6,4],
       borderWidth:2,
@@ -972,7 +912,7 @@ function drawDia(){
   }
 
   kmDiaChart=new Chart(ctx,{
-    type:'line',
+    type:'bar',
     data:{labels,datasets},
     options:{
       responsive:true,maintainAspectRatio:false,
@@ -998,7 +938,6 @@ function sortClientes(col){
 }
 
 function drawClientes(rows){
-  // Update sort arrows
   ['cliente','kmTotal','kmBus','kmInef','pct'].forEach(c=>{
     const el=document.getElementById('sa-'+c);
     if(!el)return;
@@ -1017,7 +956,7 @@ function drawClientes(rows){
 
   tbody.innerHTML=sorted.map(c=>{
     const pilCls=c.pct<=15?'green':c.pct<=35?'amber':'red';
-    const inef=c.kmInef; // original value (negative = km no cobrado)
+    const inef=c.kmInef;
     const inefSign=inef<=0?'-':'+';
     const inefCls=inef<=0?'val-neg':'val-pos';
     return`<tr style="cursor:pointer" onclick="openClienteModal(${JSON.stringify(c.cliente).replace(/</g,'&lt;')})">
@@ -1045,7 +984,6 @@ function openClienteModal(clienteNombre){
 
   const rows=sorted.map(u=>{
     const pct=numVal(u[C.pct_u]);
-    const cfg=inefColor(pct);
     const pilCls=pct<=15?'green':pct<=35?'amber':'red';
     return`<tr>
       <td style="font-weight:600">${u[C.vehicleId]||'–'}</td>
@@ -1138,7 +1076,6 @@ document.addEventListener('click',e=>{if(!e.target.closest('.dropdown'))document
 //  INIT
 // ══════════════════════════════════════════
 window.addEventListener('DOMContentLoaded',async()=>{
-  // Fecha de última actualización = hoy
   const hoy=new Date();
   const fechaEl=document.getElementById('fechaActualizacion');
   if(fechaEl){
